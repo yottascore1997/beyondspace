@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       // Create a test admin user
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash('admin123', 12);
       

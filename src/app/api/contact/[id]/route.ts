@@ -4,15 +4,16 @@ import { requireAuth } from '@/lib/auth';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return requireAuth(async (req, user) => {
+  const { id } = await params;
+  return requireAuth(async (req) => {
     try {
       const data = await req.json();
       const { isRead } = data;
 
       const contact = await prisma.contactForm.update({
-        where: { id: params.id },
+        where: { id },
         data: { isRead },
       });
 
@@ -29,12 +30,13 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return requireAuth(async (req, user) => {
+  const { id } = await params;
+  return requireAuth(async (req) => {
     try {
       await prisma.contactForm.delete({
-        where: { id: params.id },
+        where: { id },
       });
 
       return NextResponse.json({ success: true });

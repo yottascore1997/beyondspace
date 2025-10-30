@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -141,12 +142,12 @@ export default function ListYourSpacePage() {
               <p className="text-lg text-gray-600 mb-8">
                 Your property has been submitted and will be reviewed by our team. It will appear in our listings once approved.
               </p>
-              <a
+              <Link
                 href="/"
                 className="inline-flex items-center px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-blue-900 transition-colors"
               >
                 Back to Home
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -425,7 +426,7 @@ export default function ListYourSpacePage() {
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
                           placeholder="https://example.com/image.jpg"
                         />
-                        <p className="text-sm text-gray-500 mt-1">If you don't have an image file, you can provide a URL instead</p>
+                        <p className="text-sm text-gray-500 mt-1">If you don&apos;t have an image file, you can provide a URL instead</p>
                       </div>
                     </div>
                   </div>

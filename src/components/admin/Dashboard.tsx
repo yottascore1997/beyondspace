@@ -31,7 +31,9 @@ export default function Dashboard() {
       const contactsRes = await fetch('/api/contact');
       const contacts = await contactsRes.json();
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const unreadContacts = contacts.filter((contact: any) => !contact.isRead).length;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const recentContacts = contacts.filter((contact: any) => {
         const contactDate = new Date(contact.createdAt);
         const today = new Date();
@@ -117,7 +119,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's what's happening with your properties.</p>
+        <p className="text-gray-600">Welcome back! Here&apos;s what&apos;s happening with your properties.</p>
       </div>
 
       {/* Stats Cards */}

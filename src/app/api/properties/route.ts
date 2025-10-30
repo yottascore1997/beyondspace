@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const category = searchParams.get('category');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       isActive: true,
     };

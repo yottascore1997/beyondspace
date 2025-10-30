@@ -87,7 +87,7 @@ export default function MumbaiPlaces() {
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Explore{' '}
             <span className="text-orange-400">
-              Mumbai's
+              Mumbai&apos;s
             </span>{' '}
             Prime Locations
           </h2>

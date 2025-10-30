@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -74,12 +75,12 @@ export default function RequirementPage() {
               <p className="text-lg text-gray-600 mb-8">
                 Your requirement has been submitted successfully. Our workspace experts will reach out to you at the earliest.
               </p>
-              <a
+              <Link
                 href="/"
                 className="inline-flex items-center px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-blue-900 transition-colors"
               >
                 Back to Home
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -99,7 +100,7 @@ export default function RequirementPage() {
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Share your requirement</h1>
-                <p className="text-lg text-gray-600 mb-4">We'd love to hear from you!</p>
+                <p className="text-lg text-gray-600 mb-4">We&apos;d love to hear from you!</p>
                 <p className="text-gray-600">
                   Tell us your requirements and our workspace experts will reach out to you at the earliest.
                 </p>
