@@ -7,13 +7,21 @@ export default function FloatingCallButton() {
     <Link href="/requirement">
       <div className="fixed bottom-6 right-6 z-50 group">
         <style jsx>{`
-          @keyframes shake {
+          /* 20s cycle: at the start, do 4-5 shakes over ~1.5s, then stay still */
+          @keyframes shake20s {
             0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-            20%, 40%, 60%, 80% { transform: translateX(3px); }
+            /* Burst window: ~0s-1.5s of the 20s cycle */
+            0.5% { transform: translateX(-3px); }
+            1.0% { transform: translateX(3px); }
+            1.5% { transform: translateX(-3px); }
+            2.0% { transform: translateX(3px); }
+            2.5% { transform: translateX(-2px); }
+            3.0% { transform: translateX(2px); }
+            3.5% { transform: translateX(0); }
+            /* Idle from ~3.5% (~0.7s) until the next 20s cycle */
           }
           .shake-animation {
-            animation: shake 2s ease-in-out infinite;
+            animation: shake20s 20s ease-in-out infinite;
           }
         `}</style>
         

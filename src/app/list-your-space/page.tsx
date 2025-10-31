@@ -163,15 +163,13 @@ export default function ListYourSpacePage() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">List Your Space</h1>
-            <p className="text-lg text-gray-600">
-              Share your workspace with our community and reach potential tenants
-            </p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">List Your Space</h1>
+            <p className="text-lg text-gray-600">Quick form – only essential details needed</p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Basic Information */}
+              {/* Quick Information */}
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,177 +217,17 @@ export default function ListYourSpacePage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Purpose*</label>
-                    <select
-                      name="purpose"
-                      value={formData.purpose}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                    >
-                      <option value="RENT">Rent</option>
-                      <option value="BUY">Buy</option>
-                      <option value="COMMERCIAL">Commercial</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Property Type*</label>
-                    <select
-                      name="type"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                    >
-                      <option value="COWORKING">Coworking</option>
-                      <option value="MANAGED_OFFICE">Managed Office</option>
-                      <option value="RESIDENTIAL">Residential</option>
-                      <option value="COMMERCIAL">Commercial</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Beds/Seats*</label>
-                    <input
-                      type="text"
-                      name="beds"
-                      value={formData.beds}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="e.g., 50+ Seats, 2 BHK"
-                    />
-                  </div>
+                  {/* Purpose hidden - default RENT; Type and Beds removed to match property page fields */}
                 </div>
               </div>
 
-              {/* Pricing Information */}
+              {/* Pricing Info removed for quick submission */}
+
+              {/* Optional: One image and quick notes */}
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Pricing & Details</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">Images (optional)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price Display*</label>
-                    <input
-                      type="text"
-                      name="priceDisplay"
-                      value={formData.priceDisplay}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="e.g., ₹15,000/month"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price (Numbers Only)*</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="15000"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Size (sq ft)*</label>
-                    <input
-                      type="number"
-                      name="size"
-                      value={formData.size}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="1000"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                    <input
-                      type="number"
-                      name="rating"
-                      value={formData.rating}
-                      onChange={handleInputChange}
-                      step="0.1"
-                      min="1"
-                      max="5"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="4.5"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Workspace Details */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Workspace Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Workspace Name</label>
-                    <input
-                      type="text"
-                      name="workspaceName"
-                      value={formData.workspaceName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="e.g., Work Square - BKC"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Timings</label>
-                    <input
-                      type="text"
-                      name="workspaceTimings"
-                      value={formData.workspaceTimings}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="e.g., 9:00 AM - 6:00 PM (Mon-Fri)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Closed Days</label>
-                    <input
-                      type="text"
-                      name="workspaceClosedDays"
-                      value={formData.workspaceClosedDays}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="e.g., Closed on Sundays"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
-                    <input
-                      type="number"
-                      name="capacity"
-                      value={formData.capacity}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="50"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Super Area (sq ft)</label>
-                    <input
-                      type="number"
-                      name="superArea"
-                      value={formData.superArea}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="5000"
-                    />
-                  </div>
-
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Property Image*</label>
                     <div className="space-y-4">
                       {/* Image Upload */}
@@ -435,44 +273,20 @@ export default function ListYourSpacePage() {
 
               {/* Description */}
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Description</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">Notes (optional)</h3>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Property Description*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Property Description</label>
                     <textarea
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      required
                       rows={4}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
                       placeholder="Describe your property, amenities, and what makes it special..."
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Location Details</label>
-                    <textarea
-                      name="locationDetails"
-                      value={formData.locationDetails}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="Full address and nearby landmarks..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">About Workspace</label>
-                    <textarea
-                      name="aboutWorkspace"
-                      value={formData.aboutWorkspace}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="Additional details about the workspace..."
-                    />
-                  </div>
+                  {/* Optional extra fields removed for minimal effort */}
                 </div>
               </div>
 

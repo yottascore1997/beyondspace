@@ -14,28 +14,28 @@ export default function WorkspaceCategories() {
   // Hero images from public/images folder (same as Hero component)
   const heroImages = [
     {
-      src: '/images/1.jpeg',
-      alt: 'Modern office space with professional design and bright lighting',
+      src: '/images/co1.jpeg',
+      alt: 'Modern coworking lounge with premium interiors',
       category: 'Coworking'
     },
     {
-      src: '/images/2.jpeg',
-      alt: 'Professional managed office space with modern amenities and bright environment',
+      src: '/images/co2.jpeg',
+      alt: 'Managed office floor with collaborative zones',
       category: 'Managed Office'
     },
     {
-      src: '/images/3.jpeg',
-      alt: 'Enterprise office space with premium design and bright lighting',
+      src: '/images/co3.jpeg',
+      alt: 'Enterprise office with contemporary conference area',
       category: 'Enterprise Office'
     },
     {
-      src: '/images/4.jpeg',
-      alt: 'Modern office meeting room with professional design and bright atmosphere',
+      src: '/images/co4.jpeg',
+      alt: 'Premium meeting room with high-end amenities',
       category: 'Meeting Room'
     },
     {
-      src: '/images/5.jpeg',
-      alt: 'Flexible workspace with dedicated desks and vibrant environment',
+      src: '/images/co5.jpeg',
+      alt: 'Flexible workspace featuring collaborative desks',
       category: 'Dedicated Desk'
     }
   ];
@@ -82,11 +82,11 @@ export default function WorkspaceCategories() {
       ]
     },
     {
-      name: 'Office/Commercial Spaces',
-      description: 'Rent/Lease office space for your company',
+      name: 'Enterprise Solutions',
+      description: 'Custom-built offices for fast-growing teams',
       features: [
-        'Long term contracts (3 or more years)',
-        'Full customizations with self managed amenities',
+        'End-to-end design, build and manage',
+        'Full customizations, branding and amenities',
         'Ideal for 100+ team size'
       ]
     },
@@ -112,12 +112,12 @@ export default function WorkspaceCategories() {
 
   // Assign images to categories
   const categoryImages = [
-    '/images/1.jpeg', // Coworking Space
-    '/images/2.jpeg', // Managed Office
-    '/images/5.jpeg', // Dedicated Desk
-    '/images/3.jpeg', // Office/Commercial Spaces
-    '/images/4.jpeg', // Virtual Office
-    '/images/1.jpeg'  // Meeting Room (reusing first image)
+    '/images/co1.jpeg', // Coworking Space
+    '/images/co2.jpeg', // Managed Office
+    '/images/co3.jpeg', // Dedicated Desk
+    '/images/co4.jpeg', // Enterprise Solutions
+    '/images/co5.jpeg', // Virtual Office
+    '/images/co6.jpeg'  // Meeting Room
   ];
 
   return (
@@ -127,7 +127,7 @@ export default function WorkspaceCategories() {
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             Quick Search by{' '}
-            <span className="text-orange-400">
+            <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
               Popular Categories
             </span>
           </h2>

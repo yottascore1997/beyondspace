@@ -9,8 +9,8 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-200 shadow-lg">
       
-      <div className="container mx-auto px-4 relative">
-        <div className="flex items-center justify-between py-4">
+      <div className="w-full px-0 relative">
+        <div className="flex items-center justify-between py-4 pl-0 pr-2 md:px-4">
           {/* Premium Logo Section */}
           <Link href="/" className="flex items-center gap-4 group">
             <div className="relative">
@@ -26,11 +26,12 @@ export default function Header() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-blue-600 text-4xl leading-tight tracking-tight drop-shadow-lg">
-                Beyond Space
+              <span className="font-black text-4xl leading-tight tracking-tight drop-shadow-2xl">
+                <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Beyond</span>{' '}
+                <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Space</span>
               </span>
-              <span className="text-xs text-gray-600 font-bold tracking-widest uppercase">
-                ✦ Your Dream Workspace Awaits ✦
+              <span className="text-xs font-bold tracking-widest uppercase text-black">
+                One Stop Solution For Your Office Space
               </span>
             </div>
           </Link>
@@ -50,7 +51,7 @@ export default function Header() {
             </a>
             <a
               href="/requirement"
-              className="px-5 py-2.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 hover:shadow-2xl hover:shadow-orange-400/50 transform hover:scale-110 transition-all duration-300 border border-orange-300/50 shadow-lg"
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 text-white rounded-xl font-bold hover:from-purple-700 hover:via-blue-700 hover:to-cyan-600 hover:shadow-2xl hover:shadow-purple-400/50 transform hover:scale-110 transition-all duration-300 border border-purple-300/50 shadow-lg"
             >
               Share Requirement
             </a>
@@ -90,7 +91,7 @@ export default function Header() {
               </a>
               <a 
                 href="/requirement"
-                className="px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-bold text-center shadow-lg shadow-orange-500/30 border border-orange-400/30"
+                className="px-4 py-3 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 text-white rounded-xl font-bold text-center shadow-lg shadow-purple-500/30 border border-purple-400/30"
               >
                 Share Requirement
               </a>

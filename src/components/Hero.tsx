@@ -17,11 +17,9 @@ interface HeroProps {
 export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hoveredFilter, setHoveredFilter] = useState<string | null>(null);
-  const [typedText, setTypedText] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [typedOffice, setTypedOffice] = useState('');
   const router = useRouter();
-  
-  const fullText = 'office spaces';
 
   // Hero images from public/images folder
   const heroImages = [
@@ -31,13 +29,13 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       category: 'Coworking Space'
     },
     {
-      src: '/images/4.jpeg',
-      alt: 'Modern office meeting room with professional design and bright atmosphere',
-      category: 'Meeting Room'
+      src: '/images/co1.jpeg',
+      alt: 'Premium coworking lounge with collaborative seating and natural light',
+      category: 'Coworking Lounge'
     },
     {
-      src: '/images/8.jpeg',
-      alt: 'Premium office environment with professional amenities and natural lighting',
+      src: '/images/mumbai5.jpg',
+      alt: 'Premium office environment overlooking Mumbai skyline',
       category: 'Managed Office'
     },
     {
@@ -60,37 +58,40 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   useEffect(() => {
     setIsLoaded(true);
     
-    // Repeating typewriter effect for "coworking spaces"
-    const startTypewriter = () => {
-      let index = 0;
-      setTypedText(''); // Reset text
-      
-      const typeInterval = setInterval(() => {
-        if (index < fullText.length) {
-          setTypedText(fullText.slice(0, index + 1));
-          index++;
-        } else {
-          clearInterval(typeInterval);
-          // After typing is complete, wait 2 seconds then restart
-          setTimeout(() => {
-            startTypewriter();
-          }, 2000);
-        }
-      }, 150); // 150ms delay between each character
-    };
-
-    // Start the first animation
-    startTypewriter();
-
-    // Auto-slide images every 4 seconds
+    // Auto-slide images every 10 seconds
     const imageInterval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 4000);
+    }, 10000);
+
+    // Typewriter effect for "Office Space" with restart
+    const text = 'Office Space';
+    let index = 0;
+    let typingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const startTyping = () => {
+      typingTimeout = setTimeout(() => {
+        if (index <= text.length) {
+          setTypedOffice(text.slice(0, index));
+          index += 1;
+          startTyping();
+        } else {
+          // Pause, clear, and restart
+          typingTimeout = setTimeout(() => {
+            index = 0;
+            setTypedOffice('');
+            startTyping();
+          }, 1200);
+        }
+      }, 170); // slower typing speed
+    };
+
+    startTyping();
 
     return () => {
       clearInterval(imageInterval);
+      if (typingTimeout) clearTimeout(typingTimeout);
     };
   }, [heroImages.length]);
 
@@ -140,17 +141,15 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
 
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#a08efe]/10 via-transparent to-cyan-300/10 animate-pulse"></div>
-      
-      {/* Image Slider */}
+      {/* Image Slider - keep images crisp and visible */}
       <div className="absolute inset-0">
         {heroImages.map((image, index) => (
           <img
             key={index}
-            className={`absolute inset-0 w-full h-full object-cover brightness-125 saturate-110 transition-all duration-1000 ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
               index === currentImageIndex 
-                ? 'opacity-100 scale-100' 
-                : 'opacity-0 scale-105'
+                ? 'opacity-100' 
+                : 'opacity-0'
             }`}
             src={image.src}
             alt={image.alt}
@@ -158,57 +157,82 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         ))}
       </div>
       
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20"></div>
+      {/* Subtle bottom gradient only for text readability */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/50"></div>
       
       {/* Image Navigation Dots */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
         {heroImages.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentImageIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            className={`transition-all duration-300 ${
               index === currentImageIndex 
-                ? 'bg-orange-400 scale-125' 
-                : 'bg-white/50 hover:bg-white/80'
+                ? 'w-8 h-2 bg-gradient-to-r from-purple-400 to-cyan-400 rounded-full' 
+                : 'w-2 h-2 bg-white/60 hover:bg-white rounded-full'
             }`}
           />
         ))}
       </div>
       
-      {/* Floating particles effect */}
-      <div className="absolute inset-0 opacity-30">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-[#a08efe] rounded-full animate-bounce"
-            style={{
-              left: `${20 + i * 15}%`,
-              top: `${30 + (i % 3) * 20}%`,
-              animationDelay: `${i * 0.5}s`,
-              animationDuration: `${3 + i * 0.5}s`
-            }}
-          />
-        ))}
-      </div>
-      
-      <div className={`relative z-10 text-center text-white px-4 py-16 max-w-4xl mx-auto transition-all duration-1000 ${
+      {/* Two-column layout: left text (centered vertically), right search (centered) */}
+      <div className={`relative z-10 text-left text-white w-full px-4 md:px-10 transition-all duration-1000 ${
         isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-      }`}>
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 text-white" style={{textShadow: '2px 2px 0px rgba(0,0,0,0.8), 4px 4px 0px rgba(0,0,0,0.6)'}}>
-          The new way to find <span className="font-black animate-pulse text-green-500" style={{textShadow: '1px 1px 0px rgba(0,0,0,1), 2px 2px 0px rgba(0,0,0,0.8), 3px 3px 0px rgba(0,0,0,0.6)'}}>{typedText}<span className="animate-pulse text-green-500 font-black">|</span></span>
+      } md:flex md:items-start md:justify-between md:gap-4`}>
+        <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px]">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-5 py-1.5 bg-black/80 backdrop-blur-sm border border-white/10 rounded-full mb-4">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            <span className="text-sm font-semibold text-white">1000+ Premium Workspaces Available</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight">
+            <span className="block text-white mb-1" style={{textShadow: '3px 3px 10px rgba(0,0,0,0.7)'}}>
+              Discover Your
+            </span>
+            <span className="block bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent" style={{textShadow: 'none'}}>
+              Dream <span>{typedOffice}</span><span className="inline-block w-[1ch]">|</span>
+            </span>
         </h1>
 
-        <div className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-2xl transition-all duration-700 delay-500 hover:shadow-[#a08efe]/20 hover:shadow-2xl hover:scale-105 hover:bg-white/15 ${
+          <p className="text-xl md:text-2xl text-white/95 font-semibold mb-4" style={{textShadow: '2px 2px 8px rgba(0,0,0,0.6)'}}>
+            Premium Office Spaces, Coworking Hubs & Meeting Rooms
+          </p>
+          
+          <div className="flex flex-wrap justify-start gap-5 text-base md:text-lg text-white/90 mb-2">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+              <span className="font-semibold">Instant Booking</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+              <span className="font-semibold">Prime Locations</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+              <span className="font-semibold">Best Prices</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Lighter card so image is visible behind */}
+        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-6 md:self-start max-w-3xl md:max-w-xl w-full md:w-1/2 ${
           isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 gap-4 mb-4">
             <div className="group">
-              <label className="block text-white/90 text-sm mb-2 transition-colors group-hover:text-white">City</label>
+              <label className="block text-gray-800 text-sm font-semibold mb-2">City</label>
               <select
                 value={filters.city}
                 onChange={(e) => onFilterChange('city', e.target.value)}
-                className="w-full p-3 rounded-xl border border-white/40 bg-white/90 text-gray-900 outline-none transition-all duration-300 hover:shadow-lg hover:shadow-[#a08efe]/20 focus:shadow-lg focus:shadow-[#a08efe]/30 focus:border-[#a08efe] hover:scale-105"
+                className="w-full p-3 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300"
               >
                 {cities.map((city) => (
                   <option key={city.value} value={city.value}>
@@ -219,11 +243,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </div>
 
             <div className="group">
-              <label className="block text-white/90 text-sm mb-2 transition-colors group-hover:text-white">Area</label>
+              <label className="block text-gray-800 text-sm font-semibold mb-2">Area</label>
               <select
                 value={filters.area}
                 onChange={(e) => onFilterChange('area', e.target.value)}
-                className="w-full p-3 rounded-xl border border-white/40 bg-white/90 text-gray-900 outline-none transition-all duration-300 hover:shadow-lg hover:shadow-[#a08efe]/20 focus:shadow-lg focus:shadow-[#a08efe]/30 focus:border-[#a08efe] hover:scale-105"
+                className="w-full p-3 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300"
               >
                 {areas.map((area) => (
                   <option key={area.value} value={area.value}>
@@ -233,35 +257,27 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
               </select>
             </div>
 
-            <div className="md:col-span-2 group">
-              <label className="block text-white/90 text-sm mb-2 transition-colors group-hover:text-white">Search</label>
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => onFilterChange('search', e.target.value)}
-                placeholder="Search location or property..."
-                className="w-full p-3 rounded-xl border border-white/40 bg-white/90 text-gray-900 outline-none transition-all duration-300 hover:shadow-lg hover:shadow-[#a08efe]/20 focus:shadow-lg focus:shadow-[#a08efe]/30 focus:border-[#a08efe] hover:scale-105 placeholder:text-gray-500"
-              />
-            </div>
+            <button
+              onClick={() => router.push('/properties')}
+              className="w-full mt-2 py-3 rounded-lg bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300"
+            >
+              Search Spaces
+            </button>
           </div>
 
-          <div className="flex flex-wrap gap-3 justify-center">
-            {quickFilters.map((filter, index) => (
-              <button
-                key={filter.key}
-                onClick={() => router.push(`/category/${filter.key}`)}
-                onMouseEnter={() => setHoveredFilter(filter.key)}
-                onMouseLeave={() => setHoveredFilter(null)}
-                className={`px-4 py-2 rounded-full border border-white/40 font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#a08efe]/20 hover:border-[#a08efe]/60 bg-white/10 text-white hover:bg-gradient-to-r hover:from-[#a08efe]/30 hover:to-cyan-300/30 ${
-                  hoveredFilter === filter.key ? 'animate-pulse' : ''
-                }`}
-                style={{
-                  animationDelay: `${index * 0.05}s`
-                }}
-              >
-                {filter.label}
-              </button>
-            ))}
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-sm text-gray-600 font-semibold mb-3">Popular Categories</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {quickFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => router.push(`/category/${filter.key}`)}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

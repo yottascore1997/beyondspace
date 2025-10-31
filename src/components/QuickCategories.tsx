@@ -82,7 +82,7 @@ export default function QuickCategories({ onAreaSelect, selectedArea }: QuickCat
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             Quick Search by{' '}
-            <span className="text-orange-400">
+            <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
               Popular Areas
             </span>
           </h2>

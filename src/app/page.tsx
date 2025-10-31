@@ -10,7 +10,10 @@ import PropertyCard from '@/components/PropertyCard';
 import WhyUs from '@/components/WhyUs';
 import About from '@/components/About';
 import TrustedCompanies from '@/components/TrustedCompanies';
+import Testimonials from '@/components/Testimonials';
 import Footer from '@/components/Footer';
+import Benefits from '@/components/Benefits';
+import FeaturedCoworking from '@/components/FeaturedCoworking';
 
 interface Property {
   id: string;
@@ -234,11 +237,13 @@ export default function Home() {
             </div>
           )}
         </section>
-
-        <WhyUs />
-
-        <About />
       </main>
+
+      <FeaturedCoworking />
+
+      <Benefits />
+
+      <Testimonials />
 
       <Footer />
     </div>
