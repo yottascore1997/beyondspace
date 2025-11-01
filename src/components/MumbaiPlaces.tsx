@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface Place {
   id: string;
@@ -16,95 +16,108 @@ export default function MumbaiPlaces() {
   const [showModal, setShowModal] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<string>('');
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const scrollAnimationRef = useRef<number | null>(null);
 
   const handleGetOffer = (placeName: string) => {
     setSelectedPlace(placeName);
     setShowModal(true);
   };
 
+  const smoothScrollBy = (distance: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    if (scrollAnimationRef.current) {
+      cancelAnimationFrame(scrollAnimationRef.current);
+    }
+
+    const start = container.scrollLeft;
+    const duration = 600;
+    const startTime = performance.now();
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 0.5 - Math.cos(progress * Math.PI) / 2; // easeInOut
+      container.scrollLeft = start + distance * eased;
+
+      if (progress < 1) {
+        scrollAnimationRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    scrollAnimationRef.current = requestAnimationFrame(step);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scrollAnimationRef.current) {
+        cancelAnimationFrame(scrollAnimationRef.current);
+      }
+    };
+  }, []);
+
   const mumbaiPlaces: Place[] = [
     {
       id: 'andheri-east',
       name: 'Andheri East',
       description: 'Prime business district with excellent metro connectivity and corporate offices',
-      image: '/images/mumbai1.jpg',
-      properties: '180+ Properties',
+      image: '/images/mumbai4.jpeg',
+      properties: '0 Properties',
       area: 'West Mumbai'
     },
     {
       id: 'bkc',
       name: 'BKC',
       description: 'Mumbai\'s premier business district with world-class infrastructure',
-      image: '/images/mumbai2.jpg',
-      properties: '120+ Properties',
+      image: '/images/mumbai3.jpeg',
+      properties: '0 Properties',
       area: 'Central Mumbai'
-    },
-    {
-      id: 'thane',
-      name: 'Thane',
-      description: 'Rapidly developing suburb with great connectivity and modern amenities',
-      image: '/images/mumbai3.jpg',
-      properties: '200+ Properties',
-      area: 'Extended Mumbai'
     },
     {
       id: 'lower-parel',
       name: 'Lower Parel',
       description: 'Historic mill district transformed into modern business hub',
-      image: '/images/10.jpeg',
-      properties: '160+ Properties',
+      image: '/images/mumbai5.jpeg',
+      properties: '0 Properties',
       area: 'South Mumbai'
     },
     {
-      id: 'goregaon-east',
-      name: 'Goregaon East',
-      description: 'Emerging business hub with excellent connectivity and affordable options',
-      image: '/images/8.jpeg',
-      properties: '140+ Properties',
-      area: 'West Mumbai'
+      id: 'thane',
+      name: 'Thane',
+      description: 'Rapidly developing suburb with great connectivity and modern amenities',
+      image: '/images/mumbai7.jpeg',
+      properties: '0 Properties',
+      area: 'Extended Mumbai'
     },
     {
-      id: 'ghatkopar',
-      name: 'Ghatkopar',
-      description: 'Well-connected suburb with metro connectivity and growing business district',
-      image: '/images/9.jpeg',
-      properties: '170+ Properties',
-      area: 'Central Mumbai'
-    },
-    {
-      id: 'powai',
-      name: 'Powai',
-      description: 'IT hub with modern infrastructure, lake views and premium amenities',
-      image: '/images/12.jpeg',
-      properties: '130+ Properties',
-      area: 'Central Mumbai'
+      id: 'navi-mumbai',
+      name: 'Navi Mumbai',
+      description: 'Planned satellite city with world-class infrastructure and corporate parks',
+      image: '/images/mumbai8.jpeg',
+      properties: '0 Properties',
+      area: 'Navi Mumbai'
     }
   ];
 
   const localMumbaiImages = [
-    '/images/mumbai1.jpg',
-    '/images/mumbai2.jpg',
-    '/images/mumbai3.jpg',
-    '/images/mumbai4.jpg',
-    '/images/mumbai5.jpg',
-    '/images/mumbai6.jpg',
-    '/images/mumbai7.jpg',
-    '/images/mumbai8.jpg',
+    '/images/mumbai4.jpeg',
+    '/images/mumbai3.jpeg',
+    '/images/mumbai5.jpeg',
+    '/images/mumbai7.jpeg',
+    '/images/mumbai8.jpeg',
   ];
 
   // Explicit unique image mapping per area (no repeats)
   const imageMap: Record<string, string> = {
-    bkc: '/images/mumbai3.jpg',          // BKC uses Thane image as requested
-    powai: '/images/mumbai1.jpg',
-    ghatkopar: '/images/mumbai2.jpg',
-    'andheri-east': '/images/mumbai4.jpg',
-    'lower-parel': '/images/mumbai5.jpg',
-    'goregaon-east': '/images/mumbai6.jpg',
-    thane: '/images/mumbai7.jpg',
+    'andheri-east': '/images/mumbai4.jpeg',
+    bkc: '/images/mumbai3.jpeg',
+    'lower-parel': '/images/mumbai5.jpeg',
+    thane: '/images/mumbai7.jpeg',
+    'navi-mumbai': '/images/mumbai8.jpeg',
   };
 
-  // Ensure order: BKC, Powai, Ghatkopar first, then the rest
-  const priorityOrder = ['bkc', 'powai', 'ghatkopar'];
+  const priorityOrder = ['andheri-east', 'bkc', 'lower-parel', 'thane', 'navi-mumbai'];
   const baseOrdered = [...mumbaiPlaces].sort((a, b) => {
     const pa = priorityOrder.indexOf(a.id);
     const pb = priorityOrder.indexOf(b.id);
@@ -114,36 +127,24 @@ export default function MumbaiPlaces() {
     return 0;
   });
 
-  // Compute concrete image for each place (no repeats per imageMap), then
-  // bring last three images (mumbai8, mumbai7, mumbai6) to the front in order
-  const lastThreeFirst = ['/images/mumbai8.jpg', '/images/mumbai7.jpg', '/images/mumbai6.jpg'];
-  const withImages = baseOrdered.map((p, i) => ({
+  // Compute concrete image for each place (no repeats per imageMap)
+  const orderedItems = baseOrdered.map((p, i) => ({
     place: p,
     image: imageMap[p.id] ?? (i < localMumbaiImages.length ? localMumbaiImages[i] : localMumbaiImages[localMumbaiImages.length - 1]),
-    originalIndex: i,
   }));
-  const orderedItems = withImages.sort((a, b) => {
-    const ai = lastThreeFirst.indexOf(a.image);
-    const bi = lastThreeFirst.indexOf(b.image);
-    const ag = ai === -1 ? 1 : 0;
-    const bg = bi === -1 ? 1 : 0;
-    if (ag !== bg) return ag - bg; // group with lastThreeFirst first
-    if (ag === 0 && bg === 0) return ai - bi; // maintain 8,7,6 order
-    return a.originalIndex - b.originalIndex; // then original order
-  });
 
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
             Explore{' '}
             <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
               Mumbai&apos;s
             </span>{' '}
             Prime Locations
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto" style={{ textShadow: '0 0 10px rgba(255,255,255,0.35)' }}>
             Discover the most sought-after neighborhoods in the city of dreams
           </p>
         </div>
@@ -151,12 +152,12 @@ export default function MumbaiPlaces() {
         {/* Horizontal Scrollable Container */}
         <div className="relative">
           {/* Navigation Buttons */}
-          <button onClick={() => scrollRef.current?.scrollBy({ left: -320, behavior: 'smooth' })} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110">
+          <button onClick={() => smoothScrollBy(-344)} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110">
             <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button onClick={() => scrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' })} className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110">
+          <button onClick={() => smoothScrollBy(344)} className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110">
             <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

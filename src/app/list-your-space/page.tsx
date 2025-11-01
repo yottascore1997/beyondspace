@@ -224,7 +224,7 @@ export default function ListYourSpacePage() {
               {/* Pricing Info removed for quick submission */}
 
               {/* Optional: One image and quick notes */}
-              <div>
+                  <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Images (optional)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">

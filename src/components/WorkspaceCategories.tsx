@@ -82,7 +82,7 @@ export default function WorkspaceCategories() {
       ]
     },
     {
-      name: 'Enterprise Solutions',
+      name: 'Enterprise Offices',
       description: 'Custom-built offices for fast-growing teams',
       features: [
         'End-to-end design, build and manage',
@@ -115,7 +115,7 @@ export default function WorkspaceCategories() {
     '/images/co1.jpeg', // Coworking Space
     '/images/co2.jpeg', // Managed Office
     '/images/co3.jpeg', // Dedicated Desk
-    '/images/co4.jpeg', // Enterprise Solutions
+    '/images/co4.jpeg', // Enterprise Offices
     '/images/co5.jpeg', // Virtual Office
     '/images/co6.jpeg'  // Meeting Room
   ];

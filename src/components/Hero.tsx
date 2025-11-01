@@ -19,6 +19,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   const [hoveredFilter, setHoveredFilter] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [typedOffice, setTypedOffice] = useState('');
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
   const router = useRouter();
 
   // Hero images from public/images folder
@@ -34,7 +35,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       category: 'Coworking Lounge'
     },
     {
-      src: '/images/mumbai5.jpg',
+      src: '/images/co5.jpeg',
       alt: 'Premium office environment overlooking Mumbai skyline',
       category: 'Managed Office'
     },
@@ -70,24 +71,23 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    const startTyping = () => {
+    setTypedOffice('');
+    setIsTypingComplete(false);
+
+    const typeNext = () => {
       typingTimeout = setTimeout(() => {
-        if (index <= text.length) {
-          setTypedOffice(text.slice(0, index));
+        if (index < text.length) {
           index += 1;
-          startTyping();
+          setTypedOffice(text.slice(0, index));
+          typeNext();
         } else {
-          // Pause, clear, and restart
-          typingTimeout = setTimeout(() => {
-            index = 0;
-            setTypedOffice('');
-            startTyping();
-          }, 1200);
+          setTypedOffice(text);
+          setIsTypingComplete(true);
         }
-      }, 170); // slower typing speed
+      }, 170);
     };
 
-    startTyping();
+    typeNext();
 
     return () => {
       clearInterval(imageInterval);
@@ -187,11 +187,20 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight">
-            <span className="block text-white mb-1" style={{textShadow: '3px 3px 10px rgba(0,0,0,0.7)'}}>
+            <span
+              className="block text-white mb-1"
+              style={{ textShadow: '0 0 10px rgba(255,255,255,0.7), 0 0 18px rgba(150,220,255,0.4)' }}
+            >
               Discover Your
             </span>
-            <span className="block bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent" style={{textShadow: 'none'}}>
-              Dream <span>{typedOffice}</span><span className="inline-block w-[1ch]">|</span>
+            <span
+              className="block bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent"
+              style={{ textShadow: '0 0 18px rgba(255,194,122,0.35)' }}
+            >
+              Dream <span>{typedOffice}</span>
+              <span className={`inline-block w-[1ch] transition-opacity duration-300 ${isTypingComplete ? 'opacity-0' : 'opacity-100'}`}>
+                |
+              </span>
             </span>
         </h1>
 
@@ -257,6 +266,22 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
               </select>
             </div>
 
+            <div className="group">
+              <label className="block text-gray-800 text-sm font-semibold mb-2">Category</label>
+              <select
+                value={filters.purpose}
+                onChange={(e) => onFilterChange('purpose', e.target.value)}
+                className="w-full p-3 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300"
+              >
+                <option value="">Select Category</option>
+                {quickFilters.map((category) => (
+                  <option key={category.key} value={category.key}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               onClick={() => router.push('/properties')}
               className="w-full mt-2 py-3 rounded-lg bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300"
@@ -266,17 +291,17 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
           </div>
 
           <div className="border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-600 font-semibold mb-3">Popular Categories</p>
+            <p className="text-base md:text-lg text-gray-700 font-semibold mb-4 text-center">Popular Categories</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {quickFilters.map((filter) => (
-                <button
-                  key={filter.key}
-                  onClick={() => router.push(`/category/${filter.key}`)}
+              <button
+                key={filter.key}
+                onClick={() => router.push(`/category/${filter.key}`)}
                   className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
-                >
-                  {filter.label}
-                </button>
-              ))}
+              >
+                {filter.label}
+              </button>
+            ))}
             </div>
           </div>
         </div>

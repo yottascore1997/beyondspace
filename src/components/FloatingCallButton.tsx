@@ -7,18 +7,29 @@ export default function FloatingCallButton() {
     <Link href="/requirement">
       <div className="fixed bottom-6 right-6 z-50 group">
         <style jsx>{`
-          /* 20s cycle: at the start, do 4-5 shakes over ~1.5s, then stay still */
+          /* 20s cycle: starting at each cycle shake for ~6s then stay still */
           @keyframes shake20s {
             0%, 100% { transform: translateX(0); }
-            /* Burst window: ~0s-1.5s of the 20s cycle */
-            0.5% { transform: translateX(-3px); }
-            1.0% { transform: translateX(3px); }
-            1.5% { transform: translateX(-3px); }
-            2.0% { transform: translateX(3px); }
-            2.5% { transform: translateX(-2px); }
-            3.0% { transform: translateX(2px); }
-            3.5% { transform: translateX(0); }
-            /* Idle from ~3.5% (~0.7s) until the next 20s cycle */
+            1% { transform: translateX(-3px); }
+            2% { transform: translateX(3px); }
+            3% { transform: translateX(-3px); }
+            4% { transform: translateX(3px); }
+            5% { transform: translateX(-2px); }
+            6% { transform: translateX(2px); }
+            7% { transform: translateX(-1px); }
+            8% { transform: translateX(1px); }
+            9% { transform: translateX(-3px); }
+            10% { transform: translateX(3px); }
+            11% { transform: translateX(-3px); }
+            12% { transform: translateX(3px); }
+            13% { transform: translateX(-2px); }
+            14% { transform: translateX(2px); }
+            15% { transform: translateX(-1px); }
+            16% { transform: translateX(1px); }
+            17% { transform: translateX(-1px); }
+            18% { transform: translateX(1px); }
+            19% { transform: translateX(0); }
+            /* Idle remainder (~6s burst then rest of cycle) */
           }
           .shake-animation {
             animation: shake20s 20s ease-in-out infinite;
