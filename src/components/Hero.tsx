@@ -35,9 +35,9 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       category: 'Coworking Lounge'
     },
     {
-      src: '/images/co5.jpeg',
-      alt: 'Premium office environment overlooking Mumbai skyline',
-      category: 'Managed Office'
+      src: '/images/hero4.jpeg',
+      alt: 'Modern office space',
+      category: 'Office Space'
     },
     {
       src: '/images/9.jpeg',
@@ -66,8 +66,8 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       );
     }, 10000);
 
-    // Typewriter effect for "Office Space" with restart
-    const text = 'Office Space';
+    // Typewriter effect for "Dream Office Space" with restart
+    const text = 'Dream Office Space';
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -84,7 +84,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
           setTypedOffice(text);
           setIsTypingComplete(true);
         }
-      }, 170);
+      }, 250);
     };
 
     typeNext();
@@ -132,11 +132,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   const quickFilters = [
     { key: 'coworking', label: 'Coworking' },
     { key: 'managed', label: 'Managed Office Space' },
+    { key: 'dedicateddesk', label: 'Dedicated Desk' },
+    { key: 'flexidesk', label: 'Day Pass/ Flexi Desk' },
     { key: 'virtualoffice', label: 'Virtual Office' },
     { key: 'meetingroom', label: 'Meeting Room' },
-    { key: 'dedicateddesk', label: 'Dedicated Desk' },
-    { key: 'flexidesk', label: 'Flexi Desk' },
-    { key: 'enterpriseoffices', label: 'Enterprise offices' },
+    { key: 'enterpriseoffices', label: 'Enterprise Offices' },
   ];
 
   return (
@@ -180,12 +180,6 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       } md:flex md:items-start md:justify-between md:gap-4`}>
         <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px]">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-1.5 bg-black/80 backdrop-blur-sm border border-white/10 rounded-full mb-4">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            <span className="text-sm font-semibold text-white">1000+ Premium Workspaces Available</span>
-          </div>
-          
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight">
             <span
               className="block text-white mb-1"
@@ -194,11 +188,28 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
               Discover Your
             </span>
             <span
-              className="block bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent"
-              style={{ textShadow: '0 0 18px rgba(255,194,122,0.35)' }}
+              className="block"
             >
-              Dream <span>{typedOffice}</span>
-              <span className={`inline-block w-[1ch] transition-opacity duration-300 ${isTypingComplete ? 'opacity-0' : 'opacity-100'}`}>
+              <span className="font-extrabold">
+                {typedOffice.length <= 5 ? (
+                  <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">{typedOffice}</span>
+                ) : typedOffice.length <= 12 ? (
+                  <>
+                    <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Dream </span>
+                    <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">{typedOffice.substring(6)}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Dream </span>
+                    <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">Office </span>
+                    <span className="bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 bg-clip-text text-transparent">{typedOffice.substring(13)}</span>
+                  </>
+                )}
+              </span>
+              <span 
+                className={`inline-block w-[1ch] transition-opacity duration-300 ${isTypingComplete ? 'opacity-0' : 'opacity-100'}`}
+                style={{ color: '#16a34a' }}
+              >
                 |
               </span>
             </span>

@@ -157,14 +157,14 @@ export default function WorkspaceCategories() {
               </h3>
 
               {/* Description */}
-              <p className="text-gray-600 text-sm mb-4">
+              <p className="text-gray-800 text-sm mb-4 font-medium">
                 {category.description}
               </p>
 
               {/* Bullet Points */}
               <ul className="space-y-2 mb-6">
                 {category.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start text-sm text-gray-600">
+                  <li key={idx} className="flex items-start text-sm text-gray-800">
                     <span className="text-orange-400 mr-2">•</span>
                     <span>{feature}</span>
                   </li>
@@ -178,7 +178,7 @@ export default function WorkspaceCategories() {
                     e.stopPropagation(); // Prevent card click when clicking the button
                     handleCategoryClick(category.name);
                   }}
-                  className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors flex items-center"
+                  className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300 w-full"
                 >
                   Explore {category.name} →
                 </button>

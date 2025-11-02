@@ -197,7 +197,13 @@ export default function MumbaiPlaces() {
                   </div>
 
                   {/* Place Name */}
-                  <h3 className="text-2xl font-bold mb-2 group-hover:text-cyan-300 transition-colors">
+                  <h3 
+                    className="text-2xl md:text-3xl font-bold mb-2 transition-all duration-300"
+                    style={{ 
+                      color: '#ffffff',
+                      textShadow: '0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.3)'
+                    }}
+                  >
                     {item.place.name}
                   </h3>
                   

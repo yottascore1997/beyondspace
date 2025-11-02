@@ -18,17 +18,35 @@ export default function Header() {
 
   return (
     <>
+    <style dangerouslySetInnerHTML={{
+      __html: `
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.92);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `
+    }} />
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-200 shadow-lg">
       
       <div className="w-full px-0 relative">
-        <div className="flex items-center justify-between py-4 pl-0 pr-2 md:px-4">
+        <div className="flex items-center justify-between py-2.5 pl-0 pr-2 md:px-4">
           {/* Premium Logo Section */}
-          <Link href="/" className="flex items-center gap-5 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
               {/* Glowing Effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 animate-pulse transition-opacity"></div>
               {/* Main Logo */}
-              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden shadow-2xl shadow-blue-500/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border-2 border-black/50">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden shadow-xl shadow-blue-500/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border-2 border-black/50">
                 <img 
                   src="/images/logo.jpeg" 
                   alt="Beyond Space Logo" 
@@ -36,8 +54,8 @@ export default function Header() {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <span className="font-black text-4xl md:text-5xl leading-tight tracking-tight drop-shadow-2xl">
+            <div className="flex flex-col gap-1">
+              <span className="font-black text-xl md:text-2xl leading-tight tracking-tight drop-shadow-xl">
                 <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
                   Beyond
                 </span>{' '}
@@ -45,8 +63,8 @@ export default function Header() {
                   Space
                 </span>
               </span>
-              <span className="text-sm md:text-base font-bold tracking-widest uppercase text-black">
-                One Stop Solution For Your Office Space
+              <span className="text-[10px] md:text-xs font-semibold tracking-wide normal-case text-black">
+                ✦ One Stop Solution For Your Office Space ✦
               </span>
             </div>
           </Link>
@@ -127,10 +145,16 @@ export default function Header() {
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         onClick={closeRequirementModal}
+        style={{
+          animation: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
       >
         <div
           className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative z-50 flex flex-col lg:flex-row"
           onClick={(event) => event.stopPropagation()}
+          style={{
+            animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}
         >
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
             <div className="mb-8">

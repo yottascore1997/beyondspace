@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import QuickCategories from '@/components/QuickCategories';
 import MumbaiPlaces from '@/components/MumbaiPlaces';
 import WorkspaceCategories from '@/components/WorkspaceCategories';
-import PropertyCard from '@/components/PropertyCard';
 import WhyUs from '@/components/WhyUs';
 import About from '@/components/About';
 import TrustedCompanies from '@/components/TrustedCompanies';
@@ -15,56 +14,13 @@ import Footer from '@/components/Footer';
 import Benefits from '@/components/Benefits';
 import FeaturedCoworking from '@/components/FeaturedCoworking';
 
-interface Property {
-  id: string;
-  title: string;
-  city: string;
-  area: string;
-  purpose: string;
-  type: string;
-  priceDisplay: string;
-  price: number;
-  size: number;
-  beds: string;
-  rating: number;
-  image: string;
-  tag?: string;
-}
-
 export default function Home() {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     city: 'all',
     area: 'all',
     purpose: '',
     search: '',
   });
-
-  useEffect(() => {
-    fetchProperties();
-  }, [filters]);
-
-  const fetchProperties = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (filters.city !== 'all') params.append('city', filters.city);
-      if (filters.area !== 'all') params.append('area', filters.area);
-      if (filters.purpose) params.append('purpose', filters.purpose);
-      if (filters.search) params.append('search', filters.search);
-
-      console.log('Fetching properties with filters:', filters);
-      const response = await fetch(`/api/properties?${params}`);
-      const data = await response.json();
-      console.log('Properties received:', data);
-      setProperties(data);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -198,46 +154,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <main className="container mx-auto px-4 py-8">
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-3xl font-bold text-gray-900">Featured Listings</h2>
-            <button
-              onClick={resetFilters}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Reset
-            </button>
-          </div>
-          
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl shadow-lg animate-pulse">
-                  <div className="h-96 bg-gray-300 rounded-t-2xl"></div>
-                  <div className="p-4 space-y-3">
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {properties.slice(0, 8).map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-500 text-lg">No properties found</div>
-              <p className="text-gray-400 mt-2">Try adjusting your filters or search terms</p>
-            </div>
-          )}
-        </section>
-      </main>
 
       <FeaturedCoworking />
 

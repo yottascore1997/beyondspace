@@ -1,9 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Benefits() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
+  const [currentClientIndex, setCurrentClientIndex] = useState(0);
+
+  // Client images slider - images of clients they've closed deals with
+  const clientImages = [
+    { src: '/images/1.jpeg', alt: 'Client testimonial' },
+    { src: '/images/2.jpeg', alt: 'Client testimonial' },
+    { src: '/images/3.jpeg', alt: 'Client testimonial' },
+    { src: '/images/4.jpeg', alt: 'Client testimonial' },
+    { src: '/images/5.jpeg', alt: 'Client testimonial' },
+    { src: '/images/6.jpeg', alt: 'Client testimonial' },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentClientIndex((prevIndex) =>
+        prevIndex === clientImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [clientImages.length]);
 
   const items = [
     {
@@ -19,13 +40,12 @@ export default function Benefits() {
       ),
     },
     {
-      title: 'Quick turnaround time',
-      desc:
-        'Experience swift and effective solutions — from shortlisting to onboarding in record time.',
+      title: 'Find and Book Your Perfect Workspace in 4 Easy Steps With Beyond Space',
+      desc: '1) Share Your Requirements: Provide us with your workspace needs, and we\'ll take care of the rest.\n\n2) Explore Options and Take Personalized Tours: We\'ll present you with curated space options and arrange personalized tours to ensure you find the perfect fit.\n\n3) Negotiation and Agreement Finalization: Our expert team will negotiate the best price on your behalf and handle all necessary paperwork, ensuring a smooth and efficient process.\n\n4) Quick Move-In and Seamless Onboarding: We\'ll ensure a swift and hassle-free transition, getting you settled and operational in no time.',
       iconColor: 'bg-purple-500',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
         </svg>
       ),
     },
@@ -41,7 +61,7 @@ export default function Benefits() {
       ),
     },
     {
-      title: 'Largest network',
+      title: 'Partner with premium brand, largest network of offices',
       desc:
         'Verified office spaces across Mumbai&apos;s top micro-markets to match every need and budget.',
       iconColor: 'bg-green-500',
@@ -59,27 +79,45 @@ export default function Benefits() {
     {
       number: '1',
       title: 'Share Your Requirements',
-      desc: 'Tell us what you need and a dedicated advisor will handle everything end-to-end.',
+      desc: 'Provide us with your workspace needs, and we\'ll take care of the rest.',
     },
     {
       number: '2',
-      title: 'Get Space Options & Personalised Tours',
-      desc: 'Shortlist from curated options and experience guided walkthroughs of your favourites.',
+      title: 'Explore Options and Take Personalized Tours',
+      desc: 'We\'ll present you with curated space options and arrange personalized tours to ensure you find the perfect fit.',
     },
     {
       number: '3',
-      title: 'We Negotiate, You Save',
-      desc: 'Leverage our relationships to secure the most flexible terms and best value deals.',
+      title: 'Negotiation and Agreement Finalization',
+      desc: 'Our expert team will negotiate the best price on your behalf and handle all necessary paperwork, ensuring a smooth and efficient process.',
     },
     {
       number: '4',
-      title: 'Move-In Quickly & Get To Work',
-      desc: 'We coordinate paperwork, fit-outs and onboarding so your team can start immediately.',
+      title: 'Quick Move-In and Seamless Onboarding',
+      desc: 'We\'ll ensure a swift and hassle-free transition, getting you settled and operational in no time.',
     },
   ];
 
   return (
     <>
+    <style dangerouslySetInnerHTML={{
+      __html: `
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.92);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `
+    }} />
       <section className="relative py-16 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -92,93 +130,117 @@ export default function Benefits() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Side - Benefit Cards */}
             <div className="space-y-6">
-              {items.map((it) => (
-                <div
-                  key={it.title}
-                  className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-16 h-16 ${it.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
-                      {it.icon}
+              {items.map((it, itemIndex) => {
+                // Check if this is the "4 Easy Steps" item (2nd item, index 1)
+                const isStepsItem = it.title.includes('Find and Book Your Perfect Workspace');
+                
+                if (isStepsItem) {
+                  // Parse the steps from description
+                  const stepLines = it.desc.split('\n\n').filter(line => line.trim());
+                  
+                  return (
+                    <div
+                      key={it.title}
+                      className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className={`w-16 h-16 ${it.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                          {it.icon}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">{it.title}</h3>
+                        </div>
+                      </div>
+                      
+                      {/* Steps with step-like styling */}
+                      <div className="space-y-4 relative pl-4">
+                        {stepLines.map((stepLine, stepIndex) => {
+                          const stepMatch = stepLine.match(/^([1-4])\)\s*(.+?):\s*([\s\S]+?)$/);
+                          if (!stepMatch) return null;
+                          
+                          const [, stepLetter, stepTitle, stepDesc] = stepMatch;
+                          
+                          return (
+                            <div
+                              key={stepIndex}
+                              className="relative flex gap-4"
+                            >
+                              {/* Connecting Line (except for last step) */}
+                              {stepIndex < stepLines.length - 1 && (
+                                <div className="absolute left-[18px] top-[40px] w-0.5 h-[calc(100%+1rem)] bg-gradient-to-b from-purple-400 via-blue-400 to-cyan-400 z-0"></div>
+                              )}
+                              
+                              {/* Step Number Badge */}
+                              <div className="relative z-10 flex-shrink-0">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400 text-white font-extrabold text-sm shadow-lg shadow-purple-500/40 ring-2 ring-white">
+                                  {stepLetter}
+                                </div>
+                              </div>
+                              
+                              {/* Step Content */}
+                              <div className="flex-1 relative z-10">
+                                <h4 className="text-base font-bold text-gray-900 mb-1">
+                                  {stepTitle.trim()}:
+                                </h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                  {stepDesc.trim()}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{it.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{it.desc}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Side - Image */}
-            <div className="relative">
-              <div className="relative rounded-3xl overflow-hidden border-r-8 border-b-8 border-blue-400 shadow-2xl">
-                <img
-                  src="/images/chooseus.jpeg"
-                  alt="Premium office space"
-                  className="w-full h-[600px] object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-14 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-            <div className="space-y-6">
-              <div>
-                <p className="text-sm uppercase tracking-[0.4em] text-blue-500 mb-3">How It Works</p>
-                <h2 className="text-2xl md:text-3xl lg:text-[34px] font-bold text-slate-900 leading-snug">
-                  Find and <span className="text-orange-500">Book</span> Your Perfect Workspace
-                  <br />in 4 Easy Steps with{' '}
-                  <span className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                    Beyond Space
-                  </span>
-                </h2>
-              </div>
-
-              <div className="space-y-5">
-                {steps.map((step) => (
+                  );
+                }
+                
+                // Regular item styling
+                return (
                   <div
-                    key={step.number}
-                    className="relative flex gap-4 rounded-2xl border border-slate-200 bg-white/90 px-4 py-4 shadow-sm hover:shadow-md transition-shadow"
+                    key={it.title}
+                    className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500 text-white font-bold text-lg shadow-lg shadow-orange-300/40">
-                      {step.number}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base md:text-lg font-semibold text-slate-900 mb-1">
-                        {step.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 leading-relaxed">
-                        {step.desc}
-                      </p>
+                    <div className="flex items-start gap-4">
+                      <div className={`w-16 h-16 ${it.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                        {it.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{it.title}</h3>
+                        <div className="text-gray-600 leading-relaxed whitespace-pre-line">{it.desc}</div>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setShareModalOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 px-5 py-3 text-white font-semibold shadow-lg shadow-orange-400/40 hover:shadow-pink-400/40 transition-all w-full text-sm md:text-base md:w-[calc(100%-64px)]"
-              >
-                Connect with a Workspace Expert Today
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </button>
+                );
+              })}
             </div>
 
+            {/* Right Side - Client Images Slider */}
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 to-blue-200/30 blur-3xl" />
-              <div className="relative overflow-hidden rounded-3xl border-8 border-white shadow-[0_40px_90px_rgba(30,64,175,0.35)] h-[520px]">
-                <img
-                  src="/images/co4.jpeg"
-                  alt="Workspace lounge"
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative rounded-3xl overflow-hidden border-r-8 border-b-8 border-blue-400 shadow-2xl h-[600px]">
+                {clientImages.map((client, index) => (
+                  <img
+                    key={index}
+                    src={client.src}
+                    alt={client.alt}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                      index === currentClientIndex ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  />
+                ))}
+                {/* Navigation Dots */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                  {clientImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentClientIndex(index)}
+                      className={`transition-all duration-300 ${
+                        index === currentClientIndex
+                          ? 'w-8 h-2 bg-white rounded-full'
+                          : 'w-2 h-2 bg-white/60 hover:bg-white/80 rounded-full'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -189,10 +251,16 @@ export default function Benefits() {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
           onClick={() => setShareModalOpen(false)}
+          style={{
+            animation: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
         >
           <div
             className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative z-50 flex flex-col lg:flex-row"
             onClick={(event) => event.stopPropagation()}
+            style={{
+              animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}
           >
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
               <div className="mb-8">
