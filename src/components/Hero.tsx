@@ -25,11 +25,6 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   // Hero images from public/images folder
   const heroImages = [
     {
-      src: '/images/7.jpeg',
-      alt: 'Contemporary workspace with modern furniture and collaborative environment',
-      category: 'Coworking Space'
-    },
-    {
       src: '/images/co1.jpeg',
       alt: 'Premium coworking lounge with collaborative seating and natural light',
       category: 'Coworking Lounge'
@@ -38,6 +33,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       src: '/images/hero4.jpeg',
       alt: 'Modern office space',
       category: 'Office Space'
+    },
+    {
+      src: '/images/hero1.jpeg',
+      alt: 'Premium hero workspace with modern design and professional atmosphere',
+      category: 'Hero Workspace'
     },
     {
       src: '/images/9.jpeg',
@@ -53,6 +53,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       src: '/images/12.jpeg',
       alt: 'Flexible office space with modern amenities and collaborative atmosphere',
       category: 'Flexi Desk'
+    },
+    {
+      src: '/images/7.jpeg',
+      alt: 'Contemporary workspace with modern furniture and collaborative environment',
+      category: 'Coworking Space'
     }
   ];
 

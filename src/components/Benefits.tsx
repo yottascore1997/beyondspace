@@ -131,6 +131,11 @@ export default function Benefits() {
             {/* Left Side - Benefit Cards */}
             <div className="space-y-6">
               {items.map((it, itemIndex) => {
+                // Skip "Zero brokerage fee" - it will be shown below the image
+                if (it.title === 'Zero brokerage fee') {
+                  return null;
+                }
+
                 // Check if this is the "4 Easy Steps" item (2nd item, index 1)
                 const isStepsItem = it.title.includes('Find and Book Your Perfect Workspace');
                 
@@ -148,7 +153,7 @@ export default function Benefits() {
                           {it.icon}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">{it.title}</h3>
+                          <h3 className="text-xl font-semibold bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 bg-clip-text text-transparent mb-2">{it.title}</h3>
                         </div>
                       </div>
                       
@@ -242,6 +247,26 @@ export default function Benefits() {
                   ))}
                 </div>
               </div>
+              
+              {/* Zero brokerage fee card below image */}
+              {(() => {
+                const zeroBrokerageItem = items.find(it => it.title === 'Zero brokerage fee');
+                if (!zeroBrokerageItem) return null;
+                
+                return (
+                  <div className="mt-6 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-16 h-16 ${zeroBrokerageItem.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                        {zeroBrokerageItem.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{zeroBrokerageItem.title}</h3>
+                        <div className="text-gray-600 leading-relaxed whitespace-pre-line">{zeroBrokerageItem.desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

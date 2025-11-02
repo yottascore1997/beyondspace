@@ -55,7 +55,7 @@ export default function Header() {
               </div>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="font-black text-xl md:text-2xl leading-tight tracking-tight drop-shadow-xl">
+              <span className="font-black text-3xl md:text-4xl leading-tight tracking-tight drop-shadow-xl">
                 <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
                   Beyond
                 </span>{' '}
