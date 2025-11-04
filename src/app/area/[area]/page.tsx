@@ -26,7 +26,12 @@ const HorizontalPropertyCard = ({ property }: { property: Property }) => {
   };
 
   return (
-    <Link href={`/property/${property.id}`} className="block">
+    <Link 
+      href={`/property/${property.id}`} 
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+    >
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] cursor-pointer">
         <div className="flex flex-col lg:flex-row">
           {/* Image Section - Full width on mobile, left side on desktop */}

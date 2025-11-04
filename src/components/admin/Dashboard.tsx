@@ -5,9 +5,7 @@ import { useState, useEffect } from 'react';
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalProperties: 0,
-    totalContacts: 0,
-    recentContacts: 0,
-    pendingInquiries: 0
+    totalContacts: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,23 +28,10 @@ export default function Dashboard() {
       // Fetch contacts count
       const contactsRes = await fetch('/api/contact');
       const contacts = await contactsRes.json();
-      
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const unreadContacts = contacts.filter((contact: any) => !contact.isRead).length;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const recentContacts = contacts.filter((contact: any) => {
-        const contactDate = new Date(contact.createdAt);
-        const today = new Date();
-        const diffTime = Math.abs(today.getTime() - contactDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 7;
-      }).length;
 
       setStats({
         totalProperties: properties.length,
-        totalContacts: contacts.length,
-        recentContacts,
-        pendingInquiries: unreadContacts
+        totalContacts: contacts.length
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -59,8 +44,8 @@ export default function Dashboard() {
     return (
       <div className="p-8">
         <div className="animate-pulse">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {[1, 2].map((i) => (
               <div key={i} className="bg-gray-200 h-32 rounded-2xl"></div>
             ))}
           </div>
@@ -89,28 +74,6 @@ export default function Dashboard() {
         </svg>
       ),
       color: 'from-green-500 to-emerald-500'
-    },
-    {
-      title: 'Recent Inquiries',
-      value: stats.recentContacts,
-      subtitle: 'Last 7 days',
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      color: 'from-yellow-500 to-orange-500'
-    },
-    {
-      title: 'Pending Inquiries',
-      value: stats.pendingInquiries,
-      subtitle: 'Need attention',
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-      ),
-      color: 'from-red-500 to-pink-500'
     }
   ];
 
@@ -123,7 +86,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {statCards.map((card, index) => (
           <div key={index} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">

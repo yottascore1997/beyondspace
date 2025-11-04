@@ -1,19 +1,11 @@
 'use client';
 
 export default function TrustedCompanies() {
-  // Dummy company logos data
-  const companies = [
-    { name: 'TechCorp', logo: 'https://img.icons8.com/color/96/domain.png' },
-    { name: 'InnovateLab', logo: 'https://img.icons8.com/color/96/innovation.png' },
-    { name: 'StartupHub', logo: 'https://img.icons8.com/color/96/startup.png' },
-    { name: 'DigitalWorks', logo: 'https://img.icons8.com/color/96/digital-nomad.png' },
-    { name: 'CloudTech', logo: 'https://img.icons8.com/color/96/cloud.png' },
-    { name: 'DataFlow', logo: 'https://img.icons8.com/color/96/data.png' },
-    { name: 'WebStudio', logo: 'https://img.icons8.com/color/96/web-design.png' },
-    { name: 'AppCraft', logo: 'https://img.icons8.com/color/96/mobile-app.png' },
-    { name: 'CodeForge', logo: 'https://img.icons8.com/color/96/code.png' },
-    { name: 'PixelWorks', logo: 'https://img.icons8.com/color/96/pixel-star.png' }
-  ];
+  // Company logos from trusted folder
+  const companies = Array.from({ length: 15 }, (_, i) => ({
+    name: `Company ${i + 1}`,
+    logo: `/images/trusted/c${i + 1}.jpeg`
+  }));
 
   // Duplicate the array for seamless loop
   const duplicatedCompanies = [...companies, ...companies];
@@ -40,16 +32,18 @@ export default function TrustedCompanies() {
             {duplicatedCompanies.map((company, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 mx-8 flex items-center justify-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 group"
+                className="flex-shrink-0 mx-8 flex items-center justify-center group"
               >
-                <img
-                  src={company.logo}
-                  alt={`${company.name} logo`}
-                  className="max-h-16 w-auto object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
-                />
-                <span className="ml-3 text-gray-600 font-medium group-hover:text-gray-900 transition-colors">
-                  {company.name}
-                </span>
+                <div className="w-32 h-20 md:w-40 md:h-24 flex items-center justify-center">
+                  <img
+                    src={company.logo}
+                    alt={`${company.name} logo`}
+                    className="max-w-full max-h-full w-full h-full object-contain transition-all duration-300 opacity-80 group-hover:opacity-100 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
               </div>
             ))}
           </div>

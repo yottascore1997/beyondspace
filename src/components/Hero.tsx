@@ -300,7 +300,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
 
             <button
               onClick={() => router.push('/properties')}
-              className="w-full mt-2 py-3 rounded-lg bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300"
+              className="w-full mt-2 py-3 rounded-lg bg-blue-400 text-white font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
             >
               Search Spaces
             </button>

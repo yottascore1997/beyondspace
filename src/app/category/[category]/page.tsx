@@ -44,6 +44,7 @@ interface PropertyImage {
 interface Filters {
   sortBy: string;
   area: string;
+  price: string;
 }
 
 export default function CategoryPage() {
@@ -55,11 +56,15 @@ export default function CategoryPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('grid');
   const [filters, setFilters] = useState<Filters>({
     sortBy: 'Popularity',
-    area: 'all'
+    area: 'all',
+    price: 'all'
   });
   const [isGridShaking, setIsGridShaking] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const propertiesPerPage = 8;
+  const initialPropertiesCount = 30; // Show first 30 without pagination
 
   // Decode the category name from URL
   const categoryName = decodeURIComponent(category);
@@ -70,6 +75,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     filterAndSortProperties();
+    setCurrentPage(1); // Reset to page 1 when filters change
   }, [properties, filters, searchQuery]);
 
   const fetchCategoryProperties = async () => {
@@ -103,6 +109,27 @@ export default function CategoryPage() {
       );
     }
 
+    // Price filter
+    if (filters.price !== 'all') {
+      filtered = filtered.filter(property => {
+        const price = property.price;
+        switch (filters.price) {
+          case 'under-50k':
+            return price < 50000;
+          case '50k-1lakh':
+            return price >= 50000 && price < 100000;
+          case '1lakh-2lakh':
+            return price >= 100000 && price < 200000;
+          case '2lakh-5lakh':
+            return price >= 200000 && price < 500000;
+          case 'above-5lakh':
+            return price >= 500000;
+          default:
+            return true;
+        }
+      });
+    }
+
 
     // Sort properties
     if (filters.sortBy === 'Price: Low to High') {
@@ -119,7 +146,8 @@ export default function CategoryPage() {
   const resetFilters = () => {
     setFilters({
       sortBy: 'Popularity',
-      area: 'all'
+      area: 'all',
+      price: 'all'
     });
   };
 
@@ -180,15 +208,23 @@ export default function CategoryPage() {
 
   const getCategoryDisplayName = (category: string) => {
     const categoryMap: Record<string, string> = {
-      'coworking': 'Coworking Spaces',
+      'coworking': 'Coworking-Space',
+      'coworking-space': 'Coworking-Space',
       'managed': 'Managed Office Spaces',
+      'managed-office': 'Managed Office Spaces',
       'virtualoffice': 'Virtual Offices',
+      'virtual-office': 'Virtual Offices',
       'meetingroom': 'Meeting Rooms',
+      'meeting-room': 'Meeting Rooms',
       'dedicateddesk': 'Dedicated Desks',
+      'dedicated-desk': 'Dedicated Desks',
       'flexidesk': 'Flexi Desks',
-      'enterpriseoffices': 'Enterprise Offices'
+      'flexi-desk': 'Flexi Desks',
+      'day-pass': 'Day Pass/ Flexi Desk',
+      'enterpriseoffices': 'Enterprise Offices',
+      'enterprise-offices': 'Enterprise Offices'
     };
-    return categoryMap[category] || category;
+    return categoryMap[category.toLowerCase()] || category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-');
   };
 
   return (
@@ -222,28 +258,13 @@ export default function CategoryPage() {
       <div className="bg-white">
         <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="mb-4 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-              {getCategoryDisplayName(categoryName)} in Mumbai
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+              <span className="text-blue-400">
+                {getCategoryDisplayName(categoryName)}
+              </span>
+              <span className="text-gray-900"> in Mumbai</span>
             </h1>
-            <p className="text-gray-600 mt-2">{currentCategoryInfo.description}</p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Search by property name or area..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-transparent sm:text-sm"
-              />
-            </div>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">{currentCategoryInfo.description}</p>
           </div>
 
           {/* Area Filter */}
@@ -289,48 +310,64 @@ export default function CategoryPage() {
             </div>
           </div>
 
-          {/* Results Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <p className="text-gray-600 text-sm sm:text-base">
-                Showing <span className="font-semibold">{filteredProperties.length} result(s)</span> for <span className="font-semibold">{getCategoryDisplayName(categoryName)} in {filters.area !== 'all' ? filters.area : 'Mumbai'}</span>
-              </p>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-orange-400 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-orange-400 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </button>
+          {/* Search Bar and Filters */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
+              <input
+                type="text"
+                placeholder="Search by property name or area..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-transparent sm:text-sm"
+              />
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* Popular Locations Filter */}
+            <div className="flex-shrink-0">
               <select
-                value={filters.sortBy}
-                onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm"
+                value={filters.area}
+                onChange={(e) => setFilters(prev => ({ ...prev, area: e.target.value }))}
+                className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
               >
-                <option value="Popularity">Sort by Popularity</option>
-                <option value="Price: Low to High">Price: Low to High</option>
-                <option value="Price: High to Low">Price: High to Low</option>
-                <option value="Rating">Sort by Rating</option>
+                <option value="all">Popular Locations</option>
+                <option value="Thane">Thane</option>
+                <option value="Navi Mumbai">Navi Mumbai</option>
+                <option value="Andheri West">Andheri West</option>
+                <option value="Andheri East">Andheri East</option>
+                <option value="Andheri">Andheri</option>
+                <option value="BKC">BKC</option>
+                <option value="Lower Parel">Lower Parel</option>
+                <option value="Vashi">Vashi</option>
+                <option value="Powai">Powai</option>
+                <option value="Borivali">Borivali</option>
+                <option value="Goregaon">Goregaon</option>
+                <option value="Bandra">Bandra</option>
+                <option value="Malad">Malad</option>
+                <option value="Dadar">Dadar</option>
+                <option value="Mulund">Mulund</option>
               </select>
-              <button
-                onClick={resetFilters}
-                className="bg-orange-400 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition-colors"
+            </div>
+
+            {/* Price Filter */}
+            <div className="flex-shrink-0">
+              <select
+                value={filters.price}
+                onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
+                className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
               >
-                Reset Filters
-              </button>
+                <option value="all">Select Price</option>
+                <option value="under-50k">Under ₹50,000</option>
+                <option value="50k-1lakh">₹50,000 - ₹1 Lakh</option>
+                <option value="1lakh-2lakh">₹1 Lakh - ₹2 Lakh</option>
+                <option value="2lakh-5lakh">₹2 Lakh - ₹5 Lakh</option>
+                <option value="above-5lakh">Above ₹5 Lakh</option>
+              </select>
             </div>
           </div>
         </div>
@@ -355,15 +392,234 @@ export default function CategoryPage() {
                 ))}
               </div>
             ) : filteredProperties.length > 0 ? (
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
-                {filteredProperties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onEnquireClick={handleEnquireClick}
-                  />
-                ))}
-              </div>
+              <>
+                {(() => {
+                  const batches: any[] = [];
+                  
+                  // Show first 30 properties without pagination
+                  const first30Properties = filteredProperties.slice(0, initialPropertiesCount);
+                  const remainingProperties = filteredProperties.slice(initialPropertiesCount);
+                  
+                  // Display first 30 properties with sections after every 8
+                  if (first30Properties.length > 0) {
+                    const itemsPerBatch = 8;
+                    for (let i = 0; i < first30Properties.length; i += itemsPerBatch) {
+                      const batch = first30Properties.slice(i, i + itemsPerBatch);
+                      const batchNumber = Math.floor(i / itemsPerBatch);
+                      
+                      // Add properties batch
+                      batches.push(
+                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+                          {batch.map((property) => (
+                            <PropertyCard
+                              key={property.id}
+                              property={property}
+                              onEnquireClick={handleEnquireClick}
+                            />
+                          ))}
+                        </div>
+                      );
+                      
+                      // Add section after each batch (except if it's the last batch of first 30)
+                      if (i + itemsPerBatch < first30Properties.length) {
+                        batches.push(
+                          <div key={`section-${batchNumber}`} className="my-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 md:p-12">
+                        <div className="text-center mb-8">
+                          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                            Find Your Perfect Office Solution
+                          </h2>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                          {/* Private Office Card */}
+                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div className="relative h-48 overflow-hidden">
+                              <img
+                                src="/images/co1.jpeg"
+                                alt="Private Office"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-xl font-bold text-gray-900 mb-3">Private Office</h3>
+                              <p className="text-gray-600 mb-4 leading-relaxed">
+                                Fully furnished Private offices for you and your growing team.
+                              </p>
+                              <button
+                                onClick={handleEnquireClick}
+                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
+                              >
+                                Enquire Now
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Managed Office Card */}
+                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div className="relative h-48 overflow-hidden">
+                              <img
+                                src="/images/co2.jpeg"
+                                alt="Managed Office"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-xl font-bold text-gray-900 mb-3">Managed Office</h3>
+                              <p className="text-gray-600 mb-4 leading-relaxed">
+                                Customised fully furnished office managed by professionals.
+                              </p>
+                              <button
+                                onClick={handleEnquireClick}
+                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
+                              >
+                                Enquire Now
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Enterprise Solution Card */}
+                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div className="relative h-48 overflow-hidden">
+                              <img
+                                src="/images/co3.jpeg"
+                                alt="Enterprise Solution"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-xl font-bold text-gray-900 mb-3">Enterprise Solution</h3>
+                              <p className="text-gray-600 mb-4 leading-relaxed">
+                                Fully equipped offices for larger teams with flexibility to scale & customise.
+                              </p>
+                              <button
+                                onClick={handleEnquireClick}
+                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
+                              >
+                                Enquire Now
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                        );
+                      }
+                    }
+                  }
+                  
+                  // Show remaining properties with pagination (after 30)
+                  if (remainingProperties.length > 0) {
+                    const totalPages = Math.ceil(remainingProperties.length / propertiesPerPage);
+                    const startIndex = (currentPage - 1) * propertiesPerPage;
+                    const endIndex = startIndex + propertiesPerPage;
+                    const currentPageProperties = remainingProperties.slice(startIndex, endIndex);
+                    
+                    // Add paginated properties
+                    batches.push(
+                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+                        {currentPageProperties.map((property) => (
+                          <PropertyCard
+                            key={property.id}
+                            property={property}
+                            onEnquireClick={handleEnquireClick}
+                          />
+                        ))}
+                      </div>
+                    );
+                    
+                    // Add pagination component
+                    batches.push(
+                      <div key="pagination" className="mt-12 flex items-center justify-center gap-2">
+                        {(() => {
+                          const getPageNumbers = () => {
+                            const pages: (number | string)[] = [];
+                            const maxVisible = 5;
+                            
+                            if (totalPages <= maxVisible) {
+                              for (let i = 1; i <= totalPages; i++) {
+                                pages.push(i);
+                              }
+                            } else {
+                              if (currentPage <= 3) {
+                                for (let i = 1; i <= 4; i++) {
+                                  pages.push(i);
+                                }
+                                pages.push('...');
+                                pages.push(totalPages);
+                              } else if (currentPage >= totalPages - 2) {
+                                pages.push(1);
+                                pages.push('...');
+                                for (let i = totalPages - 3; i <= totalPages; i++) {
+                                  pages.push(i);
+                                }
+                              } else {
+                                pages.push(1);
+                                pages.push('...');
+                                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                                  pages.push(i);
+                                }
+                                pages.push('...');
+                                pages.push(totalPages);
+                              }
+                            }
+                            return pages;
+                          };
+                          
+                          return (
+                            <>
+                              {/* Previous Button */}
+                              <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                  currentPage === 1
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-400 text-white hover:bg-blue-500'
+                                }`}
+                              >
+                                Previous
+                              </button>
+                              
+                              {/* Page Numbers */}
+                              {getPageNumbers().map((page, index) => (
+                                page === '...' ? (
+                                  <span key={`ellipsis-${index}`} className="px-2 text-gray-400">...</span>
+                                ) : (
+                                  <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page as number)}
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                      currentPage === page
+                                        ? 'bg-blue-400 text-white'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                  >
+                                    {page}
+                                  </button>
+                                )
+                              ))}
+                              
+                              {/* Next Button */}
+                              <button
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                  currentPage === totalPages
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-400 text-white hover:bg-blue-500'
+                                }`}
+                              >
+                                Next
+                              </button>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    );
+                  }
+                  
+                  return batches;
+                })()}
+              </>
             ) : (
               <div className="text-center py-16 bg-white rounded-lg">
                 <div className="text-6xl mb-4">🏠</div>

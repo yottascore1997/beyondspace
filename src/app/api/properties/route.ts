@@ -28,22 +28,22 @@ export async function GET(request: NextRequest) {
       where.purpose = purpose.toUpperCase();
     }
 
-    // Category filtering
+    // Category filtering - Map frontend category names to database property types
     if (category && category !== 'all') {
       const categoryTypeMap: Record<string, string[]> = {
-        'coworking': ['coworking'],
-        'managed': ['managed office', 'office'],
-        'virtualoffice': ['virtual office'],
-        'meetingroom': ['meeting room'],
-        'dedicateddesk': ['dedicated desk'],
-        'flexidesk': ['flexi desk'],
-        'enterpriseoffices': ['enterprise office']
+        'coworking': ['COWORKING'], // Coworking Space
+        'managed': ['MANAGED_OFFICE'], // Managed Office
+        'dedicateddesk': ['COWORKING'], // Dedicated Desk (stored as COWORKING)
+        'flexidesk': ['COWORKING'], // Flexi Desk (stored as COWORKING)
+        'virtualoffice': ['COWORKING'], // Virtual Office (stored as COWORKING)
+        'meetingroom': ['COMMERCIAL'], // Meeting Room (stored as COMMERCIAL)
+        'enterpriseoffices': ['MANAGED_OFFICE'], // Enterprise Offices (stored as MANAGED_OFFICE)
       };
 
-      const types = categoryTypeMap[category];
+      const types = categoryTypeMap[category.toLowerCase()];
       if (types) {
         where.type = {
-          in: types.map(type => type.toUpperCase())
+          in: types
         };
       }
     }

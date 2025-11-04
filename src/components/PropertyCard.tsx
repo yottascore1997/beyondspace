@@ -50,7 +50,12 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
   };
 
   return (
-    <Link href={`/property/${property.id}`} className="block">
+    <Link 
+      href={`/property/${property.id}`} 
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+    >
       <article className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
         <div className="relative h-96 overflow-hidden group cursor-pointer">
         <img
@@ -160,7 +165,7 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
         
         <div className="flex items-center justify-between">
           <div className="font-bold text-gray-900 text-lg">
-            {property.priceDisplay}
+            {property.priceDisplay}<span className="text-gray-500 font-normal">/month</span>
           </div>
           <button
             onClick={(e) => {
@@ -168,7 +173,7 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
               e.stopPropagation();
               onEnquireClick?.();
             }}
-            className="px-6 py-2 bg-orange-400 text-white rounded-lg font-semibold hover:bg-blue-900 transition-colors"
+            className="px-6 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors"
           >
             Get Quote
           </button>

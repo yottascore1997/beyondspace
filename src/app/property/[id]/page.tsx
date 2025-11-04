@@ -14,6 +14,13 @@ interface PropertyImage {
   createdAt: string;
 }
 
+interface SeatingPlan {
+  title: string;
+  description: string;
+  price: string;
+  seating: string;
+}
+
 interface Property {
   id: string;
   title: string;
@@ -31,6 +38,9 @@ interface Property {
   tag?: string;
   description?: string;
   location?: string;
+  locationDetails?: string;
+  aboutWorkspace?: string;
+  propertyOptions?: SeatingPlan[] | null;
   createdAt: string;
 }
 
@@ -202,95 +212,101 @@ export default function PropertyDetails() {
           {/* Property Details - Left Side */}
           <div className="lg:col-span-2">
             {/* Property Title */}
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">{property.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
+              {property.title}
+            </h1>
 
             {/* Location */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Location Details</h3>
-              <p className="text-gray-600 text-lg">{property.area}</p>
+              <p className="text-gray-600 text-lg">
+                {property.locationDetails || property.area}
+              </p>
             </div>
 
             {/* Description */}
-            {property.description && (
+            {(property.aboutWorkspace || property.description) && (
               <div className="mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">About</h3>
-                <p className="text-gray-600 text-lg">{property.description}</p>
+                <p className="text-gray-600 text-lg">
+                  {property.aboutWorkspace || property.description}
+                </p>
               </div>
             )}
 
             {/* Seating Plans Section */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Seating Plans</h3>
-              
-              {/* Dedicated Desk */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="md:w-1/3">
-                    <img 
-                      src="/images/1.jpeg" 
-                      alt="Dedicated Desk" 
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                  <div className="md:w-2/3">
-                    <h4 className="text-xl font-bold text-gray-900 mb-2">Dedicated Desk</h4>
-                    <p className="text-gray-600 mb-3">Fixed workspace in a Coworking Office with all amenities & Seating: 1 - 100+ Seats.</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-blue-600">₹10,999/ seat</span>
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                        Enquire Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {property.propertyOptions && property.propertyOptions.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Seating Plans</h3>
+                
+                {property.propertyOptions.map((plan, index) => {
+                  // Map seating plan titles to default images
+                  const getImageForPlan = (title: string) => {
+                    const titleLower = title.toLowerCase();
+                    if (titleLower.includes('dedicated desk')) return '/images/1.jpeg';
+                    if (titleLower.includes('private cabin')) return '/images/2.jpeg';
+                    if (titleLower.includes('virtual office')) return '/images/4.jpeg';
+                    return '/images/1.jpeg'; // default
+                  };
 
-              {/* Private Cabin */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="md:w-1/3">
-                    <img 
-                      src="/images/2.jpeg" 
-                      alt="Private Cabin" 
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                  <div className="md:w-2/3">
-                    <h4 className="text-xl font-bold text-gray-900 mb-2">Private Cabin</h4>
-                    <p className="text-gray-600 mb-3">Ready to move fully furnished private office with all amenities. & Seating: 4, 6, 8, 10+ (Customization Available).</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-blue-600">₹11,999/ seat</span>
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                        Enquire Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  return (
+                    <div
+                      key={index}
+                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-lg p-3 md:p-4 ${
+                        index < property.propertyOptions!.length - 1 ? 'mb-3' : ''
+                      }`}
+                    >
+                      <div className="flex flex-col md:flex-row gap-3">
+                        {/* Image on Left - Square */}
+                        <div className="md:w-1/5">
+                          <img 
+                            src={getImageForPlan(plan.title)} 
+                            alt={plan.title} 
+                            className="w-full aspect-square object-cover rounded-lg"
+                          />
+                        </div>
 
-              {/* Virtual Office */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="md:w-1/3">
-                    <img 
-                      src="/images/4.jpeg" 
-                      alt="Virtual Office" 
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                  <div className="md:w-2/3">
-                    <h4 className="text-xl font-bold text-gray-900 mb-2">Virtual Office</h4>
-                    <p className="text-gray-600 mb-3">Build your Company presence with Virtual Office in any city across India.</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-blue-600">₹24,999/ year</span>
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                        Enquire Now
-                      </button>
+                        {/* Content on Right */}
+                        <div className="md:w-4/5 flex flex-col relative">
+                          {/* Left Side - Title and Content */}
+                          <div className="flex-1 pr-3 pt-2">
+                            <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">{plan.title}</h4>
+                            
+                            {plan.description && (
+                              <p className="text-gray-800 mb-2 text-sm font-medium">{plan.description}</p>
+                            )}
+                            
+                            {plan.seating && (
+                              <p className="text-gray-600 mb-2 text-sm">
+                                <span className="mr-1">👤</span>
+                                <span>Seating : {plan.seating}</span>
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Right Side - Price and Button (Vertically Centered) */}
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end">
+                            {plan.price && (
+                              <div className="text-right mb-3">
+                                <span className="text-2xl md:text-3xl font-bold text-gray-900">{plan.price}</span>
+                                <span className="text-xl md:text-2xl font-normal text-gray-600 ml-1">/month</span>
+                              </div>
+                            )}
+                            
+                            <button
+                              onClick={handleEnquireClick}
+                              className="bg-blue-400 text-white px-6 py-2 rounded-lg text-base font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                            >
+                              Enquire Now
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
-            </div>
+            )}
 
             {/* Managed Office Space and Enterprise Solutions Section */}
             <div className="mb-8">
@@ -321,7 +337,7 @@ export default function PropertyDetails() {
                           }, 800);
                         }
                       }}
-                      className="w-full bg-gradient-to-br from-purple-500 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
+                      className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -354,7 +370,7 @@ export default function PropertyDetails() {
                           }, 800);
                         }
                       }}
-                      className="w-full bg-gradient-to-br from-purple-500 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
+                      className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -544,41 +560,37 @@ export default function PropertyDetails() {
                 </div>
               </div>
             </div>
-
-            {/* Why Book Coworking Space with Beyond Space Section */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Why book coworking space with Beyond Space?</h3>
-            </div>
           </div>
 
           {/* Contact Form - Right Side */}
           <div className="lg:col-span-1">
-            <div className="bg-gradient-to-br from-purple-300 via-purple-200 to-purple-300 rounded-2xl shadow-xl border border-purple-400 p-8 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl shadow-2xl border-2 border-blue-200/50 p-8 relative overflow-hidden">
               {/* Background Pattern */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-200/30 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-200/30 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-16 -translate-x-16"></div>
+              <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-gradient-to-r from-blue-100/30 to-cyan-100/30 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
               
               <div className="relative z-10">
                 <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    Get COWORKING in Mumbai
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
+                    Get Office Spaces in Mumbai
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Beyond Space Work Consultant assisted 150+ corporates in Mumbai to move into their new office.
+                  <p className="text-gray-700 text-base leading-relaxed font-medium">
+                    Beyond Space Work Consultant assisted <span className="font-bold text-blue-600">150+ corporates</span> in Mumbai to move into their new office.
                   </p>
                 </div>
 
-                <form className="space-y-5">
+                <form className="space-y-4">
                   <div className="relative">
                     <input
                       type="text"
                       placeholder="Your Name"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 placeholder-gray-500"
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -591,7 +603,7 @@ export default function PropertyDetails() {
                     <input
                       type="email"
                       placeholder="Email Address"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 placeholder-gray-500"
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,7 +616,7 @@ export default function PropertyDetails() {
                     <input
                       type="tel"
                       placeholder="Phone Number"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 placeholder-gray-500"
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -614,7 +626,7 @@ export default function PropertyDetails() {
                   </div>
                   
                   <div className="relative">
-                    <select className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 appearance-none">
+                    <select className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm">
                       <option>Select Area</option>
                       <option>Andheri</option>
                       <option>Thane</option>
@@ -631,13 +643,13 @@ export default function PropertyDetails() {
                     <textarea
                       placeholder="Tell us about your requirements..."
                       rows={4}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 resize-none placeholder-gray-500"
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 resize-none placeholder-gray-500 shadow-sm"
                     ></textarea>
                   </div>
                   
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    className="w-full bg-blue-400 text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-blue-500 transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     <span className="flex items-center justify-center gap-2">
                       Connect with us
@@ -650,18 +662,18 @@ export default function PropertyDetails() {
 
                 <div className="mt-8 text-center">
                   <div className="flex items-center justify-center gap-2 mb-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                       </svg>
                     </div>
-                    <span className="text-sm font-medium text-gray-700">Connect with our space expert</span>
+                    <span className="text-sm font-semibold text-gray-800">Connect with our space expert</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span className="text-purple-600 font-medium">contact@beyondspacework.com</span>
+                    <span className="text-blue-600 font-semibold text-base">contact@beyondspacework.com</span>
                   </div>
                 </div>
               </div>
