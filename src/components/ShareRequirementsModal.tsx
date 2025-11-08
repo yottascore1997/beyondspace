@@ -130,13 +130,13 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
             animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
           }}
         >
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
+          <div className="bg-gradient-to-b from-blue-50 via-white to-white p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Find Your Perfect Office Now!</h2>
-              <p className="text-gray-700 text-base">Our workspace experts will provide a customized quote with detailed inventory tailored to your needs.</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">We Curate Workspaces That Work</h2>
+              <p className="text-gray-700 text-base">Share your goals and we’ll shortlist fully managed options, negotiate savings, and coordinate a stress-free move-in.</p>
             </div>
             <div className="space-y-4">
-              {['Customized Workspaces', 'Prime Locations', 'Free Guided Tours', 'Flexible Terms'].map((text) => (
+              {[ 'Guided walkthroughs & transparent pricing', 'Flexible terms with end-to-end support' ].map((text) => (
                 <div key={text} className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +146,24 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                   <span className="text-gray-800 font-medium">{text}</span>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-10">
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Trusted by teams at</p>
+              <div className="flex flex-wrap gap-6 items-center">
+                {['/images/trusted/c1.jpeg', '/images/trusted/c2.jpeg', '/images/trusted/c3.jpeg', '/images/trusted/c4.jpeg', '/images/trusted/c5.jpeg', '/images/trusted/c6.jpeg', '/images/trusted/c7.jpeg', '/images/trusted/c8.jpeg', '/images/trusted/c9.jpeg', '/images/trusted/c10.jpeg', '/images/trusted/c11.jpeg']
+                  .map((logo, index) => (
+                  <img
+                    key={index}
+                    src={logo}
+                    alt={`Client logo ${index + 1}`}
+                    className="h-16 w-auto object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -258,14 +276,38 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:via-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </button>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${
+                    isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </button>
+              </div>
             </form>
+
+            <div className="flex items-center gap-3 mt-6">
+              <img
+                src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80"
+                alt="Workspace consultant"
+                className="w-12 h-12 rounded-full object-cover border border-blue-200"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Workspace Consultant</p>
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href="tel:+919876543210" className="text-base font-bold text-gray-900">+91 98765 43210</a>
+                </div>
+              </div>
+            </div>
 
             <div className="mt-6 flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-md shadow-purple-500/30">

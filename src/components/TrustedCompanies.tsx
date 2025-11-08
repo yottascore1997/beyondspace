@@ -17,13 +17,10 @@ export default function TrustedCompanies() {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Trusted by{' '}
-            <span className="text-orange-400">
+            <span className="bg-gradient-to-r from-orange-400 via-pink-400 to-orange-500 bg-clip-text text-transparent">
               Leading Companies
             </span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Over 500+ companies trust Beyond Estates for their office space
-          </p>
         </div>
 
         {/* Marquee Container */}

@@ -117,6 +117,16 @@ export default function Benefits() {
             transform: translateY(0) scale(1);
           }
         }
+        .cta-gradient {
+          background: linear-gradient(90deg, #fb923c, #f97316, #ec4899, #fb923c);
+          background-size: 200% 200%;
+          transition: background-position 0.6s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cta-gradient:hover {
+          background-position: 100% 0%;
+          transform: translateY(-3px);
+          box-shadow: 0 18px 45px rgba(249, 115, 22, 0.35);
+        }
       `
     }} />
       <section className="relative py-16 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
@@ -132,8 +142,8 @@ export default function Benefits() {
             {/* Left Side - Benefit Cards */}
             <div className="space-y-6">
               {items.map((it, itemIndex) => {
-                // Skip "Zero brokerage fee" - it will be shown below the image
-                if (it.title === 'Zero brokerage fee') {
+                // Skip partner item; it will be rendered below the image
+                if (it.title === 'Partner with premium brand, largest network of offices') {
                   return null;
                 }
 
@@ -155,7 +165,9 @@ export default function Benefits() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold mb-2">
-                            <span className="text-blue-400">Find and Book</span>
+                            <span className="text-blue-400">Find</span>
+                            <span className="text-black"> and </span>
+                            <span className="text-blue-400">Book</span>
                             <span className="text-black"> Your Perfect Workspace in 4 Easy Steps With Beyond Space</span>
                           </h3>
                         </div>
@@ -252,26 +264,38 @@ export default function Benefits() {
                 </div>
               </div>
               
-              {/* Zero brokerage fee card below image */}
+              {/* Partner network card below image */}
               {(() => {
-                const zeroBrokerageItem = items.find(it => it.title === 'Zero brokerage fee');
-                if (!zeroBrokerageItem) return null;
+                const partnerItem = items.find(it => it.title === 'Partner with premium brand, largest network of offices');
+                if (!partnerItem) return null;
                 
                 return (
                   <div className="mt-6 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                     <div className="flex items-start gap-4">
-                      <div className={`w-16 h-16 ${zeroBrokerageItem.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
-                        {zeroBrokerageItem.icon}
+                      <div className={`w-16 h-16 ${partnerItem.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                        {partnerItem.icon}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{zeroBrokerageItem.title}</h3>
-                        <div className="text-gray-600 leading-relaxed whitespace-pre-line">{zeroBrokerageItem.desc}</div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{partnerItem.title}</h3>
+                        <div className="text-gray-600 leading-relaxed whitespace-pre-line">{partnerItem.desc}</div>
                       </div>
                     </div>
                   </div>
                 );
               })()}
             </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="cta-gradient inline-flex items-center gap-2 px-12 py-4 rounded-full text-white text-xl font-semibold shadow-lg"
+            >
+              Schedule Your Free Workspace Consultation
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </section>

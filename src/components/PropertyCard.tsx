@@ -57,7 +57,10 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
       className="block"
     >
       <article className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
-        <div className="relative h-96 overflow-hidden group cursor-pointer">
+        <div className="relative h-64 sm:h-72 lg:h-80 overflow-hidden rounded-3xl group">
+        <span className="absolute top-2 left-2 sm:top-2 sm:left-2 z-20 inline-flex items-center rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+          Premium
+        </span>
         <img
           src={allImages[currentImageIndex]}
           alt={property.title}
@@ -74,7 +77,7 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
                 e.stopPropagation();
                 prevImage();
               }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -86,7 +89,7 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
                 e.stopPropagation();
                 nextImage();
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -121,37 +124,20 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
           </div>
         )}
         
-        {property.tag && (
-          <span className="absolute top-3 right-12 bg-white text-gray-900 px-3 py-1 rounded-full font-bold text-xs">
-            {property.tag}
-          </span>
+        {/* Image Counter */}
+        {allImages.length > 1 && (
+          <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+            {currentImageIndex + 1}/{allImages.length}
+          </div>
         )}
-        <button
-          onClick={() => setIsFav(!isFav)}
-          className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-            isFav 
-              ? 'bg-[#a08efe] text-white' 
-              : 'bg-white/85 text-gray-700 hover:bg-white'
-          }`}
-        >
-          <svg 
-            viewBox="0 0 24 24" 
-            fill={isFav ? 'currentColor' : 'none'} 
-            stroke="currentColor" 
-            strokeWidth={2}
-            className="w-5 h-5"
-          >
-            <path d="M12.1 21s-7.1-4.4-9.2-8.3c-1.5-2.7-.5-6.1 2.2-7.6 2.1-1.2 4.9-.7 6.4 1.1 1.4-1.8 4.3-2.3 6.4-1.1 2.7 1.5 3.7 4.9 2.2 7.6C19.2 16.6 12.1 21 12.1 21z"/>
-          </svg>
-                  </button>
         </div>
       
-        <div className="p-4 space-y-3">
-        <h3 className="font-bold text-gray-900 text-lg leading-tight cursor-pointer">
+        <div className="p-5 space-y-4">
+        <h3 className="font-semibold text-gray-900 text-xl leading-tight cursor-pointer">
           {property.title}
         </h3>
         
-        <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
+        <div className="flex items-center gap-3 text-sm text-gray-700 flex-wrap">
           <span>{property.city}</span>
           <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
           <span>{property.area}</span>
@@ -164,8 +150,8 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
         </div>
         
         <div className="flex items-center justify-between">
-          <div className="font-bold text-gray-900 text-lg">
-            {property.priceDisplay}<span className="text-gray-500 font-normal">/month</span>
+          <div className="font-semibold text-gray-900 text-xl">
+            {property.priceDisplay}<span className="text-gray-600 font-normal">/month</span>
           </div>
           <button
             onClick={(e) => {

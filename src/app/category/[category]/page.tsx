@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Poppins } from 'next/font/google';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import PropertyCard from '@/components/PropertyCard';
@@ -47,6 +48,12 @@ interface Filters {
   price: string;
 }
 
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap'
+});
+
 export default function CategoryPage() {
   const params = useParams();
   const category = params.category as string;
@@ -61,8 +68,12 @@ export default function CategoryPage() {
   });
   const [isGridShaking, setIsGridShaking] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
+  const [pendingArea, setPendingArea] = useState('all');
+  const locationMenuRef = useRef<HTMLDivElement | null>(null);
   const propertiesPerPage = 8;
   const initialPropertiesCount = 30; // Show first 30 without pagination
 
@@ -77,6 +88,29 @@ export default function CategoryPage() {
     filterAndSortProperties();
     setCurrentPage(1); // Reset to page 1 when filters change
   }, [properties, filters, searchQuery]);
+
+  useEffect(() => {
+    setPendingArea(filters.area === 'all' ? 'all' : filters.area);
+  }, [filters.area]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        locationMenuRef.current &&
+        !locationMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsLocationMenuOpen(false);
+      }
+    };
+
+    if (isLocationMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLocationMenuOpen]);
 
   const fetchCategoryProperties = async () => {
     try {
@@ -114,16 +148,14 @@ export default function CategoryPage() {
       filtered = filtered.filter(property => {
         const price = property.price;
         switch (filters.price) {
-          case 'under-50k':
-            return price < 50000;
-          case '50k-1lakh':
-            return price >= 50000 && price < 100000;
-          case '1lakh-2lakh':
-            return price >= 100000 && price < 200000;
-          case '2lakh-5lakh':
-            return price >= 200000 && price < 500000;
-          case 'above-5lakh':
-            return price >= 500000;
+          case 'under-10000':
+            return price < 10000;
+          case '10000-20000':
+            return price >= 10000 && price < 20000;
+          case '20000-30000':
+            return price >= 20000 && price < 30000;
+          case 'above-30000':
+            return price >= 30000;
           default:
             return true;
         }
@@ -149,6 +181,12 @@ export default function CategoryPage() {
       area: 'all',
       price: 'all'
     });
+  };
+
+  const handleSearch = () => {
+    const trimmed = searchInput.trim();
+    setSearchInput(trimmed);
+    setSearchQuery(trimmed);
   };
 
   const handleEnquireClick = () => {
@@ -227,8 +265,63 @@ export default function CategoryPage() {
     return categoryMap[category.toLowerCase()] || category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-');
   };
 
+  const categoryDisplayName = getCategoryDisplayName(categoryName);
+
+  const quickFilterAreas = [
+    { key: 'all', label: 'All Areas' },
+    { key: 'Thane', label: 'Thane' },
+    { key: 'Navi Mumbai', label: 'Navi Mumbai' },
+    { key: 'Andheri West', label: 'Andheri West' },
+    { key: 'Andheri East', label: 'Andheri East' },
+    { key: 'Andheri', label: 'Andheri' },
+    { key: 'BKC', label: 'BKC' },
+    { key: 'Lower Parel', label: 'Lower Parel' },
+    { key: 'Vashi', label: 'Vashi' },
+    { key: 'Powai', label: 'Powai' },
+    { key: 'Borivali', label: 'Borivali' },
+    { key: 'Goregaon', label: 'Goregaon' },
+    { key: 'Bandra', label: 'Bandra' },
+    { key: 'Malad', label: 'Malad' },
+    { key: 'Dadar', label: 'Dadar' },
+    { key: 'Mulund', label: 'Mulund' },
+    { key: 'Borivali West', label: 'Borivali West' },
+    { key: 'Vikhroli', label: 'Vikhroli' },
+    { key: 'Worli', label: 'Worli' },
+    { key: 'Churchgate', label: 'Churchgate' },
+    { key: 'Marol', label: 'Marol' },
+    { key: 'Vile Parle', label: 'Vile Parle' }
+  ];
+
+  const popularDropdownAreas = [
+    { key: 'Thane', label: 'Thane' },
+    { key: 'Navi Mumbai', label: 'Navi Mumbai' },
+    { key: 'Andheri West', label: 'Andheri West' },
+    { key: 'Andheri East', label: 'Andheri East' },
+    { key: 'Andheri', label: 'Andheri' },
+    { key: 'BKC', label: 'BKC' },
+    { key: 'Lower Parel', label: 'Lower Parel' },
+    { key: 'Vashi', label: 'Vashi' },
+    { key: 'Powai', label: 'Powai' },
+    { key: 'Borivali', label: 'Borivali' },
+    { key: 'Goregaon', label: 'Goregaon' },
+    { key: 'Bandra', label: 'Bandra' },
+    { key: 'Malad', label: 'Malad' },
+    { key: 'Dadar', label: 'Dadar' },
+    { key: 'Mulund', label: 'Mulund' }
+  ];
+
+  const handleApplyArea = () => {
+    setFilters(prev => ({ ...prev, area: pendingArea || 'all' }));
+    setIsLocationMenuOpen(false);
+  };
+
+  const handleResetArea = () => {
+    setPendingArea('all');
+    setFilters(prev => ({ ...prev, area: 'all' }));
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`${poppins.className} min-h-screen bg-gray-50`}>
       <style jsx>{`
         .line-clamp-1 {
           display: -webkit-box;
@@ -259,49 +352,24 @@ export default function CategoryPage() {
         <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              <span className="text-blue-400">
-                {getCategoryDisplayName(categoryName)}
+              <span className="text-gray-900">
+                {categoryDisplayName} in Mumbai
               </span>
-              <span className="text-gray-900"> in Mumbai</span>
             </h1>
             <p className="text-gray-600 mt-2 text-sm sm:text-base">{currentCategoryInfo.description}</p>
           </div>
 
-          {/* Area Filter */}
+          {/* Quick Area Filters */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Filter by Area</h3>
             <div className="flex flex-wrap gap-3">
-              {[
-                { key: 'all', label: 'All Areas' },
-                { key: 'Thane', label: 'Thane' },
-                { key: 'Navi Mumbai', label: 'Navi Mumbai' },
-                { key: 'Andheri West', label: 'Andheri West' },
-                { key: 'Andheri East', label: 'Andheri East' },
-                { key: 'Andheri', label: 'Andheri' },
-                { key: 'BKC', label: 'BKC' },
-                { key: 'Lower Parel', label: 'Lower Parel' },
-                { key: 'Vashi', label: 'Vashi' },
-                { key: 'Powai', label: 'Powai' },
-                { key: 'Borivali', label: 'Borivali' },
-                { key: 'Goregaon', label: 'Goregaon' },
-                { key: 'Bandra', label: 'Bandra' },
-                { key: 'Malad', label: 'Malad' },
-                { key: 'Dadar', label: 'Dadar' },
-                { key: 'Mulund', label: 'Mulund' },
-                { key: 'Borivali West', label: 'Borivali West' },
-                { key: 'Vikhroli', label: 'Vikhroli' },
-                { key: 'Worli', label: 'Worli' },
-                { key: 'Churchgate', label: 'Churchgate' },
-                { key: 'Marol', label: 'Marol' },
-                { key: 'Vile Parle', label: 'Vile Parle' }
-              ].map((area) => (
+              {quickFilterAreas.map(area => (
                 <button
                   key={area.key}
                   onClick={() => setFilters(prev => ({ ...prev, area: area.key }))}
-                  className={`px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 ${
+                  className={`px-5 py-3 rounded-full text-sm sm:text-base font-medium border transition-all duration-200 ${
                     filters.area === area.key
-                      ? 'bg-orange-400 text-white shadow-lg'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-orange-50 hover:border-orange-300'
+                      ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                      : 'bg-white text-gray-900 border-gray-300 hover:border-blue-400 hover:text-blue-500'
                   }`}
                 >
                   {area.label}
@@ -311,9 +379,10 @@ export default function CategoryPage() {
           </div>
 
           {/* Search Bar and Filters */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="mb-6 flex flex-col sm:flex-row gap-4 sm:items-center">
             {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
+            <div className="flex flex-1 w-full max-w-xl items-stretch sm:items-center gap-3">
+              <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -322,51 +391,99 @@ export default function CategoryPage() {
               <input
                 type="text"
                 placeholder="Search by property name or area..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-transparent sm:text-sm"
               />
-            </div>
-
-            {/* Popular Locations Filter */}
-            <div className="flex-shrink-0">
-              <select
-                value={filters.area}
-                onChange={(e) => setFilters(prev => ({ ...prev, area: e.target.value }))}
-                className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+              </div>
+              <button
+                type="button"
+                onClick={handleSearch}
+                className="px-7 sm:px-9 py-3 bg-blue-400 text-white font-semibold rounded-lg shadow-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-colors duration-200"
               >
-                <option value="all">Popular Locations</option>
-                <option value="Thane">Thane</option>
-                <option value="Navi Mumbai">Navi Mumbai</option>
-                <option value="Andheri West">Andheri West</option>
-                <option value="Andheri East">Andheri East</option>
-                <option value="Andheri">Andheri</option>
-                <option value="BKC">BKC</option>
-                <option value="Lower Parel">Lower Parel</option>
-                <option value="Vashi">Vashi</option>
-                <option value="Powai">Powai</option>
-                <option value="Borivali">Borivali</option>
-                <option value="Goregaon">Goregaon</option>
-                <option value="Bandra">Bandra</option>
-                <option value="Malad">Malad</option>
-                <option value="Dadar">Dadar</option>
-                <option value="Mulund">Mulund</option>
-              </select>
+                Search
+              </button>
             </div>
 
-            {/* Price Filter */}
-            <div className="flex-shrink-0">
+            {/* Filters */}
+            <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-3 sm:ml-auto">
+              <div className="relative flex-1 sm:flex-none" ref={locationMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (filters.area === 'all') {
+                      setPendingArea(popularDropdownAreas[0]?.key ?? 'all');
+                    } else {
+                      setPendingArea(filters.area);
+                    }
+                    setIsLocationMenuOpen(prev => !prev);
+                  }}
+                  className="flex items-center justify-between w-full px-4 sm:px-5 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm sm:text-base font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                >
+                  <span>Popular Locations</span>
+                  <svg
+                    className={`h-4 w-4 ml-4 transform transition-transform duration-200 ${isLocationMenuOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isLocationMenuOpen && (
+                  <div className="absolute z-30 mt-3 w-72 sm:w-96 rounded-xl bg-white shadow-2xl border border-gray-100 p-4" onMouseDown={(e) => e.preventDefault()}>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {popularDropdownAreas.map(area => (
+                        <button
+                          key={area.key}
+                          onClick={() => setPendingArea(area.key)}
+                          className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-medium border transition-all duration-200 ${
+                            pendingArea === area.key
+                              ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                              : 'bg-white text-gray-900 border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                          }`}
+                        >
+                          {area.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                      <button
+                        type="button"
+                        onClick={handleResetArea}
+                        className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleApplyArea}
+                        className="px-5 py-2.5 bg-blue-500 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-600"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <select
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
                 className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
               >
                 <option value="all">Select Price</option>
-                <option value="under-50k">Under ₹50,000</option>
-                <option value="50k-1lakh">₹50,000 - ₹1 Lakh</option>
-                <option value="1lakh-2lakh">₹1 Lakh - ₹2 Lakh</option>
-                <option value="2lakh-5lakh">₹2 Lakh - ₹5 Lakh</option>
-                <option value="above-5lakh">Above ₹5 Lakh</option>
+                <option value="under-10000">Less than ₹10,000</option>
+                <option value="10000-20000">₹10,000 - ₹20,000</option>
+                <option value="20000-30000">₹20,000 - ₹30,000</option>
+                <option value="above-30000">More than ₹30,000</option>
               </select>
             </div>
           </div>
@@ -378,6 +495,7 @@ export default function CategoryPage() {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Properties List */}
           <div className="flex-1">
+            
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -396,6 +514,89 @@ export default function CategoryPage() {
                 {(() => {
                   const batches: any[] = [];
                   
+                  const promoSection = (
+                    <div className="my-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 md:p-12">
+                      <div className="text-center mb-8">
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                          Find Your Perfect Office Solution
+                        </h2>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                        {[
+                          {
+                            title: 'Private Office',
+                            description: 'Fully furnished Private offices for you and your growing team.',
+                            image: '/images/co1.jpeg'
+                          },
+                          {
+                            title: 'Managed Office',
+                            description: 'Customised fully furnished office managed by professionals.',
+                            image: '/images/co2.jpeg'
+                          },
+                          {
+                            title: 'Enterprise Solution',
+                            description: 'Fully equipped offices for larger teams with flexibility to scale & customise.',
+                            image: '/images/co3.jpeg'
+                          }
+                        ].map((card) => (
+                          <div key={card.title} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div className="relative h-48 overflow-hidden">
+                              <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
+                              <p className="text-gray-600 mb-4 leading-relaxed">{card.description}</p>
+                              <button
+                                onClick={handleEnquireClick}
+                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
+                              >
+                                Enquire Now
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+
+                  const customSection = (
+                    <div className="my-12 rounded-3xl bg-gradient-to-r from-blue-50 to-blue-100 p-10 md:p-14 flex flex-col lg:flex-row items-center gap-10">
+                      <div className="flex-1 space-y-6">
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                          Customized office solutions for your team
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-base md:text-lg text-gray-900 font-medium">
+                          {[
+                            'Customized Office Spaces',
+                            'Prime Locations',
+                            'Free Guided Tours',
+                            'Perfect for 50+ Team Size'
+                          ].map((item) => (
+                            <div key={item} className="flex items-center gap-3">
+                              <span className="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white text-sm">✔</span>
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          onClick={handleEnquireClick}
+                          className="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 w-fit"
+                        >
+                          Enquire Now
+                        </button>
+                      </div>
+                      <div className="flex-1">
+                        <div className="relative rounded-3xl overflow-hidden shadow-xl">
+                          <img
+                            src="/images/customized-office.jpg"
+                            alt="Customized office"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+
                   // Show first 30 properties without pagination
                   const first30Properties = filteredProperties.slice(0, initialPropertiesCount);
                   const remainingProperties = filteredProperties.slice(initialPropertiesCount);
@@ -421,86 +622,12 @@ export default function CategoryPage() {
                       );
                       
                       // Add section after each batch (except if it's the last batch of first 30)
-                      if (i + itemsPerBatch < first30Properties.length) {
+                      if (i + itemsPerBatch < first30Properties.length || first30Properties.length < itemsPerBatch) {
+                        const isPromo = Math.floor(i / itemsPerBatch) % 2 === 0;
                         batches.push(
-                          <div key={`section-${batchNumber}`} className="my-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 md:p-12">
-                        <div className="text-center mb-8">
-                          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Find Your Perfect Office Solution
-                          </h2>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                          {/* Private Office Card */}
-                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                            <div className="relative h-48 overflow-hidden">
-                              <img
-                                src="/images/co1.jpeg"
-                                alt="Private Office"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="p-6">
-                              <h3 className="text-xl font-bold text-gray-900 mb-3">Private Office</h3>
-                              <p className="text-gray-600 mb-4 leading-relaxed">
-                                Fully furnished Private offices for you and your growing team.
-                              </p>
-                              <button
-                                onClick={handleEnquireClick}
-                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
-                              >
-                                Enquire Now
-                              </button>
-                            </div>
+                          <div key={`section-${batchNumber}`}>
+                            {isPromo ? promoSection : customSection}
                           </div>
-
-                          {/* Managed Office Card */}
-                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                            <div className="relative h-48 overflow-hidden">
-                              <img
-                                src="/images/co2.jpeg"
-                                alt="Managed Office"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="p-6">
-                              <h3 className="text-xl font-bold text-gray-900 mb-3">Managed Office</h3>
-                              <p className="text-gray-600 mb-4 leading-relaxed">
-                                Customised fully furnished office managed by professionals.
-                              </p>
-                              <button
-                                onClick={handleEnquireClick}
-                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
-                              >
-                                Enquire Now
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Enterprise Solution Card */}
-                          <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                            <div className="relative h-48 overflow-hidden">
-                              <img
-                                src="/images/co3.jpeg"
-                                alt="Enterprise Solution"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="p-6">
-                              <h3 className="text-xl font-bold text-gray-900 mb-3">Enterprise Solution</h3>
-                              <p className="text-gray-600 mb-4 leading-relaxed">
-                                Fully equipped offices for larger teams with flexibility to scale & customise.
-                              </p>
-                              <button
-                                onClick={handleEnquireClick}
-                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
-                              >
-                                Enquire Now
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                         );
                       }
                     }

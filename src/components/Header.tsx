@@ -44,10 +44,8 @@ export default function Header() {
           {/* Premium Logo Section */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
-              {/* Glowing Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 animate-pulse transition-opacity"></div>
               {/* Main Logo */}
-              <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden shadow-xl shadow-blue-500/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border-2 border-black/50">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border-2 border-black/50">
                 <img 
                   src="/images/logo.jpeg" 
                   alt="Beyond Space Logo" 

@@ -16,7 +16,10 @@ export default function FeaturedCoworking() {
         <div className="relative text-center mb-12">
           <span className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-300/60 blur-xl" />
           <h2 className="relative inline-block text-3xl md:text-4xl font-bold text-slate-900">
-            Featured Coworking
+            Our Network of{' '}
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+              Premier Brands
+            </span>
           </h2>
           <span className="mt-4 block h-1 w-24 mx-auto rounded-full bg-blue-500" />
         </div>

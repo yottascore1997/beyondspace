@@ -137,7 +137,7 @@ export default function MumbaiPlaces() {
     <section className="py-16 bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
             Explore{' '}
             <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
               Mumbai&apos;s

@@ -72,7 +72,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     }, 10000);
 
     // Typewriter effect for "Dream Office Space" with restart
-    const text = 'Dream Office Space';
+    const text = 'Discover Your Dream Office Spaces';
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -151,9 +151,9 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         {heroImages.map((image, index) => (
           <img
             key={index}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
               index === currentImageIndex 
-                ? 'opacity-100' 
+                ? 'opacity-100 object-cover'
                 : 'opacity-0'
             }`}
             src={image.src}
@@ -186,39 +186,16 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       } md:flex md:items-start md:justify-between md:gap-4`}>
         <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px]">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight">
-            <span
-              className="block text-white mb-1"
-              style={{ textShadow: '0 0 10px rgba(255,255,255,0.7), 0 0 18px rgba(150,220,255,0.4)' }}
-            >
-              Discover Your
-            </span>
-            <span
-              className="block"
-            >
-              <span className="font-extrabold">
-                {typedOffice.length <= 5 ? (
-                  <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">{typedOffice}</span>
-                ) : typedOffice.length <= 12 ? (
-                  <>
-                    <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Dream </span>
-                    <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">{typedOffice.substring(6)}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Dream </span>
-                    <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">Office </span>
-                    <span className="bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 bg-clip-text text-transparent">{typedOffice.substring(13)}</span>
-                  </>
-                )}
-              </span>
-              <span 
+            <span className="block text-white" style={{ textShadow: '0 0 10px rgba(255,255,255,0.7), 0 0 18px rgba(150,220,255,0.4)' }}>
+              {typedOffice}
+              <span
                 className={`inline-block w-[1ch] transition-opacity duration-300 ${isTypingComplete ? 'opacity-0' : 'opacity-100'}`}
                 style={{ color: '#16a34a' }}
               >
                 |
               </span>
             </span>
-        </h1>
+          </h1>
 
           <p className="text-xl md:text-2xl text-white/95 font-semibold mb-4" style={{textShadow: '2px 2px 8px rgba(0,0,0,0.6)'}}>
             Premium Office Spaces, Coworking Hubs & Meeting Rooms
@@ -247,17 +224,17 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         </div>
 
         {/* Lighter card so image is visible behind */}
-        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-6 md:self-start max-w-3xl md:max-w-xl w-full md:w-1/2 ${
+        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-6 md:self-start max-w-xl md:max-w-md w-full md:w-[42%] ${
           isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
 
-          <div className="grid grid-cols-1 gap-4 mb-4">
+          <div className="grid grid-cols-1 gap-3 mb-3">
             <div className="group">
-              <label className="block text-gray-800 text-sm font-semibold mb-2">City</label>
+              <label className="block text-gray-800 text-xs font-semibold mb-1">City</label>
               <select
                 value={filters.city}
                 onChange={(e) => onFilterChange('city', e.target.value)}
-                className="w-full p-3 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300"
+                className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
               >
                 {cities.map((city) => (
                   <option key={city.value} value={city.value}>
@@ -268,11 +245,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </div>
 
             <div className="group">
-              <label className="block text-gray-800 text-sm font-semibold mb-2">Area</label>
+              <label className="block text-gray-800 text-xs font-semibold mb-1">Area</label>
               <select
                 value={filters.area}
                 onChange={(e) => onFilterChange('area', e.target.value)}
-                className="w-full p-3 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300"
+                className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
               >
                 {areas.map((area) => (
                   <option key={area.value} value={area.value}>
@@ -283,11 +260,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </div>
 
             <div className="group">
-              <label className="block text-gray-800 text-sm font-semibold mb-2">Category</label>
+              <label className="block text-gray-800 text-xs font-semibold mb-1">Category</label>
               <select
                 value={filters.purpose}
                 onChange={(e) => onFilterChange('purpose', e.target.value)}
-                className="w-full p-3 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300"
+                className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
               >
                 <option value="">Select Category</option>
                 {quickFilters.map((category) => (
@@ -300,20 +277,20 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
 
             <button
               onClick={() => router.push('/properties')}
-              className="w-full mt-2 py-3 rounded-lg bg-blue-400 text-white font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+              className="w-full mt-2 py-2 rounded-lg bg-blue-400 text-white text-sm font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
             >
               Search Spaces
             </button>
           </div>
 
-          <div className="border-t border-gray-200 pt-4">
-            <p className="text-base md:text-lg text-gray-700 font-semibold mb-4 text-center">Popular Categories</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="border-t border-gray-200 pt-3">
+            <p className="text-sm md:text-base text-gray-700 font-semibold mb-3 text-center">Popular Categories</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5">
               {quickFilters.map((filter) => (
               <button
                 key={filter.key}
                 onClick={() => router.push(`/category/${filter.key}`)}
-                  className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
+                  className="w-full px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs md:text-sm font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
               >
                 {filter.label}
               </button>

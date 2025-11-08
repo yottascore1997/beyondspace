@@ -125,13 +125,12 @@ export default function WorkspaceCategories() {
       <div className="container mx-auto px-4">
         {/* Section Heading */}
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Quick Search by{' '}
             <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
               Popular Categories
             </span>
           </h2>
-          <p className="text-gray-600">Choose the perfect workspace solution for your business needs</p>
         </div>
 
         {/* Categories Section */}
