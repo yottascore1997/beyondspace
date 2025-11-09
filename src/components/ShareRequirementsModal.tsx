@@ -8,6 +8,15 @@ interface ShareRequirementsModalProps {
 }
 
 export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequirementsModalProps) {
+  const workspaceTypes = [
+    'Coworking Space',
+    'Managed Office',
+    'Dedicated Desk',
+    'Enterprise Offices',
+    'Virtual Office',
+    'Meeting Room',
+    'Day Pass / Flexi Desk'
+  ];
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -117,7 +126,7 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
         `
       }} />
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 font-['Poppins']"
         onClick={handleClose}
         style={{
           animation: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -239,10 +248,9 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
                   >
                     <option value="">Select Type</option>
-                    <option>Coworking</option>
-                    <option>Managed Office</option>
-                    <option>Virtual Office</option>
-                    <option>Meeting Room</option>
+                    {workspaceTypes.map((type) => (
+                      <option key={type}>{type}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -304,7 +312,7 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                   <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <a href="tel:+919876543210" className="text-base font-bold text-gray-900">+91 98765 43210</a>
+                  <a href="tel:+919876543210" className="text-base font-bold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">+91 98765 43210</a>
                 </div>
               </div>
             </div>
@@ -316,12 +324,12 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Connect with our space expert</p>
+                <p className="text-base font-semibold text-gray-900">Connect with our space expert</p>
                 <div className="flex items-center gap-2 text-gray-700">
                   <svg className="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                  <span className="text-base font-semibold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
                     contact@beyondspacework.com
                   </span>
                 </div>

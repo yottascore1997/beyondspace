@@ -356,7 +356,7 @@ export default function CategoryPage() {
                 {categoryDisplayName} in Mumbai
               </span>
             </h1>
-            <p className="text-gray-600 mt-2 text-sm sm:text-base">{currentCategoryInfo.description}</p>
+            <p className="text-black mt-2 text-sm sm:text-base">{currentCategoryInfo.description}</p>
           </div>
 
           {/* Quick Area Filters */}
@@ -369,7 +369,7 @@ export default function CategoryPage() {
                   className={`px-5 py-3 rounded-full text-sm sm:text-base font-medium border transition-all duration-200 ${
                     filters.area === area.key
                       ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                      : 'bg-white text-gray-900 border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                      : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
                   }`}
                 >
                   {area.label}
@@ -384,7 +384,7 @@ export default function CategoryPage() {
             <div className="flex flex-1 w-full max-w-xl items-stretch sm:items-center gap-3">
               <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -424,7 +424,7 @@ export default function CategoryPage() {
                     }
                     setIsLocationMenuOpen(prev => !prev);
                   }}
-                  className="flex items-center justify-between w-full px-4 sm:px-5 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm sm:text-base font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  className="flex items-center justify-between w-full px-4 sm:px-5 py-3 border border-gray-300 rounded-lg bg-white text-black text-sm sm:text-base font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 >
                   <span>Popular Locations</span>
                   <svg
@@ -447,7 +447,7 @@ export default function CategoryPage() {
                           className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-medium border transition-all duration-200 ${
                             pendingArea === area.key
                               ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                              : 'bg-white text-gray-900 border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                              : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
                           }`}
                         >
                           {area.label}
@@ -458,7 +458,7 @@ export default function CategoryPage() {
                       <button
                         type="button"
                         onClick={handleResetArea}
-                        className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                        className="text-sm font-medium text-black hover:text-black"
                       >
                         Reset
                       </button>
@@ -477,7 +477,7 @@ export default function CategoryPage() {
               <select
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
-                className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
               >
                 <option value="all">Select Price</option>
                 <option value="under-10000">Less than ₹10,000</option>
@@ -545,7 +545,7 @@ export default function CategoryPage() {
                             </div>
                             <div className="p-6">
                               <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
-                              <p className="text-gray-600 mb-4 leading-relaxed">{card.description}</p>
+                              <p className="text-black mb-4 leading-relaxed">{card.description}</p>
                               <button
                                 onClick={handleEnquireClick}
                                 className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
@@ -565,7 +565,7 @@ export default function CategoryPage() {
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
                           Customized office solutions for your team
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-base md:text-lg text-gray-900 font-medium">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-base md:text-lg text-black font-medium">
                           {[
                             'Customized Office Spaces',
                             'Prime Locations',
@@ -699,7 +699,7 @@ export default function CategoryPage() {
                                 disabled={currentPage === 1}
                                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                                   currentPage === 1
-                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    ? 'bg-gray-200 text-black cursor-not-allowed'
                                     : 'bg-blue-400 text-white hover:bg-blue-500'
                                 }`}
                               >
@@ -709,7 +709,7 @@ export default function CategoryPage() {
                               {/* Page Numbers */}
                               {getPageNumbers().map((page, index) => (
                                 page === '...' ? (
-                                  <span key={`ellipsis-${index}`} className="px-2 text-gray-400">...</span>
+                                  <span key={`ellipsis-${index}`} className="px-2 text-black">...</span>
                                 ) : (
                                   <button
                                     key={page}
@@ -717,7 +717,7 @@ export default function CategoryPage() {
                                     className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                                       currentPage === page
                                         ? 'bg-blue-400 text-white'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : 'bg-gray-200 text-black hover:bg-gray-300'
                                     }`}
                                   >
                                     {page}
@@ -731,7 +731,7 @@ export default function CategoryPage() {
                                 disabled={currentPage === totalPages}
                                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                                   currentPage === totalPages
-                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    ? 'bg-gray-200 text-black cursor-not-allowed'
                                     : 'bg-blue-400 text-white hover:bg-blue-500'
                                 }`}
                               >
@@ -751,7 +751,7 @@ export default function CategoryPage() {
               <div className="text-center py-16 bg-white rounded-lg">
                 <div className="text-6xl mb-4">🏠</div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h3>
-                <p className="text-gray-600 mb-8">
+                <p className="text-black mb-8">
                   No properties match your current filters. Try adjusting your search criteria.
                 </p>
                 <button
@@ -783,7 +783,7 @@ export default function CategoryPage() {
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 flex-1 rounded-l-2xl">
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Find Your Perfect Office Now!</h2>
-                <p className="text-gray-700 text-lg">Our space experts will provide customized quote with detailed inventory as per your needs</p>
+                <p className="text-black text-lg">Our space experts will provide customized quote with detailed inventory as per your needs</p>
               </div>
 
               {/* Features List */}
@@ -794,7 +794,7 @@ export default function CategoryPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-gray-800 font-medium">Customized Workspaces</span>
+                  <span className="text-black font-medium">Customized Workspaces</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -802,7 +802,7 @@ export default function CategoryPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-gray-800 font-medium">Prime Locations</span>
+                  <span className="text-black font-medium">Prime Locations</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -810,7 +810,7 @@ export default function CategoryPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-gray-800 font-medium">Free Guided Tours</span>
+                  <span className="text-black font-medium">Free Guided Tours</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -818,7 +818,7 @@ export default function CategoryPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-gray-800 font-medium">Flexible Terms</span>
+                  <span className="text-black font-medium">Flexible Terms</span>
                 </div>
               </div>
 
@@ -829,7 +829,7 @@ export default function CategoryPage() {
               {/* Close Button */}
               <button
                 onClick={closeModal}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute top-4 right-4 text-black hover:text-black transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -838,13 +838,13 @@ export default function CategoryPage() {
 
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Interested in this Property</h3>
-                <p className="text-gray-600">Fill your details for a customized quote</p>
+                <p className="text-black">Fill your details for a customized quote</p>
               </div>
 
               <form className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Name*</label>
+                    <label className="block text-sm font-medium text-black mb-1">Name*</label>
                     <input
                       type="text"
                       placeholder="Enter your name"
@@ -853,7 +853,7 @@ export default function CategoryPage() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                    <label className="block text-sm font-medium text-black mb-1">Email*</label>
                     <input
                       type="email"
                       placeholder="Enter your email"
@@ -863,9 +863,9 @@ export default function CategoryPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone*</label>
+                  <label className="block text-sm font-medium text-black mb-1">Phone*</label>
                   <div className="flex gap-2">
-                    <select className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                    <select className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-black">
                       <option>+91</option>
                     </select>
                     <input
@@ -878,7 +878,7 @@ export default function CategoryPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <label className="block text-sm font-medium text-black mb-1">Type</label>
                     <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300">
                       <option>Select Type</option>
                       <option>Coworking</option>
@@ -889,7 +889,7 @@ export default function CategoryPage() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">No. Of Seats</label>
+                    <label className="block text-sm font-medium text-black mb-1">No. Of Seats</label>
                     <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300">
                       <option>Select Seats</option>
                       <option>1-5</option>
@@ -912,12 +912,12 @@ export default function CategoryPage() {
               {/* Contact Expert Section */}
               <div className="mt-6 flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Connect with our space expert</p>
+                  <p className="text-sm font-medium text-black">Connect with our space expert</p>
                   <div className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

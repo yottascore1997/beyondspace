@@ -156,14 +156,14 @@ export default function WorkspaceCategories() {
               </h3>
 
               {/* Description */}
-              <p className="text-gray-800 text-sm mb-4 font-medium">
+              <p className="text-black text-sm mb-4 font-medium">
                 {category.description}
               </p>
 
               {/* Bullet Points */}
               <ul className="space-y-2 mb-6">
                 {category.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start text-sm text-gray-800">
+                  <li key={idx} className="flex items-start text-sm text-black">
                     <span className="text-orange-400 mr-2">•</span>
                     <span>{feature}</span>
                   </li>

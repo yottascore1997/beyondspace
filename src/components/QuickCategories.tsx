@@ -86,7 +86,7 @@ export default function QuickCategories({ onAreaSelect, selectedArea }: QuickCat
               Popular Areas
             </span>
           </h2>
-          <p className="text-gray-600">Click on any area to explore all properties in that location</p>
+          <p className="text-black">Click on any area to explore all properties in that location</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -120,7 +120,7 @@ export default function QuickCategories({ onAreaSelect, selectedArea }: QuickCat
               </h3>
 
               {/* Description */}
-              <p className="text-xs text-gray-600 mb-2 leading-tight">
+              <p className="text-xs text-black mb-2 leading-tight">
                 {category.description}
               </p>
 
@@ -147,11 +147,11 @@ export default function QuickCategories({ onAreaSelect, selectedArea }: QuickCat
           <div className="inline-flex items-center space-x-6 bg-gray-50 rounded-2xl px-6 py-3">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-[#a08efe] rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600">1000+ Properties Available</span>
+              <span className="text-sm text-black">1000+ Properties Available</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600">All Areas Covered</span>
+              <span className="text-sm text-black">All Areas Covered</span>
             </div>
           </div>
         </div>

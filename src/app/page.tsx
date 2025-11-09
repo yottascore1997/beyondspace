@@ -83,7 +83,7 @@ export default function Home() {
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                   Discover Your Perfect Workspace
                 </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
+                <p className="text-lg text-black leading-relaxed">
                   Watch how Beyond Space Work transforms your office search experience. 
                   From premium coworking spaces to managed offices, we help you find 
                   the perfect workspace that matches your business needs.
@@ -99,7 +99,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Premium Locations</h3>
-                    <p className="text-gray-600">Access to the best business districts in Mumbai</p>
+                    <p className="text-black">Access to the best business districts in Mumbai</p>
                   </div>
                 </div>
 
@@ -111,7 +111,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Flexible Solutions</h3>
-                    <p className="text-gray-600">From hot desks to private offices, find what works for you</p>
+                    <p className="text-black">From hot desks to private offices, find what works for you</p>
                   </div>
                 </div>
 
@@ -123,7 +123,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Expert Support</h3>
-                    <p className="text-gray-600">Dedicated team to help you every step of the way</p>
+                    <p className="text-black">Dedicated team to help you every step of the way</p>
                   </div>
                 </div>
               </div>

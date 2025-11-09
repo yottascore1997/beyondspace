@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface HeroProps {
@@ -25,9 +25,9 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   // Hero images from public/images folder
   const heroImages = [
     {
-      src: '/images/co1.jpeg',
-      alt: 'Premium coworking lounge with collaborative seating and natural light',
-      category: 'Coworking Lounge'
+      src: '/images/co2.jpeg',
+      alt: 'Managed office floor with collaborative zones',
+      category: 'Managed Office'
     },
     {
       src: '/images/hero4.jpeg',
@@ -138,11 +138,16 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     { key: 'coworking', label: 'Coworking' },
     { key: 'managed', label: 'Managed Office Space' },
     { key: 'dedicateddesk', label: 'Dedicated Desk' },
-    { key: 'flexidesk', label: 'Day Pass/ Flexi Desk' },
+    { key: 'flexidesk', label: 'Day Pass / Flexi Desk' },
     { key: 'virtualoffice', label: 'Virtual Office' },
     { key: 'meetingroom', label: 'Meeting Room' },
     { key: 'enterpriseoffices', label: 'Enterprise Offices' },
   ];
+
+  const headlineSpanStyle: CSSProperties = {
+    textShadow: '0 0 10px rgba(255,255,255,0.7), 0 0 18px rgba(150,220,255,0.4)',
+    WebkitTextStroke: '1.6px rgba(0, 0, 0, 0.7)'
+  };
 
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
@@ -186,11 +191,14 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       } md:flex md:items-start md:justify-between md:gap-4`}>
         <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px]">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight">
-            <span className="block text-white" style={{ textShadow: '0 0 10px rgba(255,255,255,0.7), 0 0 18px rgba(150,220,255,0.4)' }}>
+            <span
+              className="block text-white"
+              style={headlineSpanStyle}
+            >
               {typedOffice}
               <span
                 className={`inline-block w-[1ch] transition-opacity duration-300 ${isTypingComplete ? 'opacity-0' : 'opacity-100'}`}
-                style={{ color: '#16a34a' }}
+                style={{ color: '#4f46e5' }}
               >
                 |
               </span>

@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Poppins } from 'next/font/google';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ContactForm from '@/components/ContactForm';
 
 interface PropertyImage {
   id: string;
@@ -68,8 +67,6 @@ const primeLocations: PrimeLocation[] = [
   { name: 'Powai', slug: 'powai', image: '/images/mumbai8.jpeg' }
 ];
 
-const contactSliderImages = ['/images/1.jpeg', '/images/2.jpeg', '/images/3.jpeg', '/images/mumbai3.jpeg'];
-
 export default function PropertyDetails() {
   const params = useParams();
   const [property, setProperty] = useState<Property | null>(null);
@@ -78,7 +75,28 @@ export default function PropertyDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contactSlideIndex, setContactSlideIndex] = useState(0);
+  const [contactFormData, setContactFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    type: '',
+    seats: ''
+  });
+  const [contactIsSubmitting, setContactIsSubmitting] = useState(false);
+  const [contactSubmitMessage, setContactSubmitMessage] = useState('');
+  const [contactSubmitError, setContactSubmitError] = useState('');
+
+  const workspaceTypes = [
+    'Coworking Space',
+    'Managed Office',
+    'Dedicated Desk',
+    'Enterprise Offices',
+    'Virtual Office',
+    'Meeting Room',
+    'Day Pass / Flexi Desk'
+  ];
+
+  const seatOptions = ['1-5', '6-10', '11-20', '21-50', '50-70', '120+'];
 
   const handleEnquireClick = () => {
     setIsModalOpen(true);
@@ -94,19 +112,60 @@ export default function PropertyDetails() {
     }
   }, [params.id]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setContactSlideIndex((prev) => (prev + 1) % contactSliderImages.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleContactPrev = () => {
-    setContactSlideIndex((prev) => (prev - 1 + contactSliderImages.length) % contactSliderImages.length);
+  const handleContactInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setContactFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setContactSubmitMessage('');
+    setContactSubmitError('');
   };
 
-  const handleContactNext = () => {
-    setContactSlideIndex((prev) => (prev + 1) % contactSliderImages.length);
+  const handleContactSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setContactIsSubmitting(true);
+    setContactSubmitMessage('');
+    setContactSubmitError('');
+
+    try {
+      const solution = contactFormData.type && contactFormData.seats
+        ? `${contactFormData.type} - ${contactFormData.seats} seats`
+        : contactFormData.type || contactFormData.seats || 'General Inquiry';
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: contactFormData.name,
+          mobile: contactFormData.phone,
+          email: contactFormData.email,
+          solution,
+          message: `Type: ${contactFormData.type || 'Not specified'}, Seats: ${contactFormData.seats || 'Not specified'}`
+        })
+      });
+
+      if (response.ok) {
+        setContactSubmitMessage('Thank you for your inquiry! We will contact you soon.');
+        setContactFormData({
+          name: '',
+          email: '',
+          phone: '',
+          type: '',
+          seats: ''
+        });
+      } else {
+        const errorData = await response.json();
+        setContactSubmitError(errorData.error || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      setContactSubmitError('Network error. Please try again.');
+    } finally {
+      setContactIsSubmitting(false);
+    }
   };
 
   const fetchProperty = async (id: string) => {
@@ -355,7 +414,7 @@ export default function PropertyDetails() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Managed Office Space Card */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-48 md:h-56 overflow-hidden">
+                  <div className="w-full h-56 md:h-72 overflow-hidden">
                     <img 
                       src="/images/1.jpeg" 
                       alt="Managed Office Space" 
@@ -369,7 +428,7 @@ export default function PropertyDetails() {
                     </p>
                     <button 
                       onClick={() => {
-                        const contactForm = document.querySelector('.lg\\:col-span-1');
+                        const contactForm = document.querySelector('.lg\\:col-span-1') as HTMLElement | null;
                         if (contactForm) {
                           contactForm.scrollIntoView({ behavior: 'smooth' });
                           // Add strong shake animation
@@ -388,7 +447,7 @@ export default function PropertyDetails() {
 
                 {/* Enterprise Solutions Card */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-48 md:h-56 overflow-hidden">
+                  <div className="w-full h-56 md:h-72 overflow-hidden">
                     <img 
                       src="/images/2.jpeg" 
                       alt="Enterprise Solutions" 
@@ -402,7 +461,7 @@ export default function PropertyDetails() {
                     </p>
                     <button 
                       onClick={() => {
-                        const contactForm = document.querySelector('.lg\\:col-span-1');
+                        const contactForm = document.querySelector('.lg\\:col-span-1') as HTMLElement | null;
                         if (contactForm) {
                           contactForm.scrollIntoView({ behavior: 'smooth' });
                           // Add strong shake animation
@@ -605,7 +664,7 @@ export default function PropertyDetails() {
           </div>
 
           {/* Contact Form - Right Side */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 lg:sticky lg:top-24">
             <div className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl shadow-2xl border-2 border-blue-200/50 p-8 relative overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
@@ -613,174 +672,160 @@ export default function PropertyDetails() {
               <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-gradient-to-r from-blue-100/30 to-cyan-100/30 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
               
               <div className="relative z-10">
-                <div className="text-center mb-8">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl">
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
-                    Get Office Spaces in Mumbai
-                  </h3>
-                  <p className="text-gray-700 text-base leading-relaxed font-medium">
-                    Beyond Space Work Consultant assisted <span className="font-bold text-blue-600">150+ corporates</span> in Mumbai to move into their new office.
-                  </p>
+                <div className="mb-6">
+                  <h4 className="text-2xl font-bold text-black mb-2">Interested in this Property</h4>
+                  <p className="text-black">Fill your details for a customized quote</p>
                 </div>
 
-                <form className="space-y-4">
-                  <div className="relative">
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">Name*</label>
                     <input
                       type="text"
-                      placeholder="Your Name"
-                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      name="name"
+                      value={contactFormData.name}
+                      onChange={handleContactInputChange}
+                      placeholder="Enter your name"
+                      required
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
                   </div>
                   
-                  <div className="relative">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">Email*</label>
                     <input
                       type="email"
-                      placeholder="Email Address"
-                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      name="email"
+                      value={contactFormData.email}
+                      onChange={handleContactInputChange}
+                      placeholder="Enter your email"
+                      required
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
                   </div>
                   
-                  <div className="relative">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">Phone*</label>
+                    <div className="flex gap-2">
+                      <select
+                        className="px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300"
+                        defaultValue="+91"
+                        disabled
+                      >
+                        <option>+91</option>
+                      </select>
                     <input
                       type="tel"
-                      placeholder="Phone Number"
-                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
+                        name="phone"
+                        value={contactFormData.phone}
+                        onChange={handleContactInputChange}
+                        placeholder="Enter your phone number"
+                        required
+                        className="flex-1 px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      />
                     </div>
                   </div>
                   
-                  <div className="relative">
-                    <select className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm">
-                      <option>Select Area</option>
-                      <option>Andheri</option>
-                      <option>Thane</option>
-                      <option>Navi Mumbai</option>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">Type</label>
+                      <select
+                        name="type"
+                        value={contactFormData.type}
+                        onChange={handleContactInputChange}
+                        className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
+                      >
+                        <option value="">Select Type</option>
+                        {workspaceTypes.map((type) => (
+                          <option key={type}>{type}</option>
+                        ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">No. Of Seats</label>
+                      <select
+                        name="seats"
+                        value={contactFormData.seats}
+                        onChange={handleContactInputChange}
+                        className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
+                      >
+                        <option value="">Select Seats</option>
+                        {seatOptions.map(option => (
+                          <option key={option}>{option}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   
-                  <div className="relative">
-                    <textarea
-                      placeholder="Tell us about your requirements..."
-                      rows={4}
-                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-gray-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 resize-none placeholder-gray-500 shadow-sm"
-                    ></textarea>
+                  {contactSubmitMessage && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">{contactSubmitMessage}</p>
                   </div>
+                  )}
+
+                  {contactSubmitError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-800">{contactSubmitError}</p>
+                    </div>
+                  )}
                   
                   <button
                     type="submit"
-                    className="w-full bg-blue-400 text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-blue-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    disabled={contactIsSubmitting}
+                    className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl ${
+                      contactIsSubmitting ? 'bg-blue-300 cursor-not-allowed text-white' : 'bg-blue-400 text-white hover:bg-blue-500'
+                    }`}
                   >
-                    <span className="flex items-center justify-center gap-2">
-                      Connect with us
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </span>
+                    {contactIsSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                 </form>
 
-                <div className="mt-8 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl">
-                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-800">Connect with our space expert</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
+                <div className="mt-8">
+                  <p className="text-xs font-semibold text-black uppercase tracking-wider text-center">Workspace consultant</p>
+                  <div className="flex items-center gap-3 mt-4">
                     <img
-                      src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=80&q=80"
-                      alt="Beyond Space expert"
-                      className="w-10 h-10 rounded-full object-cover border border-blue-200"
+                      src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80"
+                      alt="Workspace consultant"
+                      className="w-12 h-12 rounded-full object-cover border border-blue-200"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div>
+                      <p className="text-base font-semibold text-black">Workspace Consultant</p>
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                        <span className="text-base font-bold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">+91 98765 43210</span>
+                    </div>
+                  </div>
+                  </div>
+
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-md shadow-purple-500/30">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-black">Connect with our space expert</p>
+                      <div className="flex items-center gap-2 text-black">
+                        <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span className="text-blue-600 font-semibold text-lg">contact@beyondspacework.com</span>
+                        <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                          contact@beyondspacework.com
+                        </span>
                   </div>
                 </div>
-
               </div>
-            </div>
-
-            <div className="mt-10">
-              <h4 className="text-lg font-semibold text-gray-900 text-center mb-4">Workspace Gallery</h4>
-              <div className="relative">
-                <div className="overflow-hidden rounded-2xl shadow-xl h-80 sm:h-96">
-                  <img
-                    src={contactSliderImages[contactSlideIndex]}
-                    alt="Workspace highlight"
-                    className="w-full h-full object-cover transition-opacity duration-500"
-                  />
-                </div>
-                {contactSliderImages.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleContactPrev}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:scale-110 transition-transform"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleContactNext}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:scale-110 transition-transform"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </>
-                )}
-              </div>
-              {contactSliderImages.length > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  {contactSliderImages.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setContactSlideIndex(index)}
-                      className={`h-2.5 rounded-full transition-all ${
-                        index === contactSlideIndex ? 'bg-blue-500 w-6' : 'bg-gray-300 w-2'
-                      }`}
-                      aria-label={`Go to workspace slide ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
+
+          </div>
+      </div>
 
       </div>
 
@@ -825,7 +870,7 @@ export default function PropertyDetails() {
           </div>
         </div>
       </section>
- 
+
       <Footer />
 
       {/* Simple Gallery Modal with Big Image and Next/Previous */}
@@ -909,7 +954,7 @@ export default function PropertyDetails() {
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 flex-1 rounded-l-2xl">
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Find Your Perfect Office Now!</h2>
-                <p className="text-gray-700 text-lg">Our space experts will provide customized quote with detailed inventory as per your needs</p>
+                <p className="text-black text-lg">Our space experts will provide customized quote with detailed inventory as per your needs</p>
               </div>
 
               {/* Features List */}
@@ -1058,5 +1103,6 @@ export default function PropertyDetails() {
     </div>
   );
 }
+
 
 

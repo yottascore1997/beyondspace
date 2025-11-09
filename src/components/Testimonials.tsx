@@ -135,7 +135,7 @@ export default function Testimonials() {
                   <img src={t.avatar} alt={t.name} className="w-24 h-24 rounded-full object-cover border-2 border-white shadow group-hover:scale-105 transition-transform" />
                   <div>
                     <div className="font-extrabold text-gray-900 text-2xl">{t.name}</div>
-                    <div className="text-gray-600 text-base">{t.role}</div>
+                    <div className="text-black text-base">{t.role}</div>
                     <div className="text-orange-500 text-sm font-semibold">{t.company}</div>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export default function Testimonials() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-gray-700 leading-relaxed text-lg">{t.text}</p>
+                <p className="text-black leading-relaxed text-lg">{t.text}</p>
               </div>
             ))}
           </div>

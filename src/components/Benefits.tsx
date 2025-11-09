@@ -64,7 +64,7 @@ export default function Benefits() {
     {
       title: 'Partner with premium brand, largest network of offices',
       desc:
-        'Verified office spaces across Mumbai&apos;s top micro-markets to match every need and budget.',
+        'Certified office spaces across Mumbai’s top micro-markets, tailored to every team’s needs and budget.',
       iconColor: 'bg-green-500',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,10 +165,11 @@ export default function Benefits() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold mb-2">
-                            <span className="text-blue-400">Find</span>
+                            <span className="text-black">We&apos;ll Assist You </span>
+                            <span className="bg-gradient-to-r from-orange-600 via-pink-600 to-red-500 bg-clip-text text-transparent">Find</span>
                             <span className="text-black"> and </span>
-                            <span className="text-blue-400">Book</span>
-                            <span className="text-black"> Your Perfect Workspace in 4 Easy Steps With Beyond Space</span>
+                            <span className="bg-gradient-to-r from-orange-600 via-pink-600 to-red-500 bg-clip-text text-transparent">Book</span>
+                            <span className="text-black"> Your Perfect Workspace In 4 Easy Steps.</span>
                           </h3>
                         </div>
                       </div>
@@ -203,7 +204,7 @@ export default function Benefits() {
                                 <h4 className="text-base font-bold text-gray-900 mb-1">
                                   {stepTitle.trim()}:
                                 </h4>
-                                <p className="text-sm text-gray-600 leading-relaxed">
+                                <p className="text-sm text-black leading-relaxed">
                                   {stepDesc.trim()}
                                 </p>
                               </div>
@@ -227,7 +228,7 @@ export default function Benefits() {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-gray-900 mb-2">{it.title}</h3>
-                        <div className="text-gray-600 leading-relaxed whitespace-pre-line">{it.desc}</div>
+                        <div className="text-black leading-relaxed whitespace-pre-line">{it.desc}</div>
                       </div>
                     </div>
                   </div>
@@ -277,7 +278,7 @@ export default function Benefits() {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-gray-900 mb-2">{partnerItem.title}</h3>
-                        <div className="text-gray-600 leading-relaxed whitespace-pre-line">{partnerItem.desc}</div>
+                        <div className="text-black leading-relaxed whitespace-pre-line">{partnerItem.desc}</div>
                       </div>
                     </div>
                   </div>

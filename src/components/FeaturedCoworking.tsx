@@ -14,9 +14,11 @@ export default function FeaturedCoworking() {
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="relative text-center mb-12">
-          <span className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-300/60 blur-xl" />
           <h2 className="relative inline-block text-3xl md:text-4xl font-bold text-slate-900">
-            Our Network of{' '}
+            <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+              Trusted Partners
+            </span>{' '}
+            <span className="text-slate-900">&amp;</span>{' '}
             <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
               Premier Brands
             </span>
