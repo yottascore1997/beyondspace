@@ -23,6 +23,8 @@ export default function ListYourSpacePage() {
     workspaceTimings: '',
     workspaceClosedDays: '',
     locationDetails: '',
+    metroStationDistance: '',
+    railwayStationDistance: '',
     aboutWorkspace: '',
     capacity: '',
     superArea: ''
@@ -111,6 +113,8 @@ export default function ListYourSpacePage() {
           workspaceTimings: '',
           workspaceClosedDays: '',
           locationDetails: '',
+          metroStationDistance: '',
+          railwayStationDistance: '',
           aboutWorkspace: '',
           capacity: '',
           superArea: ''
@@ -218,6 +222,55 @@ export default function ListYourSpacePage() {
                   </div>
 
                   {/* Purpose hidden - default RENT; Type and Beds removed to match property page fields */}
+                </div>
+              </div>
+
+              {/* Location Details */}
+              <div className="border-t pt-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">Location Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location Details*
+                    </label>
+                    <textarea
+                      name="locationDetails"
+                      value={formData.locationDetails}
+                      onChange={handleInputChange}
+                      required
+                      rows={2}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                      placeholder="e.g., Sumer Plaza, Sankasth Pada Welfare Society, Marol, Andheri East, Mumbai"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nearest Metro Station Distance
+                    </label>
+                    <input
+                      type="text"
+                      name="metroStationDistance"
+                      value={formData.metroStationDistance}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                      placeholder="e.g., 2 km away from Marol Naka Metro Station"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nearest Railway Station Distance
+                    </label>
+                    <input
+                      type="text"
+                      name="railwayStationDistance"
+                      value={formData.railwayStationDistance}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                      placeholder="e.g., 3.5 km away from Andheri Railway Station"
+                    />
+                  </div>
                 </div>
               </div>
 

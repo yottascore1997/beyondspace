@@ -20,6 +20,8 @@ interface CustomerSubmission {
   workspaceTimings: string | null;
   workspaceClosedDays: string | null;
   locationDetails: string | null;
+  metroStationDistance: string | null;
+  railwayStationDistance: string | null;
   aboutWorkspace: string | null;
   capacity: number | null;
   superArea: number | null;
@@ -175,6 +177,23 @@ export default function CustomerSubmissions() {
                     <div className="mb-4">
                       <p className="text-sm text-gray-500 mb-1">Description</p>
                       <p className="text-gray-700 text-sm">{submission.description}</p>
+                    </div>
+                  )}
+                  
+                  {(submission.metroStationDistance || submission.railwayStationDistance) && (
+                    <div className="mb-4 grid gap-3 md:grid-cols-2">
+                      {submission.metroStationDistance && (
+                        <div>
+                          <p className="text-sm text-gray-500">Metro Station Distance</p>
+                          <p className="text-gray-900">{submission.metroStationDistance}</p>
+                        </div>
+                      )}
+                      {submission.railwayStationDistance && (
+                        <div>
+                          <p className="text-sm text-gray-500">Railway Station Distance</p>
+                          <p className="text-gray-900">{submission.railwayStationDistance}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                   

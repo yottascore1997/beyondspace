@@ -30,6 +30,8 @@ interface Property {
   workspaceClosedDays?: string;
   amenities?: Array<{icon: string; name: string; category: string}>;
   locationDetails?: string;
+  metroStationDistance?: string | null;
+  railwayStationDistance?: string | null;
   aboutWorkspace?: string;
   capacity?: number;
   superArea?: number;

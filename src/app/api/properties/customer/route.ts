@@ -43,6 +43,8 @@ export async function POST(request: NextRequest) {
       workspaceClosedDays: data.workspaceClosedDays || null,
       amenities: data.amenities && Array.isArray(data.amenities) ? data.amenities : null,
       locationDetails: data.locationDetails || null,
+      metroStationDistance: data.metroStationDistance || null,
+      railwayStationDistance: data.railwayStationDistance || null,
       aboutWorkspace: data.aboutWorkspace || null,
       capacity: data.capacity ? parseInt(data.capacity) : null,
       superArea: data.superArea ? parseInt(data.superArea) : null,

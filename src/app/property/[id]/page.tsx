@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
 import { Poppins } from 'next/font/google';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -45,6 +45,8 @@ interface Property {
   description?: string;
   location?: string;
   locationDetails?: string;
+  metroStationDistance?: string | null;
+  railwayStationDistance?: string | null;
   aboutWorkspace?: string;
   propertyOptions?: SeatingPlan[] | null;
   createdAt: string;
@@ -79,12 +81,18 @@ export default function PropertyDetails() {
     name: '',
     email: '',
     phone: '',
+    countryCode: '+91',
     type: '',
     seats: ''
   });
   const [contactIsSubmitting, setContactIsSubmitting] = useState(false);
   const [contactSubmitMessage, setContactSubmitMessage] = useState('');
   const [contactSubmitError, setContactSubmitError] = useState('');
+  const [isCountryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [isModalCountryDropdownOpen, setModalCountryDropdownOpen] = useState(false);
+  const [modalCountryCode, setModalCountryCode] = useState('+91');
+  const countryDropdownRef = useRef<HTMLDivElement | null>(null);
+  const modalCountryDropdownRef = useRef<HTMLDivElement | null>(null);
 
   const workspaceTypes = [
     'Coworking Space',
@@ -97,14 +105,91 @@ export default function PropertyDetails() {
   ];
 
   const seatOptions = ['1-5', '6-10', '11-20', '21-50', '50-70', '120+'];
+  const countryCodes: Array<{ code: string; name: string; flag: string }> = [
+    { code: '+1', name: 'United States', flag: '🇺🇸' },
+    { code: '+44', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: '+61', name: 'Australia', flag: '🇦🇺' },
+    { code: '+81', name: 'Japan', flag: '🇯🇵' },
+    { code: '+82', name: 'South Korea', flag: '🇰🇷' },
+    { code: '+86', name: 'China', flag: '🇨🇳' },
+    { code: '+91', name: 'India', flag: '🇮🇳' },
+    { code: '+92', name: 'Pakistan', flag: '🇵🇰' },
+    { code: '+93', name: 'Afghanistan', flag: '🇦🇫' },
+    { code: '+94', name: 'Sri Lanka', flag: '🇱🇰' },
+    { code: '+95', name: 'Myanmar', flag: '🇲🇲' },
+    { code: '+971', name: 'United Arab Emirates', flag: '🇦🇪' },
+    { code: '+972', name: 'Israel', flag: '🇮🇱' },
+    { code: '+973', name: 'Bahrain', flag: '🇧🇭' },
+    { code: '+974', name: 'Qatar', flag: '🇶🇦' },
+    { code: '+975', name: 'Bhutan', flag: '🇧🇹' },
+    { code: '+977', name: 'Nepal', flag: '🇳🇵' },
+    { code: '+60', name: 'Malaysia', flag: '🇲🇾' },
+    { code: '+62', name: 'Indonesia', flag: '🇮🇩' },
+    { code: '+63', name: 'Philippines', flag: '🇵🇭' },
+    { code: '+64', name: 'New Zealand', flag: '🇳🇿' },
+    { code: '+65', name: 'Singapore', flag: '🇸🇬' },
+    { code: '+66', name: 'Thailand', flag: '🇹🇭' },
+    { code: '+234', name: 'Nigeria', flag: '🇳🇬' },
+    { code: '+254', name: 'Kenya', flag: '🇰🇪' },
+    { code: '+27', name: 'South Africa', flag: '🇿🇦' },
+    { code: '+351', name: 'Portugal', flag: '🇵🇹' },
+    { code: '+352', name: 'Luxembourg', flag: '🇱🇺' },
+    { code: '+353', name: 'Ireland', flag: '🇮🇪' },
+    { code: '+354', name: 'Iceland', flag: '🇮🇸' },
+    { code: '+355', name: 'Albania', flag: '🇦🇱' },
+    { code: '+356', name: 'Malta', flag: '🇲🇹' },
+    { code: '+357', name: 'Cyprus', flag: '🇨🇾' },
+    { code: '+358', name: 'Finland', flag: '🇫🇮' },
+    { code: '+359', name: 'Bulgaria', flag: '🇧🇬' },
+    { code: '+380', name: 'Ukraine', flag: '🇺🇦' },
+    { code: '+381', name: 'Serbia', flag: '🇷🇸' },
+    { code: '+386', name: 'Slovenia', flag: '🇸🇮' },
+    { code: '+852', name: 'Hong Kong', flag: '🇭🇰' },
+    { code: '+853', name: 'Macau', flag: '🇲🇴' },
+    { code: '+855', name: 'Cambodia', flag: '🇰🇭' },
+    { code: '+856', name: 'Laos', flag: '🇱🇦' },
+    { code: '+880', name: 'Bangladesh', flag: '🇧🇩' },
+    { code: '+886', name: 'Taiwan', flag: '🇹🇼' },
+    { code: '+960', name: 'Maldives', flag: '🇲🇻' }
+  ];
 
   const handleEnquireClick = () => {
-    setIsModalOpen(true);
+    const formSection = document.getElementById('contact-form-section');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      formSection.classList.add('animate-shake');
+      setTimeout(() => {
+        formSection.classList.remove('animate-shake');
+      }, 600);
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setModalCountryDropdownOpen(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCountryDropdownOpen(false);
+      }
+      if (
+        modalCountryDropdownRef.current &&
+        !modalCountryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setModalCountryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (params.id) {
@@ -140,7 +225,7 @@ export default function PropertyDetails() {
         },
         body: JSON.stringify({
           name: contactFormData.name,
-          mobile: contactFormData.phone,
+          mobile: `${contactFormData.countryCode} ${contactFormData.phone}`,
           email: contactFormData.email,
           solution,
           message: `Type: ${contactFormData.type || 'Not specified'}, Seats: ${contactFormData.seats || 'Not specified'}`
@@ -153,9 +238,11 @@ export default function PropertyDetails() {
           name: '',
           email: '',
           phone: '',
+          countryCode: '+91',
           type: '',
           seats: ''
         });
+        setCountryDropdownOpen(false);
       } else {
         const errorData = await response.json();
         setContactSubmitError(errorData.error || 'Something went wrong. Please try again.');
@@ -186,6 +273,9 @@ export default function PropertyDetails() {
       setLoading(false);
     }
   };
+
+  const selectedCountry = countryCodes.find(country => country.code === contactFormData.countryCode) || countryCodes[0];
+  const selectedModalCountry = countryCodes.find(country => country.code === modalCountryCode) || countryCodes[0];
 
   if (loading) {
     return (
@@ -230,6 +320,19 @@ export default function PropertyDetails() {
 
   return (
     <div className={`${poppins.className} min-h-screen bg-white`}>
+      <style jsx global>{`
+        @keyframes subtle-shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-4px); }
+          40% { transform: translateX(4px); }
+          60% { transform: translateX(-3px); }
+          80% { transform: translateX(3px); }
+        }
+
+        .animate-shake {
+          animation: subtle-shake 0.6s ease-in-out;
+        }
+      `}</style>
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -313,32 +416,52 @@ export default function PropertyDetails() {
           {/* Property Details - Left Side */}
           <div className="lg:col-span-2">
             {/* Property Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 leading-tight">
               {property.title}
             </h1>
 
             {/* Location */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Location Details</h3>
+              <h3 className="text-xl font-medium text-gray-800 mb-3">Location Details</h3>
               <p className="text-gray-600 text-lg">
                 {property.locationDetails || property.area}
               </p>
+              {(property.metroStationDistance || property.railwayStationDistance) && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {property.metroStationDistance && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">🚇</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                          Metro Station
+                        </p>
+                        <p className="text-gray-600 text-base">
+                          {property.metroStationDistance}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {property.railwayStationDistance && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">🚆</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                          Railway Station
+                        </p>
+                        <p className="text-gray-600 text-base">
+                          {property.railwayStationDistance}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Description */}
-            {(property.aboutWorkspace || property.description) && (
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">About</h3>
-                <p className="text-gray-600 text-lg">
-                  {property.aboutWorkspace || property.description}
-                </p>
-              </div>
-            )}
 
             {/* Seating Plans Section */}
             {property.propertyOptions && property.propertyOptions.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Seating Plans</h3>
+              <h3 className="text-xl font-medium text-gray-800 mb-5">Seating Plans</h3>
               
                 {property.propertyOptions.map((plan, index) => {
                   // Map seating plan titles to default images
@@ -371,10 +494,10 @@ export default function PropertyDetails() {
                         <div className="md:w-4/5 flex flex-col relative">
                           {/* Left Side - Title and Content */}
                           <div className="flex-1 pr-3 pt-2">
-                            <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">{plan.title}</h4>
+                            <h4 className="text-lg md:text-xl font-medium text-gray-800 mb-3">{plan.title}</h4>
                             
                             {plan.description && (
-                              <p className="text-gray-800 mb-2 text-sm font-medium">{plan.description}</p>
+                              <p className="text-gray-700 mb-2 text-sm font-normal">{plan.description}</p>
                             )}
                             
                             {plan.seating && (
@@ -395,6 +518,7 @@ export default function PropertyDetails() {
                             )}
                             
                             <button
+                        type="button"
                               onClick={handleEnquireClick}
                               className="bg-blue-400 text-white px-6 py-2 rounded-lg text-base font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                             >
@@ -411,7 +535,7 @@ export default function PropertyDetails() {
 
             {/* Managed Office Space and Enterprise Solutions Section */}
             <div className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Managed Office Space Card */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
                   <div className="w-full h-56 md:h-72 overflow-hidden">
@@ -422,22 +546,13 @@ export default function PropertyDetails() {
                     />
                   </div>
                   <div className="p-5 space-y-3">
-                    <h4 className="text-xl font-semibold text-gray-900">Managed Office Space</h4>
+                    <h4 className="text-lg font-semibold text-gray-900">Managed Office Space</h4>
                     <p className="text-gray-600 text-base leading-relaxed">
                       An end-to-end office space solution customized to your needs including sourcing, design, building and operations
                     </p>
                     <button 
-                      onClick={() => {
-                        const contactForm = document.querySelector('.lg\\:col-span-1') as HTMLElement | null;
-                        if (contactForm) {
-                          contactForm.scrollIntoView({ behavior: 'smooth' });
-                          // Add strong shake animation
-                          contactForm.style.animation = 'shake 0.8s ease-in-out';
-                          setTimeout(() => {
-                            contactForm.style.animation = '';
-                          }, 800);
-                        }
-                      }}
+                      type="button"
+                      onClick={handleEnquireClick}
                       className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
@@ -455,22 +570,13 @@ export default function PropertyDetails() {
                     />
                   </div>
                   <div className="p-5 space-y-3">
-                    <h4 className="text-xl font-semibold text-gray-900">Enterprise Solutions</h4>
+                    <h4 className="text-lg font-semibold text-gray-900">Enterprise Solutions</h4>
                     <p className="text-gray-600 text-base leading-relaxed">
                       Fully equipped offices for larger teams with flexibility to scale and customize your office in prime locations & LEED certified buildings
                     </p>
                     <button 
-                      onClick={() => {
-                        const contactForm = document.querySelector('.lg\\:col-span-1') as HTMLElement | null;
-                        if (contactForm) {
-                          contactForm.scrollIntoView({ behavior: 'smooth' });
-                          // Add strong shake animation
-                          contactForm.style.animation = 'shake 0.8s ease-in-out';
-                          setTimeout(() => {
-                            contactForm.style.animation = '';
-                          }, 800);
-                        }
-                      }}
+                      type="button"
+                      onClick={handleEnquireClick}
                       className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
@@ -480,9 +586,19 @@ export default function PropertyDetails() {
               </div>
             </div>
 
+            {/* Description */}
+            {(property.aboutWorkspace || property.description) && (
+              <div className="mb-8">
+                <h3 className="text-xl font-medium text-gray-800 mb-3">About</h3>
+                <p className="text-gray-600 text-lg">
+                  {property.aboutWorkspace || property.description}
+                </p>
+              </div>
+            )}
+
             {/* Office Timing Section */}
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Office Timing</h3>
+              <h3 className="text-xl font-medium text-gray-800 mb-5">Office Timing</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Monday to Friday */}
@@ -537,7 +653,7 @@ export default function PropertyDetails() {
 
             {/* Amenities Section */}
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Amenities</h3>
+              <h3 className="text-xl font-medium text-gray-800 mb-5">Amenities</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* High Speed WiFi */}
@@ -664,8 +780,9 @@ export default function PropertyDetails() {
           </div>
 
           {/* Contact Form - Right Side */}
-          <div className="lg:col-span-1 lg:sticky lg:top-24">
-            <div className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl shadow-2xl border-2 border-blue-200/50 p-8 relative overflow-hidden">
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            <div className="lg:sticky lg:top-24">
+            <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl shadow-2xl border-2 border-blue-200/50 p-8 relative overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-16 -translate-x-16"></div>
@@ -673,8 +790,8 @@ export default function PropertyDetails() {
               
               <div className="relative z-10">
                 <div className="mb-6">
-                  <h4 className="text-2xl font-bold text-black mb-2">Interested in this Property</h4>
-                  <p className="text-black">Fill your details for a customized quote</p>
+                  <h4 className="text-lg md:text-xl font-semibold text-black mb-2">Tell Us About Your Workspace Needs</h4>
+                  <p className="text-black">Share your requirements and we’ll tailor a proposal for you.</p>
                 </div>
 
                 <form onSubmit={handleContactSubmit} className="space-y-4">
@@ -707,13 +824,45 @@ export default function PropertyDetails() {
                   <div>
                     <label className="block text-sm font-medium text-black mb-1">Phone*</label>
                     <div className="flex gap-2">
-                      <select
-                        className="px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300"
-                        defaultValue="+91"
-                        disabled
-                      >
-                        <option>+91</option>
-                      </select>
+                      <div className="relative" ref={countryDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setCountryDropdownOpen(prev => !prev)}
+                          className="flex w-32 items-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-3 py-3 text-sm font-semibold text-black shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
+                        >
+                          <span className="text-lg leading-none">{selectedCountry.flag}</span>
+                          <span>{selectedCountry.code}</span>
+                          <svg
+                            className={`ml-auto h-3 w-3 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {isCountryDropdownOpen && (
+                          <div className="absolute left-0 bottom-full z-30 mb-2 w-64 max-h-64 overflow-y-auto rounded-xl border border-blue-100 bg-white shadow-2xl">
+                            {countryCodes.map(country => (
+                              <button
+                                type="button"
+                                key={country.code}
+                                onClick={() => {
+                                  setContactFormData(prev => ({ ...prev, countryCode: country.code }));
+                                  setCountryDropdownOpen(false);
+                                }}
+                                className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-blue-50"
+                              >
+                                <span className="text-lg leading-none">{country.flag}</span>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-semibold text-gray-900">{country.name}</span>
+                                  <span className="text-xs text-gray-500">{country.code}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     <input
                       type="tel"
                         name="phone"
@@ -721,7 +870,7 @@ export default function PropertyDetails() {
                         onChange={handleContactInputChange}
                         placeholder="Enter your phone number"
                         required
-                        className="flex-1 px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                        className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                       />
                     </div>
                   </div>
@@ -792,12 +941,12 @@ export default function PropertyDetails() {
                       }}
                     />
                     <div>
-                      <p className="text-base font-semibold text-black">Workspace Consultant</p>
+                      <p className="text-sm font-semibold text-black">Workspace Consultant</p>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
-                        <span className="text-base font-bold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">+91 98765 43210</span>
+                        <span className="text-base font-bold text-orange-500">+91 98765 43210</span>
                     </div>
                   </div>
                   </div>
@@ -811,16 +960,19 @@ export default function PropertyDetails() {
                     <div>
                       <p className="text-sm font-semibold text-black">Connect with our space expert</p>
                       <div className="flex items-center gap-2 text-black">
-                        <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                        <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                        <span className="text-base font-semibold text-orange-500">
                           contact@beyondspacework.com
                         </span>
                   </div>
                 </div>
               </div>
+
             </div>
+            </div>
+
           </div>
         </div>
 
@@ -888,7 +1040,7 @@ export default function PropertyDetails() {
         };
 
         return (
-          <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center">
+          <div className={`${poppins.className} fixed inset-0 bg-black/95 z-50 flex items-center justify-center`}>
             {/* Close Button */}
             <button
               onClick={() => setShowGallery(false)}
@@ -943,7 +1095,7 @@ export default function PropertyDetails() {
       {/* Modal Popup */}
       {isModalOpen && (
         <div 
-          className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          className={`${poppins.className} fixed inset-0 flex items-center justify-center z-50 p-4`}
           onClick={closeModal}
         >
           <div 
@@ -953,7 +1105,7 @@ export default function PropertyDetails() {
             {/* Left Panel - Office Space Features */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 flex-1 rounded-l-2xl">
               <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Find Your Perfect Office Now!</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Find Your Perfect Office Now!</h2>
                 <p className="text-black text-lg">Our space experts will provide customized quote with detailed inventory as per your needs</p>
               </div>
 
@@ -1007,8 +1159,8 @@ export default function PropertyDetails() {
               </button>
 
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Interested in this Property</h3>
-                <p className="text-gray-600">Fill your details for a customized quote</p>
+                <h3 className="text-lg md:text-xl font-semibold text-black mb-2">Tell Us About Your Workspace Needs</h3>
+                <p className="text-gray-600">Share your requirements and we’ll tailor a proposal for you.</p>
               </div>
 
               <form className="space-y-4">
@@ -1035,9 +1187,45 @@ export default function PropertyDetails() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Phone*</label>
                   <div className="flex gap-2">
-                    <select className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
-                      <option>+91</option>
-                    </select>
+                    <div className="relative" ref={modalCountryDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setModalCountryDropdownOpen(prev => !prev)}
+                        className="flex w-32 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm font-semibold text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <span className="text-lg leading-none">{selectedModalCountry.flag}</span>
+                        <span>{selectedModalCountry.code}</span>
+                        <svg
+                          className={`ml-auto h-3 w-3 transition-transform ${isModalCountryDropdownOpen ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isModalCountryDropdownOpen && (
+                        <div className="absolute left-0 bottom-full z-30 mb-2 w-64 max-h-64 overflow-y-auto rounded-xl border border-blue-100 bg-white shadow-2xl">
+                          {countryCodes.map(country => (
+                            <button
+                              type="button"
+                              key={`modal-${country.code}`}
+                              onClick={() => {
+                                setModalCountryCode(country.code);
+                                setModalCountryDropdownOpen(false);
+                              }}
+                              className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-blue-50"
+                            >
+                              <span className="text-lg leading-none">{country.flag}</span>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-semibold text-gray-900">{country.name}</span>
+                                <span className="text-xs text-gray-500">{country.code}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <input
                       type="tel"
                       placeholder="Enter your phone number"
@@ -1089,10 +1277,10 @@ export default function PropertyDetails() {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Connect with our space expert</p>
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span className="text-blue-600 text-sm">hello@beyondspacework.com</span>
+                    <span className="text-orange-500 text-base">hello@beyondspacework.com</span>
                   </div>
                 </div>
               </div>

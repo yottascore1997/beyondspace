@@ -86,6 +86,8 @@ model Property {
   workspaceClosedDays String? // e.g., "Closed (Sun)"
   amenities Json? // Array of amenity objects with icon and name
   locationDetails String? // e.g., "Sumer Plaza, Sankasth Pada Welfare Society, Marol, Andheri East, Mumbai, Maharashtra"
+  metroStationDistance String? // e.g., "2 km away from Marol Naka Metro Station"
+  railwayStationDistance String? // e.g., "3.5 km away from Andheri Railway Station"
   aboutWorkspace String? @db.Text // e.g., "one of the best business centres in Marol..."
   capacity Int? // e.g., 220+ seats
   superArea Int? // e.g., 10000+ sq ft

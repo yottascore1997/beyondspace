@@ -99,6 +99,8 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       workspaceClosedDays: propertyData.workspaceClosedDays || null,
       amenities: propertyData.amenities && Array.isArray(propertyData.amenities) ? propertyData.amenities : null,
       locationDetails: propertyData.locationDetails || null,
+      metroStationDistance: propertyData.metroStationDistance || null,
+      railwayStationDistance: propertyData.railwayStationDistance || null,
       aboutWorkspace: propertyData.aboutWorkspace || null,
       capacity: propertyData.capacity ? parseInt(propertyData.capacity) : null,
       superArea: propertyData.superArea ? parseInt(propertyData.superArea) : null,

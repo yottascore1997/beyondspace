@@ -38,6 +38,8 @@ interface PropertyFormData {
   workspaceClosedDays: string;
   amenities: Amenity[];
   locationDetails: string;
+  metroStationDistance: string;
+  railwayStationDistance: string;
   aboutWorkspace: string;
   capacity: number;
   superArea: number;
@@ -69,6 +71,8 @@ export default function PropertyForm() {
     workspaceClosedDays: '',
     amenities: [],
     locationDetails: '',
+    metroStationDistance: '',
+    railwayStationDistance: '',
     aboutWorkspace: '',
     capacity: 0,
     superArea: 0,
@@ -228,6 +232,8 @@ export default function PropertyForm() {
           workspaceClosedDays: '',
           amenities: [],
           locationDetails: '',
+          metroStationDistance: '',
+          railwayStationDistance: '',
           aboutWorkspace: '',
           capacity: 0,
           superArea: 0,
@@ -667,6 +673,34 @@ export default function PropertyForm() {
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
                 placeholder="e.g., Sumer Plaza, Sankasth Pada Welfare Society, Marol, Andheri East, Mumbai, Maharashtra"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nearest Metro Station Distance
+              </label>
+              <input
+                type="text"
+                name="metroStationDistance"
+                value={formData.metroStationDistance}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                placeholder="e.g., 2 km away from Marol Naka Metro Station"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nearest Railway Station Distance
+              </label>
+              <input
+                type="text"
+                name="railwayStationDistance"
+                value={formData.railwayStationDistance}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                placeholder="e.g., 3.5 km away from Andheri Railway Station"
               />
             </div>
 
