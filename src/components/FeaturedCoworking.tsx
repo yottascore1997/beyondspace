@@ -100,7 +100,7 @@ export default function FeaturedCoworking() {
                     const isWeWork = lowerName === 'wework';
                     const isSpringboard = lowerName === '91springboard';
                     const imageClasses = isConnect
-                      ? 'max-h-28 md:max-h-32'
+                      ? 'max-h-16 md:max-h-20'
                       : isSmartworks
                         ? 'max-h-8 md:max-h-10'
                         : isWorkAvenue
