@@ -2,9 +2,26 @@
 
 export default function TrustedCompanies() {
   // Company logos from trusted folder
-  const companies = Array.from({ length: 15 }, (_, i) => ({
-    name: `Company ${i + 1}`,
-    logo: `/images/trusted/c${i + 1}.jpeg`
+  const companyLogos = [
+    'c1.png',
+    'c2.png',
+    'c3.png',
+    'c4.jpeg',
+    'c5.png',
+    'c6.png',
+    'c7.png',
+    'c8.png',
+    'c9.png',
+    'c10.png',
+    'c11.png',
+    'c12.png',
+    'c13.png',
+    'c14.png'
+  ];
+
+  const companies = companyLogos.map((fileName, index) => ({
+    name: `Company ${index + 1}`,
+    logo: `/images/trusted/${fileName}`
   }));
 
   // Duplicate the array for seamless loop
@@ -26,23 +43,30 @@ export default function TrustedCompanies() {
         {/* Marquee Container */}
         <div className="relative overflow-hidden">
           <div className="flex animate-marquee">
-            {duplicatedCompanies.map((company, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 mx-8 flex items-center justify-center group"
-              >
-                <div className="w-32 h-20 md:w-40 md:h-24 flex items-center justify-center">
-                  <img
-                    src={company.logo}
-                    alt={`${company.name} logo`}
-                    className="max-w-full max-h-full w-full h-full object-contain transition-all duration-300 opacity-80 group-hover:opacity-100 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+            {duplicatedCompanies.map((company, index) => {
+              const isLargeLogo = ['c1', 'c6', 'c8'].some((code) => company.logo.includes(code));
+              const wrapperClasses = isLargeLogo
+                ? 'w-44 h-32 md:w-64 md:h-36 scale-125'
+                : 'w-32 h-20 md:w-40 md:h-24';
+
+              return (
+                <div
+                  key={index}
+                  className="flex-shrink-0 mx-8 flex items-center justify-center group"
+                >
+                  <div className={`${wrapperClasses} flex items-center justify-center`}>
+                    <img
+                      src={company.logo}
+                      alt={`${company.name} logo`}
+                      className="max-w-full max-h-full w-full h-full object-contain transition-all duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

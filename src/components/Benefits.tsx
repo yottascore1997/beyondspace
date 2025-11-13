@@ -237,7 +237,7 @@ export default function Benefits() {
             </div>
 
             {/* Right Side - Client Images Slider */}
-            <div className="relative">
+            <div className="relative lg:-mt-2">
               <div className="relative rounded-3xl overflow-hidden border-r-8 border-b-8 border-blue-400 shadow-2xl h-[600px]">
                 {clientImages.map((client, index) => (
                   <img

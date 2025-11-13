@@ -92,19 +92,39 @@ export default function FeaturedCoworking() {
                   key={`brand-slide-${slideIndex}`}
                   className="w-full flex-shrink-0 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center justify-items-center"
                 >
-                  {group.map((brand) => (
+                  {group.map((brand) => {
+                    const lowerName = brand.name.toLowerCase();
+                    const isConnect = lowerName === 'connect';
+                    const isSmartworks = lowerName === 'smartworks';
+                    const isWorkAvenue = lowerName === 'work avenue';
+                    const isWeWork = lowerName === 'wework';
+                    const isSpringboard = lowerName === '91springboard';
+                    const imageClasses = isConnect
+                      ? 'max-h-28 md:max-h-32'
+                      : isSmartworks
+                        ? 'max-h-8 md:max-h-10'
+                        : isWorkAvenue
+                          ? 'max-h-28 md:max-h-32'
+                          : isWeWork
+                            ? 'max-h-32 md:max-h-36'
+                            : isSpringboard
+                              ? 'max-h-20 md:max-h-24'
+                        : 'max-h-12';
+
+                    return (
                     <div
                       key={brand.name}
-                      className="flex h-20 w-full items-center justify-center rounded-2xl bg-white shadow-md shadow-slate-200/70 ring-1 ring-slate-100/60 transition-transform hover:-translate-y-1 hover:shadow-lg"
+                      className="flex h-20 w-full items-center justify-center transition-transform hover:-translate-y-1"
                     >
                       <img
                         src={brand.src}
                         alt={brand.name}
-                        className="max-h-12 object-contain"
+                        className={`${imageClasses} object-contain`}
                         loading="lazy"
                       />
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ))}
             </div>
