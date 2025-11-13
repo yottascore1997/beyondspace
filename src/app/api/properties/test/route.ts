@@ -16,11 +16,11 @@ export async function POST(request: NextRequest) {
       // Create a test admin user
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('admin123', 12);
+      const hashedPassword = await bcrypt.hash('admin1234', 12);
       
       user = await prisma.user.create({
         data: {
-          email: 'admin@beyondestates.com',
+          email: 'beyondspace@gmail.com',
           name: 'Admin User',
           password: hashedPassword,
           role: 'ADMIN',

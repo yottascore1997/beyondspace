@@ -14,10 +14,10 @@ async function addTestProperty() {
 
     if (!user) {
       console.log('👤 Creating admin user...');
-      const hashedPassword = await bcrypt.hash('admin123', 12);
+      const hashedPassword = await bcrypt.hash('admin1234', 12);
       user = await prisma.user.create({
         data: {
-          email: 'admin@beyondestates.com',
+          email: 'beyondspace@gmail.com',
           name: 'Admin User',
           password: hashedPassword,
           role: 'ADMIN',
@@ -33,7 +33,7 @@ async function addTestProperty() {
       title: "2BHK Luxury",
       city: "Mumbai",
       area: "Andheri",
-      purpose: "buy",
+      purpose: "BUY",
       type: "COMMERCIAL",
       priceDisplay: "76543",
       price: 435678,

@@ -9,15 +9,15 @@ async function addSampleData() {
 
     // First, create admin user if not exists
     let admin = await prisma.user.findUnique({
-      where: { email: 'admin@beyondestates.com' }
+      where: { email: 'beyondspace@gmail.com' }
     });
 
     if (!admin) {
       console.log('👤 Creating admin user...');
-      const hashedPassword = await bcrypt.hash('admin123', 12);
+      const hashedPassword = await bcrypt.hash('admin1234', 12);
       admin = await prisma.user.create({
         data: {
-          email: 'admin@beyondestates.com',
+          email: 'beyondspace@gmail.com',
           name: 'Admin User',
           password: hashedPassword,
           role: 'ADMIN',
@@ -36,7 +36,7 @@ async function addSampleData() {
         title: '2BHK Luxury, Andheri West',
         city: 'Mumbai',
         area: 'Andheri',
-        purpose: 'buy',
+        purpose: 'BUY',
         type: 'RESIDENTIAL',
         priceDisplay: '₹ 1.85 Cr',
         price: 18500000,
@@ -52,7 +52,7 @@ async function addSampleData() {
         title: 'Grade‑A Office, Andheri East',
         city: 'Mumbai',
         area: 'Andheri',
-        purpose: 'commercial',
+        purpose: 'COMMERCIAL',
         type: 'COMMERCIAL',
         priceDisplay: '₹ 1.80 L/mo',
         price: 180000,
@@ -68,7 +68,7 @@ async function addSampleData() {
         title: 'Spacious 3BHK, Thane West',
         city: 'Mumbai',
         area: 'Thane',
-        purpose: 'rent',
+        purpose: 'RENT',
         type: 'RESIDENTIAL',
         priceDisplay: '₹ 42,000/mo',
         price: 42000,
@@ -84,7 +84,7 @@ async function addSampleData() {
         title: 'Modern 2BHK, Andheri (Pune)',
         city: 'Pune',
         area: 'Andheri',
-        purpose: 'buy',
+        purpose: 'BUY',
         type: 'RESIDENTIAL',
         priceDisplay: '₹ 78 L',
         price: 7800000,
@@ -100,7 +100,7 @@ async function addSampleData() {
         title: 'Smart Office Floor, Thane (Pune)',
         city: 'Pune',
         area: 'Thane',
-        purpose: 'commercial',
+        purpose: 'COMMERCIAL',
         type: 'COMMERCIAL',
         priceDisplay: '₹ 95,000/mo',
         price: 95000,
@@ -129,8 +129,8 @@ async function addSampleData() {
 
     console.log('\n🎉 Sample data added successfully!');
     console.log('\n📋 Login credentials:');
-    console.log('Email: admin@beyondestates.com');
-    console.log('Password: admin123');
+    console.log('Email: beyondspace@gmail.com');
+    console.log('Password: admin1234');
     console.log('\n🌐 Access URLs:');
     console.log('Website: http://localhost:3000');
     console.log('Admin Panel: http://localhost:3000/admin');

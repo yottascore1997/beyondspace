@@ -99,8 +99,8 @@ A modern real estate platform built with Next.js, TypeScript, and Tailwind CSS. 
 ## Admin Access
 
 ### Default Admin Credentials
-- **Email**: admin@beyondestates.com
-- **Password**: admin123
+- **Email**: beyondspace@gmail.com
+- **Password**: admin1234
 
 ### Admin Panel Features
 - Access at `/admin`

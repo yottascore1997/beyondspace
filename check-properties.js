@@ -16,7 +16,7 @@ async function checkProperties() {
       
       // Add sample properties
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('admin123', 12);
+      const hashedPassword = await bcrypt.hash('admin1234', 12);
       
       // Create admin user if not exists
       let user = await prisma.user.findFirst({
@@ -26,7 +26,7 @@ async function checkProperties() {
       if (!user) {
         user = await prisma.user.create({
           data: {
-            email: 'admin@beyondestates.com',
+            email: 'beyondspace@gmail.com',
             name: 'Admin User',
             password: hashedPassword,
             role: 'ADMIN',

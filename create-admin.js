@@ -8,17 +8,17 @@ async function createAdmin() {
     console.log('🔧 Creating admin user...\n');
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash('admin123', 12);
+    const hashedPassword = await bcrypt.hash('admin1234', 12);
 
     // Create or update admin user
     const admin = await prisma.user.upsert({
-      where: { email: 'admin@beyondestates.com' },
+      where: { email: 'beyondspace@gmail.com' },
       update: {
         password: hashedPassword,
         role: 'ADMIN',
       },
       create: {
-        email: 'admin@beyondestates.com',
+        email: 'beyondspace@gmail.com',
         name: 'Admin User',
         password: hashedPassword,
         role: 'ADMIN',
@@ -27,8 +27,8 @@ async function createAdmin() {
 
     console.log('✅ Admin user created/updated successfully!');
     console.log('\n📋 Login Credentials:');
-    console.log('   Email: admin@beyondestates.com');
-    console.log('   Password: admin123');
+    console.log('   Email: beyondspace@gmail.com');
+    console.log('   Password: admin1234');
     console.log('\n🔗 Admin Panel: http://localhost:3000/admin/login\n');
 
   } catch (error) {

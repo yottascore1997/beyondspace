@@ -9,23 +9,23 @@ async function addAdminUser() {
 
     // Check if admin user already exists
     const existingAdmin = await prisma.user.findUnique({
-      where: { email: 'admin@beyondestates.com' }
+      where: { email: 'beyondspace@gmail.com' }
     });
 
     if (existingAdmin) {
       console.log('✅ Admin user already exists!');
-      console.log('Email: admin@beyondestates.com');
-      console.log('Password: admin123\n');
+      console.log('Email: beyondspace@gmail.com');
+      console.log('Password: admin1234\n');
       return;
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash('admin123', 12);
+    const hashedPassword = await bcrypt.hash('admin1234', 12);
 
     // Create admin user
     const admin = await prisma.user.create({
       data: {
-        email: 'admin@beyondestates.com',
+        email: 'beyondspace@gmail.com',
         name: 'Admin User',
         password: hashedPassword,
         role: 'ADMIN',
@@ -33,8 +33,8 @@ async function addAdminUser() {
     });
 
     console.log('✅ Admin user created successfully!');
-    console.log('Email: admin@beyondestates.com');
-    console.log('Password: admin123');
+    console.log('Email: beyondspace@gmail.com');
+    console.log('Password: admin1234');
     console.log('Role: ADMIN');
     console.log('User ID:', admin.id);
     console.log('\n🎉 You can now login to the admin panel!');

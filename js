@@ -10,8 +10,8 @@ Next steps:
 5. Run: npm run dev
 
 Admin credentials:
-- Email: admin@beyondestates.com
-- Password: admin123
+- Email: beyondspace@gmail.com
+- Password: admin1234
 
 Visit: http://localhost:3000
 Admin Panel: http://localhost:3000/admin
