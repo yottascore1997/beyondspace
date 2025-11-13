@@ -271,7 +271,7 @@ export default function Benefits() {
                 if (!partnerItem) return null;
                 
                 return (
-                  <div className="mt-6 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+                  <div className="mt-10 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                     <div className="flex items-start gap-4">
                       <div className={`w-16 h-16 ${partnerItem.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
                         {partnerItem.icon}

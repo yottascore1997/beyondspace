@@ -3,9 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
-import PropertyCard from '@/components/PropertyCard';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  coworking: 'Coworking',
+  managed: 'Managed Office',
+  dedicateddesk: 'Dedicated Desk',
+  flexidesk: 'Flexi Desk',
+  virtualoffice: 'Virtual Office',
+  meetingroom: 'Meeting Room',
+  enterpriseoffices: 'Enterprise Offices',
+};
+
+const formatCategoryLabel = (key: string) => CATEGORY_LABELS[key.toLowerCase()] ?? key;
 
 // Horizontal Property Card Component
 const HorizontalPropertyCard = ({ property }: { property: Property }) => {
@@ -140,6 +151,25 @@ const HorizontalPropertyCard = ({ property }: { property: Property }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <span className="truncate">{property.area}, {property.city}</span>
+                </div>
+                {property.categories && property.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {property.categories.map((category) => (
+                      <span
+                        key={category}
+                        className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100"
+                      >
+                        {formatCategoryLabel(category)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-center text-sm text-gray-600">
+                  <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
+                  </svg>
+                  <span className="whitespace-nowrap">{property.type}</span>
                 </div>
               </div>
               <div className="text-left sm:text-right">
@@ -304,6 +334,8 @@ interface Property {
   area: string;
   purpose: string;
   type: string;
+  displayOrder?: number;
+  categories?: string[];
   priceDisplay: string;
   price: number;
   size: number;
@@ -346,6 +378,26 @@ export default function AreaPage() {
     area: 'all'
   });
 
+  const categoryKeyMap: Record<string, string[]> = {
+    coworking: ['coworking', 'dedicateddesk', 'flexidesk', 'virtualoffice'],
+    managed: ['managed', 'enterpriseoffices'],
+    dedicateddesk: ['dedicateddesk'],
+    flexidesk: ['flexidesk'],
+    virtualoffice: ['virtualoffice'],
+    meetingroom: ['meetingroom'],
+    enterpriseoffices: ['enterpriseoffices'],
+  };
+
+  const categoryTypeFallback: Record<string, string[]> = {
+    coworking: ['coworking'],
+    managed: ['managed_office', 'office', 'managed office'],
+    dedicateddesk: ['coworking'],
+    flexidesk: ['coworking'],
+    virtualoffice: ['coworking'],
+    meetingroom: ['commercial', 'meeting room'],
+    enterpriseoffices: ['managed_office', 'enterprise office'],
+  };
+
   // Decode the area name from URL
   const areaName = decodeURIComponent(area);
 
@@ -376,30 +428,28 @@ export default function AreaPage() {
     // Main category filter
     if (filters.mainCategory !== 'all') {
       filtered = filtered.filter(property => {
-        const propertyType = property.type.toLowerCase();
-        switch (filters.mainCategory) {
-          case 'coworking':
-            return propertyType === 'coworking';
-          case 'managed':
-            return propertyType === 'managed office' || propertyType === 'office';
-          case 'virtualoffice':
-            return propertyType === 'virtual office';
-          case 'meetingroom':
-            return propertyType === 'meeting room';
-          case 'dedicateddesk':
-            return propertyType === 'dedicated desk';
-          case 'flexidesk':
-            return propertyType === 'flexi desk';
-          case 'enterpriseoffices':
-            return propertyType === 'enterprise office';
-          default:
-            return true;
+        const normalizedCategories = Array.isArray(property.categories)
+          ? property.categories.map(cat => cat.toLowerCase())
+          : [];
+        const requestedKey = filters.mainCategory.toLowerCase();
+
+        if (normalizedCategories.includes(requestedKey)) {
+          return true;
         }
+
+        const relatedKeys = categoryKeyMap[requestedKey] || [];
+        if (relatedKeys.some(key => normalizedCategories.includes(key))) {
+          return true;
+        }
+
+        const propertyType = property.type?.toLowerCase();
+        const fallbackTypes = categoryTypeFallback[requestedKey] || [];
+        return fallbackTypes.some(typeName => propertyType === typeName);
       });
     }
 
-    // Area filter (when category is selected)
-    if (filters.area !== 'all' && filters.mainCategory !== 'all') {
+    // Area filter
+    if (filters.area !== 'all') {
       filtered = filtered.filter(property => 
         property.area.toLowerCase() === filters.area.toLowerCase()
       );

@@ -1,0 +1,2 @@
+ALTER TABLE `Property`
+ADD COLUMN `displayOrder` INT NOT NULL DEFAULT 0;

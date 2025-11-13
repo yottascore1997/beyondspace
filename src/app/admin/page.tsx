@@ -22,6 +22,8 @@ export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null);
+  const [propertyListRefreshKey, setPropertyListRefreshKey] = useState(0);
   const router = useRouter();
   const isClient = useIsClient();
 
@@ -74,6 +76,33 @@ export default function AdminPage() {
     router.push('/admin/login');
   };
 
+  const handleEditProperty = (propertyId: string) => {
+    setEditingPropertyId(propertyId);
+    setActiveTab('add-property');
+  };
+
+  const handleFormFinish = (action: 'created' | 'updated') => {
+    if (action === 'updated') {
+      setPropertyListRefreshKey(prev => prev + 1);
+      setEditingPropertyId(null);
+      setActiveTab('properties');
+    } else if (action === 'created') {
+      setPropertyListRefreshKey(prev => prev + 1);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPropertyId(null);
+    setActiveTab('properties');
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab !== 'add-property') {
+      setEditingPropertyId(null);
+    }
+  };
+
   if (loading || !isClient) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -96,7 +125,7 @@ export default function AdminPage() {
         <AdminSidebar 
           user={user} 
           activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
+          setActiveTab={handleTabChange} 
           onLogout={handleLogout} 
         />
       )}
@@ -110,7 +139,10 @@ export default function AdminPage() {
               <div className="p-8">
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <h1 className="text-2xl font-bold text-gray-900 mb-6">Properties Management</h1>
-                  <PropertyList />
+                  <PropertyList
+                    onEditProperty={handleEditProperty}
+                    refreshKey={propertyListRefreshKey}
+                  />
                 </div>
               </div>
             )}
@@ -118,7 +150,11 @@ export default function AdminPage() {
               <div className="p-8">
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Property</h1>
-                  <PropertyForm />
+                  <PropertyForm
+                    editingPropertyId={editingPropertyId}
+                    onFinish={handleFormFinish}
+                    onCancelEdit={handleCancelEdit}
+                  />
                 </div>
               </div>
             )}

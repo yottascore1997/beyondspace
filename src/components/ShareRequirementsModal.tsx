@@ -160,21 +160,31 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
             <div className="mt-10">
               <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Trusted by teams at</p>
               <div className="grid grid-cols-3 gap-4 gap-y-6 items-center">
-                {['/images/trusted/c1.png', '/images/trusted/c2.png', '/images/trusted/c3.png', '/images/trusted/c4-removebg-preview.png', '/images/trusted/c5.png', '/images/trusted/c6.png', '/images/trusted/c7.png', '/images/trusted/c8.png', '/images/trusted/c9.png']
-                  .map((logo, index) => {
-                    const isLargeLogo = ['c1', 'c6', 'c8'].some((code) => logo.includes(code));
-                    return (
-                      <img
-                        key={index}
-                        src={logo}
-                        alt={`Client logo ${index + 1}`}
-                        className={`${isLargeLogo ? 'h-16' : 'h-12'} w-auto object-contain mx-auto`}
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    );
-                  })}
+                {[
+                  '/images/trusted/c1.png',
+                  '/images/trusted/c2.png',
+                  '/images/trusted/c3.png',
+                  '/images/trusted/c4-removebg-preview.png',
+                  '/images/trusted/c5.png',
+                  '/images/trusted/c6.png',
+                  '/images/trusted/c7.png',
+                  '/images/trusted/c8.png',
+                  '/images/trusted/c9.png'
+                ].map((logo, index) => (
+                  <div
+                    key={index}
+                    className="relative mx-auto flex h-20 w-24 sm:h-24 sm:w-28 items-center justify-center rounded-xl border border-transparent bg-white/80 shadow-[0_8px_24px_rgba(148,163,184,0.18)] backdrop-blur-sm"
+                  >
+                    <img
+                      src={logo}
+                      alt={`Client logo ${index + 1}`}
+                      className="h-full w-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>

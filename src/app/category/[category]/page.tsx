@@ -16,6 +16,8 @@ interface Property {
   area: string;
   purpose: string;
   type: string;
+  displayOrder?: number;
+  categories?: string[];
   priceDisplay: string;
   price: number;
   size: number;

@@ -17,6 +17,8 @@ interface Property {
   area: string;
   purpose: string;
   type: string;
+  displayOrder?: number;
+  categories?: string[];
   priceDisplay: string;
   price: number;
   size: number;
@@ -36,6 +38,16 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
   const [isFav, setIsFav] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
+  const categoryLabelMap: Record<string, string> = {
+    coworking: 'Coworking',
+    managed: 'Managed Office',
+    dedicateddesk: 'Dedicated Desk',
+    flexidesk: 'Flexi Desk',
+    virtualoffice: 'Virtual Office',
+    meetingroom: 'Meeting Room',
+    enterpriseoffices: 'Enterprise Offices',
+  };
+
   // Get all available images (main image + additional images)
   const allImages = property.propertyImages && property.propertyImages.length > 0 
     ? [property.image, ...property.propertyImages.map(img => img.imageUrl).filter(img => img !== property.image)]
@@ -148,7 +160,20 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
             ⭐ {property.rating}
           </span>
         </div>
-        
+
+        {property.categories && property.categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 text-xs text-blue-700 font-semibold">
+            {property.categories.map((category) => (
+              <span
+                key={category}
+                className="px-2 py-1 bg-blue-50 border border-blue-100 rounded-full"
+              >
+                {categoryLabelMap[category.toLowerCase()] ?? category}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="font-semibold text-gray-900 text-xl">
             {property.priceDisplay}<span className="text-gray-600 font-normal">/month</span>

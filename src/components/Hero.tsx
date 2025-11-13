@@ -72,7 +72,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     }, 10000);
 
     // Typewriter effect for "Dream Office Space" with restart
-    const text = 'Discover Your Dream Office Spaces';
+    const text = 'Discover Your Dream Office Space';
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -190,7 +190,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       } md:flex md:items-start md:justify-between md:gap-4`}>
         <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px]">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight font-[Poppins,sans-serif]">
             <span
               className="block text-white"
               style={headlineSpanStyle}
@@ -232,7 +232,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         </div>
 
         {/* Lighter card so image is visible behind */}
-        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-6 md:self-start max-w-xl md:max-w-md w-full md:w-[42%] ${
+        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-4 md:self-start max-w-2xl md:max-w-lg w-full md:w-[52%] ${
           isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
 

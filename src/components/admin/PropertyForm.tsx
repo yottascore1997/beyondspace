@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface Amenity {
   icon: string;
@@ -23,6 +23,8 @@ interface PropertyFormData {
   area: string;
   purpose: string;
   type: string;
+  displayOrder: number;
+  categories: string[];
   priceDisplay: string;
   price: number;
   size: number;
@@ -47,63 +49,85 @@ interface PropertyFormData {
   seatingPlans: SeatingPlan[];
 }
 
-export default function PropertyForm() {
-  const [selectedCategoryName, setSelectedCategoryName] = useState<string>('');
+interface PropertyFormProps {
+  editingPropertyId?: string | null;
+  onFinish?: (action: 'created' | 'updated') => void;
+  onCancelEdit?: () => void;
+}
 
-  const [formData, setFormData] = useState<PropertyFormData>({
-    title: '',
-    city: 'Mumbai',
-    area: 'Andheri',
-    purpose: 'commercial',
-    type: '',
-    priceDisplay: '',
-    price: 0,
-    size: 0,
-    beds: '',
-    rating: 0,
-    image: '',
-    images: [],
-    tag: '',
+const createDefaultSeatingPlans = (): SeatingPlan[] => ([
+  {
+    id: 'dedicated-desk',
+    title: 'Dedicated Desk',
     description: '',
-    // Coworking specific fields
-    workspaceName: '',
-    workspaceTimings: '',
-    workspaceClosedDays: '',
-    amenities: [],
-    locationDetails: '',
-    metroStationDistance: '',
-    railwayStationDistance: '',
-    aboutWorkspace: '',
-    capacity: 0,
-    superArea: 0,
-    // Seating Plans
-    seatingPlans: [
-      {
-        id: 'dedicated-desk',
-        title: 'Dedicated Desk',
-        description: '',
-        price: '',
-        seating: '',
-        isSelected: false,
-      },
-      {
-        id: 'private-cabin',
-        title: 'Private Cabin',
-        description: '',
-        price: '',
-        seating: '',
-        isSelected: false,
-      },
-      {
-        id: 'virtual-office',
-        title: 'Virtual Office',
-        description: '',
-        price: '',
-        seating: '',
-        isSelected: false,
-      },
-    ],
-  });
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+  {
+    id: 'private-cabin',
+    title: 'Private Cabin',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+  {
+    id: 'virtual-office',
+    title: 'Virtual Office',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+  {
+    id: 'meeting-room',
+    title: 'Meeting Room',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+]);
+
+const createInitialFormData = (): PropertyFormData => ({
+  title: '',
+  city: 'Mumbai',
+  area: 'Andheri',
+  purpose: 'commercial',
+  type: '',
+  displayOrder: 0,
+  categories: [],
+  priceDisplay: '',
+  price: 0,
+  size: 0,
+  beds: '',
+  rating: 0,
+  image: '',
+  images: [],
+  tag: '',
+  description: '',
+  workspaceName: '',
+  workspaceTimings: '',
+  workspaceClosedDays: '',
+  amenities: [],
+  locationDetails: '',
+  metroStationDistance: '',
+  railwayStationDistance: '',
+  aboutWorkspace: '',
+  capacity: 0,
+  superArea: 0,
+  seatingPlans: createDefaultSeatingPlans(),
+});
+
+export default function PropertyForm({
+  editingPropertyId = null,
+  onFinish,
+  onCancelEdit,
+}: PropertyFormProps) {
+  const [selectedCategoryNames, setSelectedCategoryNames] = useState<string[]>([]);
+
+  const [formData, setFormData] = useState<PropertyFormData>(() => createInitialFormData());
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -111,6 +135,9 @@ export default function PropertyForm() {
   const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
+  const [isFetchingProperty, setIsFetchingProperty] = useState(false);
+  const [currentEditingId, setCurrentEditingId] = useState<string | null>(null);
 
   // Available amenities with icons
   const availableAmenities: Amenity[] = [
@@ -130,6 +157,160 @@ export default function PropertyForm() {
     { icon: 'power-backup', name: 'Power Backup', category: 'free' },
     { icon: 'lift', name: 'Lift', category: 'free' },
   ];
+
+  const categoryOptions = [
+    { key: 'coworking', label: 'Coworking Space', type: 'COWORKING', purpose: 'commercial' },
+    { key: 'managed', label: 'Managed Office Space', type: 'MANAGED_OFFICE', purpose: 'commercial' },
+    { key: 'dedicateddesk', label: 'Dedicated Desk', type: 'COWORKING', purpose: 'commercial' },
+    { key: 'flexidesk', label: 'Flexi Desk', type: 'COWORKING', purpose: 'commercial' },
+    { key: 'virtualoffice', label: 'Virtual Office', type: 'COWORKING', purpose: 'commercial' },
+    { key: 'meetingroom', label: 'Meeting Room', type: 'COMMERCIAL', purpose: 'commercial' },
+    { key: 'enterpriseoffices', label: 'Enterprise Offices', type: 'MANAGED_OFFICE', purpose: 'commercial' },
+  ];
+
+  const getCategoryLabels = (keys: string[]) =>
+    keys.map((key) => categoryOptions.find((option) => option.key === key)?.label ?? key);
+
+const primaryCategoryLabel = selectedCategoryNames[0]
+  || (formData.type === 'COWORKING'
+    ? 'Coworking Workspace'
+    : formData.type === 'MANAGED_OFFICE'
+      ? 'Managed Office'
+      : 'Workspace');
+
+const isEditMode = Boolean(editingPropertyId);
+
+const resetFormState = (options: { keepMessage?: boolean } = {}) => {
+  const { keepMessage = false } = options;
+  setFormData(createInitialFormData());
+  setSelectedCategoryNames([]);
+  setUploadedImages([]);
+  setImagePreview('');
+  setUploadMethod('url');
+  setDraggedImageIndex(null);
+  setIsFetchingProperty(false);
+  setCurrentEditingId(null);
+  if (!keepMessage) {
+    setMessage('');
+  }
+};
+
+const loadPropertyForEdit = async (propertyId: string) => {
+  setIsFetchingProperty(true);
+  setMessage('');
+  try {
+    const response = await fetch(`/api/properties/${propertyId}`);
+    if (!response.ok) {
+      throw new Error('Failed to load property details');
+    }
+
+    const property = await response.json();
+
+    const primaryImage = property.image || '';
+    const galleryImages = Array.isArray(property.propertyImages)
+      ? property.propertyImages
+          .map((img: { imageUrl: string }) => img?.imageUrl)
+          .filter((url: string) => url && url !== primaryImage)
+      : [];
+    const combinedImages = Array.from(new Set([primaryImage, ...galleryImages].filter(Boolean)));
+
+    const normalizedCategories = Array.isArray(property.categories)
+      ? property.categories.map((cat: string) => cat.toLowerCase())
+      : [];
+
+    const basePlans = createDefaultSeatingPlans();
+    const propertyOptions = Array.isArray(property.propertyOptions) ? property.propertyOptions : [];
+
+    const matchedPlans = basePlans.map((plan) => {
+      const match = propertyOptions.find(
+        (option: { title?: string; description?: string; price?: string; seating?: string }) =>
+          option?.title?.toLowerCase() === plan.title.toLowerCase()
+      );
+      if (match) {
+        return {
+          ...plan,
+          description: match.description || '',
+          price: match.price || '',
+          seating: match.seating || '',
+          isSelected: true,
+        };
+      }
+      return { ...plan, isSelected: false, description: '', price: '', seating: '' };
+    });
+
+    const additionalPlans = propertyOptions
+      .filter((option: { title?: string }) => {
+        const title = option?.title?.toLowerCase();
+        return title && !basePlans.some((plan) => plan.title.toLowerCase() === title);
+      })
+      .map((option: { title?: string; description?: string; price?: string; seating?: string }) => ({
+        id: option.title?.toLowerCase().replace(/\s+/g, '-') || `custom-${Math.random().toString(36).slice(2, 10)}`,
+        title: option.title || 'Custom Plan',
+        description: option.description || '',
+        price: option.price || '',
+        seating: option.seating || '',
+        isSelected: true,
+      }));
+
+    const updatedSeatingPlans = [...matchedPlans, ...additionalPlans];
+
+    const updatedFormData: PropertyFormData = {
+      title: property.title || '',
+      city: property.city || 'Mumbai',
+      area: property.area || '',
+      purpose: (property.purpose || 'commercial').toLowerCase(),
+      type: property.type || '',
+      displayOrder: property.displayOrder ?? 0,
+      categories: normalizedCategories,
+      priceDisplay: property.priceDisplay || '',
+      price: property.price || 0,
+      size: property.size || 0,
+      beds: property.beds || '',
+      rating: property.rating || 0,
+      image: combinedImages[0] || '',
+      images: combinedImages,
+      tag: property.tag || '',
+      description: property.description || '',
+      workspaceName: property.workspaceName || '',
+      workspaceTimings: property.workspaceTimings || '',
+      workspaceClosedDays: property.workspaceClosedDays || '',
+      amenities: Array.isArray(property.amenities) ? property.amenities : [],
+      locationDetails: property.locationDetails || '',
+      metroStationDistance: property.metroStationDistance || '',
+      railwayStationDistance: property.railwayStationDistance || '',
+      aboutWorkspace: property.aboutWorkspace || '',
+      capacity: property.capacity ?? 0,
+      superArea: property.superArea ?? 0,
+      seatingPlans: updatedSeatingPlans,
+    };
+
+    setFormData(updatedFormData);
+    setUploadedImages(combinedImages);
+    setImagePreview(combinedImages[0] || '');
+    setSelectedCategoryNames(getCategoryLabels(updatedFormData.categories));
+    setUploadMethod('url');
+    setMessage('Editing property details. Make your changes and click Update Property.');
+    setCurrentEditingId(propertyId);
+  } catch (error) {
+    console.error('Failed to load property for editing:', error);
+    setMessage('Unable to load property details for editing.');
+    resetFormState({ keepMessage: true });
+    onCancelEdit?.();
+  } finally {
+    setIsFetchingProperty(false);
+  }
+};
+
+useEffect(() => {
+  if (editingPropertyId) {
+    if (editingPropertyId !== currentEditingId) {
+      loadPropertyForEdit(editingPropertyId);
+    }
+  } else if (currentEditingId) {
+    resetFormState();
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [editingPropertyId]);
 
   const handleAmenityToggle = (amenity: Amenity) => {
     setFormData(prev => ({
@@ -177,13 +358,17 @@ export default function PropertyForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.categories.length === 0) {
+      setMessage('Please select at least one category');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
 
     try {
       const token = localStorage.getItem('token');
-      
-      // Prepare property options - only selected seating plans
+
       const selectedPlans = formData.seatingPlans
         .filter(plan => plan.isSelected)
         .map(plan => ({
@@ -195,12 +380,17 @@ export default function PropertyForm() {
 
       const submitData = {
         ...formData,
+        images: uploadedImages,
         propertyOptions: selectedPlans.length > 0 ? selectedPlans : null,
-        seatingPlans: undefined, // Don't send this to API
+        seatingPlans: undefined,
       };
 
-      const response = await fetch('/api/properties', {
-        method: 'POST',
+      const targetPropertyId = currentEditingId ?? editingPropertyId;
+      const endpoint = isEditMode && targetPropertyId ? `/api/properties/${targetPropertyId}` : '/api/properties';
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -209,68 +399,18 @@ export default function PropertyForm() {
       });
 
       if (response.ok) {
-        setMessage('Property added successfully!');
-        setSelectedCategoryName('');
-        setFormData({
-          title: '',
-          city: 'Mumbai',
-          area: 'Andheri',
-          purpose: 'commercial',
-          type: '',
-          priceDisplay: '',
-          price: 0,
-          size: 0,
-          beds: '',
-          rating: 0,
-          image: '',
-          images: [],
-          tag: '',
-          description: '',
-          // Coworking specific fields
-          workspaceName: '',
-          workspaceTimings: '',
-          workspaceClosedDays: '',
-          amenities: [],
-          locationDetails: '',
-          metroStationDistance: '',
-          railwayStationDistance: '',
-          aboutWorkspace: '',
-          capacity: 0,
-          superArea: 0,
-          // Seating Plans
-          seatingPlans: [
-            {
-              id: 'dedicated-desk',
-              title: 'Dedicated Desk',
-              description: '',
-              price: '',
-              seating: '',
-              isSelected: false,
-            },
-            {
-              id: 'private-cabin',
-              title: 'Private Cabin',
-              description: '',
-              price: '',
-              seating: '',
-              isSelected: false,
-            },
-            {
-              id: 'virtual-office',
-              title: 'Virtual Office',
-              description: '',
-              price: '',
-              seating: '',
-              isSelected: false,
-            },
-          ],
-        });
-        setImagePreview('');
-        setUploadedImages([]);
-        setUploadMethod('url');
+        if (isEditMode) {
+          resetFormState({ keepMessage: true });
+          setMessage('Property updated successfully!');
+          onFinish?.('updated');
+        } else {
+          resetFormState({ keepMessage: true });
+          setMessage('Property added successfully!');
+          onFinish?.('created');
+        }
       } else {
         const error = await response.json();
-        setMessage(`Error: ${error.error}`);
+        setMessage(`Error: ${error.error ?? 'Something went wrong.'}`);
       }
     } catch (error) {
       setMessage('Network error. Please try again.');
@@ -298,9 +438,10 @@ export default function PropertyForm() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // Validate file count (max 5 images)
-    if (files.length > 5) {
-      setMessage('Maximum 5 images allowed');
+    // Validate file count (max 10 images in total)
+    const totalImagesCount = uploadedImages.length + files.length;
+    if (totalImagesCount > 10) {
+      setMessage('Maximum 10 images allowed');
       return;
     }
 
@@ -341,14 +482,7 @@ export default function PropertyForm() {
       const uploadedUrls = await Promise.all(uploadPromises);
       const newImages = [...uploadedImages, ...uploadedUrls];
       
-      setUploadedImages(newImages);
-      setFormData(prev => ({ 
-        ...prev, 
-        images: newImages,
-        image: newImages[0] || prev.image // Set first image as main image
-      }));
-      setImagePreview(newImages[0] || '');
-      setMessage(`${uploadedUrls.length} image(s) uploaded successfully!`);
+      syncImagesState(newImages);
     } catch (error) {
       setMessage('Upload failed. Please try again.');
     } finally {
@@ -356,15 +490,19 @@ export default function PropertyForm() {
     }
   };
 
+  const syncImagesState = (nextImages: string[], fallbackMainImage?: string) => {
+    setUploadedImages(nextImages);
+    setFormData(prev => ({
+      ...prev,
+      images: nextImages,
+      image: nextImages[0] || fallbackMainImage || ''
+    }));
+    setImagePreview(nextImages[0] || fallbackMainImage || '');
+  };
+
   const removeImage = (index: number) => {
     const newImages = uploadedImages.filter((_, i) => i !== index);
-    setUploadedImages(newImages);
-    setFormData(prev => ({ 
-      ...prev, 
-      images: newImages,
-      image: newImages[0] || ''
-    }));
-    setImagePreview(newImages[0] || '');
+    syncImagesState(newImages);
   };
 
   const handleUploadMethodChange = (method: 'url' | 'file') => {
@@ -376,10 +514,61 @@ export default function PropertyForm() {
     }
   };
 
+  const toggleCategory = (categoryKey: string) => {
+    setMessage('');
+    setFormData(prev => {
+      const isSelected = prev.categories.includes(categoryKey);
+      const nextCategories = isSelected
+        ? prev.categories.filter(key => key !== categoryKey)
+        : [...prev.categories, categoryKey];
+
+      const primaryOption = nextCategories.length > 0
+        ? categoryOptions.find(option => option.key === nextCategories[0])
+        : null;
+
+      setSelectedCategoryNames(getCategoryLabels(nextCategories));
+
+      return {
+        ...prev,
+        categories: nextCategories,
+        type: primaryOption ? primaryOption.type : '',
+        purpose: primaryOption ? primaryOption.purpose : 'commercial',
+      };
+    });
+  };
+
+  const handleImageDragStart = (event: React.DragEvent<HTMLDivElement>, index: number) => {
+    setDraggedImageIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleImageDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleImageDrop = (event: React.DragEvent<HTMLDivElement>, index: number) => {
+    event.preventDefault();
+
+    if (draggedImageIndex === null || draggedImageIndex === index) {
+      setDraggedImageIndex(null);
+      return;
+    }
+
+    const reorderedImages = [...uploadedImages];
+    const [movedImage] = reorderedImages.splice(draggedImageIndex, 1);
+    reorderedImages.splice(index, 0, movedImage);
+
+    syncImagesState(reorderedImages, formData.image);
+    setDraggedImageIndex(null);
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedImageIndex(null);
+  };
+ 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Property</h2>
-      
       {message && (
         <div className={`mb-6 p-4 rounded-lg ${
           message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
@@ -388,7 +577,13 @@ export default function PropertyForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {isFetchingProperty && (
+        <div className="mb-6 p-4 rounded-lg bg-blue-50 text-blue-700">
+          Loading property details...
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6 mt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -459,33 +654,36 @@ export default function PropertyForm() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Popular Category *
+              Categories *
             </label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={(e) => {
-                const categoryType = e.target.value;
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const categoryName = selectedOption.text;
-                setSelectedCategoryName(categoryName);
-                setFormData(prev => ({
-                  ...prev,
-                  type: categoryType,
-                  purpose: 'commercial' // Set default purpose for all categories
-                }));
-              }}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-            >
-              <option value="">Select Category</option>
-              <option value="COWORKING" data-category="Coworking Space">Coworking Space</option>
-              <option value="MANAGED_OFFICE" data-category="Managed Office">Managed Office</option>
-              <option value="COWORKING" data-category="Dedicated Desk">Dedicated Desk</option>
-              <option value="MANAGED_OFFICE" data-category="Enterprise Offices">Enterprise Offices</option>
-              <option value="COWORKING" data-category="Virtual Office">Virtual Office</option>
-              <option value="COMMERCIAL" data-category="Meeting Room">Meeting Room</option>
-            </select>
+            <div className="flex flex-wrap gap-3">
+              {categoryOptions.map((option) => {
+                const isSelected = formData.categories.includes(option.key);
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => toggleCategory(option.key)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${
+                      isSelected
+                        ? 'bg-[#a08efe] text-white border-[#a08efe] shadow-lg shadow-[#a08efe]/30'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-[#a08efe] hover:text-[#a08efe]'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs text-gray-600">
+              Select one or more categories. The first selected category is treated as the primary workspace type.
+            </p>
+            {selectedCategoryNames.length > 0 && (
+              <p className="mt-2 text-sm font-medium text-gray-700">
+                Selected:&nbsp;
+                <span className="text-[#a08efe]">{selectedCategoryNames.join(', ')}</span>
+              </p>
+            )}
           </div>
 
           <div>
@@ -566,7 +764,7 @@ export default function PropertyForm() {
                   disabled={uploading}
                   className="w-full px-3 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#a08efe] hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {uploading ? 'Uploading...' : 'Click to select images (max 5)'}
+                  {uploading ? 'Uploading...' : 'Click to select images (max 10)'}
                 </button>
               </div>
             )}
@@ -600,7 +798,18 @@ export default function PropertyForm() {
                 {/* All Images Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {uploadedImages.map((imageUrl, index) => (
-                    <div key={index} className="relative group">
+                    <div
+                      key={index}
+                      draggable
+                      onDragStart={(event) => handleImageDragStart(event, index)}
+                      onDragOver={handleImageDragOver}
+                      onDrop={(event) => handleImageDrop(event, index)}
+                      onDragEnd={handleImageDragEnd}
+                      className={`relative group cursor-grab active:cursor-grabbing transition ${
+                        draggedImageIndex === index ? 'opacity-75 ring-2 ring-[#a08efe]' : ''
+                      }`}
+                      title="Drag to reorder"
+                    >
                       <img
                         src={imageUrl}
                         alt={`Property image ${index + 1}`}
@@ -626,34 +835,6 @@ export default function PropertyForm() {
               </div>
             )}
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tag
-            </label>
-            <input
-              type="text"
-              name="tag"
-              value={formData.tag}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-              placeholder="e.g., Ready to Move"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-            placeholder="Property description..."
-          />
         </div>
 
         {/* Location Details and About - Available for all property types */}
@@ -723,9 +904,14 @@ export default function PropertyForm() {
         {/* Workspace Details - Dynamic based on selected category */}
         {(formData.type === 'COWORKING' || formData.type === 'MANAGED_OFFICE') && (
           <div className="border-t pt-6 mt-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">
-              {selectedCategoryName ? `${selectedCategoryName} Details` : (formData.type === 'COWORKING' ? 'Coworking Workspace Details' : 'Managed Office Details')}
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {primaryCategoryLabel} Details
             </h3>
+            {selectedCategoryNames.length > 1 && (
+              <p className="text-sm text-gray-600 mb-4">
+                Also listed under: {selectedCategoryNames.slice(1).join(', ')}
+              </p>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
@@ -964,13 +1150,33 @@ export default function PropertyForm() {
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-[#a08efe] to-[#7a66ff] text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Adding Property...' : 'Add Property'}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="submit"
+            disabled={loading || isFetchingProperty}
+            className="w-full sm:flex-1 bg-gradient-to-r from-[#a08efe] to-[#7a66ff] text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isEditMode
+              ? loading
+                ? 'Updating Property...'
+                : 'Update Property'
+              : loading
+                ? 'Adding Property...'
+                : 'Add Property'}
+          </button>
+          {isEditMode && (
+            <button
+              type="button"
+              onClick={() => {
+                resetFormState();
+                onCancelEdit?.();
+              }}
+              className="w-full sm:w-auto bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-all"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

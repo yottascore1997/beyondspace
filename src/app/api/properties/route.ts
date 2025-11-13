@@ -9,12 +9,46 @@ export async function GET(request: NextRequest) {
     const area = searchParams.get('area');
     const purpose = searchParams.get('purpose');
     const search = searchParams.get('search');
-    const category = searchParams.get('category');
+    const categoryParam = searchParams.get('category');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       isActive: true,
     };
+
+    const categoryKeyMap: Record<string, string[]> = {
+      coworking: ['coworking', 'dedicateddesk', 'flexidesk', 'virtualoffice'],
+      managed: ['managed', 'enterpriseoffices'],
+      dedicateddesk: ['dedicateddesk'],
+      flexidesk: ['flexidesk'],
+      virtualoffice: ['virtualoffice'],
+      meetingroom: ['meetingroom'],
+      enterpriseoffices: ['enterpriseoffices'],
+    };
+
+    const normalizeCategoryKey = (value: string | null) => {
+      if (!value || value === 'all') return null;
+      const cleaned = value.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const mapping: Record<string, string> = {
+        coworkingspace: 'coworking',
+        coworkingspaces: 'coworking',
+        managedoffice: 'managed',
+        managedoffices: 'managed',
+        dedicateddesk: 'dedicateddesk',
+        dedicateddesks: 'dedicateddesk',
+        flexidesk: 'flexidesk',
+        flexidesks: 'flexidesk',
+        virtualoffice: 'virtualoffice',
+        virtualoffices: 'virtualoffice',
+        meetingroom: 'meetingroom',
+        meetingrooms: 'meetingroom',
+        enterpriseoffice: 'enterpriseoffices',
+        enterpriseoffices: 'enterpriseoffices',
+      };
+      return mapping[cleaned] ?? value.toLowerCase();
+    };
+
+    const category = normalizeCategoryKey(categoryParam);
 
     if (city && city !== 'all') {
       where.city = city;
@@ -29,23 +63,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Category filtering - Map frontend category names to database property types
-    if (category && category !== 'all') {
+    if (category) {
       const categoryTypeMap: Record<string, string[]> = {
-        'coworking': ['COWORKING'], // Coworking Space
-        'managed': ['MANAGED_OFFICE'], // Managed Office
-        'dedicateddesk': ['COWORKING'], // Dedicated Desk (stored as COWORKING)
-        'flexidesk': ['COWORKING'], // Flexi Desk (stored as COWORKING)
-        'virtualoffice': ['COWORKING'], // Virtual Office (stored as COWORKING)
-        'meetingroom': ['COMMERCIAL'], // Meeting Room (stored as COMMERCIAL)
-        'enterpriseoffices': ['MANAGED_OFFICE'], // Enterprise Offices (stored as MANAGED_OFFICE)
+        coworking: ['COWORKING'],
+        managed: ['MANAGED_OFFICE'],
+        dedicateddesk: ['COWORKING'],
+        flexidesk: ['COWORKING'],
+        virtualoffice: ['COWORKING'],
+        meetingroom: ['COMMERCIAL'],
+        enterpriseoffices: ['MANAGED_OFFICE'],
       };
 
-      const types = categoryTypeMap[category.toLowerCase()];
+      const relatedCategoryKeys = categoryKeyMap[category] || [category];
+      const types = categoryTypeMap[category];
+
+      const categoryFilters: Record<string, unknown>[] = relatedCategoryKeys.map((key) => ({
+        categories: { array_contains: [key] },
+      }));
+
       if (types) {
-        where.type = {
-          in: types
-        };
+        categoryFilters.push({ type: { in: types } });
       }
+
+      where.AND = [...(where.AND || []), { OR: categoryFilters }];
     }
 
     if (search) {
@@ -62,7 +102,10 @@ export async function GET(request: NextRequest) {
       include: {
         propertyImages: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { displayOrder: 'asc' },
+        { createdAt: 'desc' },
+      ],
     });
 
     return NextResponse.json(properties);
@@ -88,6 +131,9 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       ...propertyData,
       purpose: propertyData.purpose?.toUpperCase(),
       type: propertyData.type?.toUpperCase(),
+      categories: Array.isArray(propertyData.categories)
+        ? propertyData.categories.map((category: string) => category.toLowerCase())
+        : [],
       userId: user.id,
       // Convert string numbers to integers
       price: parseInt(propertyData.price) || 0,

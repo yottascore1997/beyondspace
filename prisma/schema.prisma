@@ -67,6 +67,8 @@ model Property {
   area        String
   purpose     PropertyPurpose
   type        PropertyType
+  displayOrder Int @default(0)
+  categories  Json?
   priceDisplay String
   price       Int
   size        Int

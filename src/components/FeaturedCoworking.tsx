@@ -17,7 +17,7 @@ const coworkingBrands = [
 
 export default function FeaturedCoworking() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const brandsPerSlide = 8;
+  const brandsPerSlide = 10;
   const slides = useMemo(() => {
     const chunks: typeof coworkingBrands[] = [];
     for (let i = 0; i < coworkingBrands.length; i += brandsPerSlide) {
@@ -90,7 +90,7 @@ export default function FeaturedCoworking() {
               {slides.map((group, slideIndex) => (
                 <div
                   key={`brand-slide-${slideIndex}`}
-                  className="w-full flex-shrink-0 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center justify-items-center"
+                  className="w-full flex-shrink-0 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 md:grid-rows-2 gap-6 md:gap-8 items-center justify-items-center"
                 >
                   {group.map((brand) => {
                     const lowerName = brand.name.toLowerCase();
@@ -112,17 +112,17 @@ export default function FeaturedCoworking() {
                         : 'max-h-12';
 
                     return (
-                    <div
-                      key={brand.name}
-                      className="flex h-20 w-full items-center justify-center transition-transform hover:-translate-y-1"
-                    >
-                      <img
-                        src={brand.src}
-                        alt={brand.name}
-                        className={`${imageClasses} object-contain`}
-                        loading="lazy"
-                      />
-                    </div>
+                      <div
+                        key={brand.name}
+                        className="flex h-24 w-full max-w-[220px] items-center justify-center rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-sm transition-transform hover:-translate-y-1"
+                      >
+                        <img
+                          src={brand.src}
+                          alt={brand.name}
+                          className={`${imageClasses} max-w-full object-contain`}
+                          loading="lazy"
+                        />
+                      </div>
                     );
                   })}
                 </div>

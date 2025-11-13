@@ -34,6 +34,8 @@ interface Property {
   area: string;
   purpose: string;
   type: string;
+  displayOrder?: number;
+  categories?: string[];
   priceDisplay: string;
   price: number;
   size: number;
@@ -68,6 +70,18 @@ const primeLocations: PrimeLocation[] = [
   { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpeg' },
   { name: 'Powai', slug: 'powai', image: '/images/mumbai8.jpeg' }
 ];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  coworking: 'Coworking',
+  managed: 'Managed Office',
+  dedicateddesk: 'Dedicated Desk',
+  flexidesk: 'Flexi Desk',
+  virtualoffice: 'Virtual Office',
+  meetingroom: 'Meeting Room',
+  enterpriseoffices: 'Enterprise Offices',
+};
+
+const formatCategoryLabel = (key: string) => CATEGORY_LABELS[key.toLowerCase()] ?? key;
 
 export default function PropertyDetails() {
   const params = useParams();
@@ -416,9 +430,21 @@ export default function PropertyDetails() {
           {/* Property Details - Left Side */}
           <div className="lg:col-span-2">
             {/* Property Title */}
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 leading-tight">
               {property.title}
             </h1>
+            {property.categories && property.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {property.categories.map((category) => (
+                  <span
+                    key={category}
+                    className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100 uppercase tracking-wide"
+                  >
+                    {formatCategoryLabel(category)}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Location */}
             <div className="mb-8">
@@ -791,7 +817,7 @@ export default function PropertyDetails() {
               <div className="relative z-10">
                 <div className="mb-6">
                   <h4 className="text-lg md:text-xl font-semibold text-black mb-2">Tell Us About Your Workspace Needs</h4>
-                  <p className="text-black">Share your requirements and we’ll tailor a proposal for you.</p>
+                  <p className="text-black">Share your requirements and we'll tailor a proposal for you.</p>
                 </div>
 
                 <form onSubmit={handleContactSubmit} className="space-y-4">
@@ -1160,7 +1186,7 @@ export default function PropertyDetails() {
 
               <div className="mb-6">
                 <h3 className="text-lg md:text-xl font-semibold text-black mb-2">Tell Us About Your Workspace Needs</h3>
-                <p className="text-gray-600">Share your requirements and we’ll tailor a proposal for you.</p>
+                <p className="text-gray-600">Share your requirements and we'll tailor a proposal for you.</p>
               </div>
 
               <form className="space-y-4">

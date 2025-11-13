@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import type { DragEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Property {
   id: string;
@@ -9,6 +10,7 @@ interface Property {
   area: string;
   purpose: string;
   type: string;
+  categories?: string[];
   priceDisplay: string;
   price: number;
   size: number;
@@ -17,17 +19,44 @@ interface Property {
   image: string;
   tag?: string;
   isActive: boolean;
+  displayOrder?: number;
   createdAt: string;
 }
 
-export default function PropertyList() {
+interface PropertyListProps {
+  onEditProperty?: (propertyId: string) => void;
+  refreshKey?: number;
+}
+
+export default function PropertyList({ onEditProperty, refreshKey = 0 }: PropertyListProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [selectedArea, setSelectedArea] = useState<string>('All');
+  const [areaOrderMap, setAreaOrderMap] = useState<Record<string, string[]>>({});
+  const [draggedPropertyId, setDraggedPropertyId] = useState<string | null>(null);
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+
+  const categoryLabelMap: Record<string, string> = {
+    coworking: 'Coworking',
+    managed: 'Managed Office',
+    dedicateddesk: 'Dedicated Desk',
+    flexidesk: 'Flexi Desk',
+    virtualoffice: 'Virtual Office',
+    meetingroom: 'Meeting Room',
+    enterpriseoffices: 'Enterprise Offices',
+  };
 
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  useEffect(() => {
+    if (refreshKey !== 0) {
+      fetchProperties();
+    }
+  }, [refreshKey]);
 
   const fetchProperties = async () => {
     try {
@@ -41,6 +70,8 @@ export default function PropertyList() {
       if (response.ok) {
         const data = await response.json();
         setProperties(data);
+        setMessage('');
+        setOrderDirty(false);
       } else {
         setMessage('Failed to fetch properties');
       }
@@ -51,53 +82,191 @@ export default function PropertyList() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this property?')) {
+  useEffect(() => {
+    if (orderDirty) {
       return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/properties/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        setProperties(prev => prev.filter(p => p.id !== id));
-        setMessage('Property deleted successfully');
-      } else {
-        setMessage('Failed to delete property');
+    const groups = new Map<string, Property[]>();
+    properties.forEach((property) => {
+      const areaKey = property.area || 'Unassigned';
+      if (!groups.has(areaKey)) {
+        groups.set(areaKey, []);
       }
-    } catch (error) {
-      setMessage('Network error. Please try again.');
+      groups.get(areaKey)!.push(property);
+    });
+
+    const newMap: Record<string, string[]> = {};
+    groups.forEach((props, areaKey) => {
+      const sorted = props
+        .slice()
+        .sort((a, b) => {
+          const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+          if (orderDiff !== 0) return orderDiff;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+      newMap[areaKey] = sorted.map((property) => property.id);
+    });
+
+    setAreaOrderMap(newMap);
+  }, [properties, orderDirty]);
+
+  const predefinedAreas = [
+    'Thane',
+    'Navi Mumbai',
+    'Andheri West',
+    'Andheri East',
+    'Andheri',
+    'BKC',
+    'Lower Parel',
+    'Vashi',
+    'Powai',
+    'Borivali',
+    'Goregaon',
+    'Bandra',
+    'Malad',
+    'Dadar',
+    'Mulund',
+    'Borivali West',
+    'Vikhroli',
+    'Worli',
+    'Churchgate',
+    'Marol',
+    'Vile Parle',
+  ];
+
+  const uniqueAreas = Array.from(
+    new Set([...predefinedAreas, ...properties.map((property) => property.area).filter(Boolean)])
+  );
+
+  const filteredProperties =
+    selectedArea === 'All'
+      ? properties
+      : properties.filter((property) => property.area === selectedArea);
+
+  const sortedFilteredProperties = useMemo(() => {
+    if (selectedArea === 'All') {
+      return filteredProperties
+        .slice()
+        .sort((a, b) => {
+          const areaCompare = a.area.localeCompare(b.area);
+          if (areaCompare !== 0) return areaCompare;
+          const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+          if (orderDiff !== 0) return orderDiff;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
     }
+
+    const order = areaOrderMap[selectedArea];
+    if (!order || order.length === 0) {
+      return filteredProperties
+        .slice()
+        .sort((a, b) => {
+          const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+          if (orderDiff !== 0) return orderDiff;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+    }
+
+    const indexMap = new Map(order.map((id, index) => [id, index]));
+    return filteredProperties
+      .slice()
+      .sort((a, b) => {
+        const aIndex = indexMap.has(a.id) ? indexMap.get(a.id)! : Number.MAX_SAFE_INTEGER;
+        const bIndex = indexMap.has(b.id) ? indexMap.get(b.id)! : Number.MAX_SAFE_INTEGER;
+        if (aIndex !== bIndex) return aIndex - bIndex;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }, [filteredProperties, selectedArea, areaOrderMap]);
+
+  const reorderWithinArea = (draggedId: string, targetId: string) => {
+    if (selectedArea === 'All' || draggedId === targetId) return;
+
+    setAreaOrderMap((prev) => {
+      const currentOrder =
+        prev[selectedArea] ?? filteredProperties.map((property) => property.id);
+      if (!currentOrder.includes(draggedId) || !currentOrder.includes(targetId)) {
+        return prev;
+      }
+
+      const newOrder = currentOrder.filter((id) => id !== draggedId);
+      const targetIndex = newOrder.indexOf(targetId);
+      newOrder.splice(targetIndex, 0, draggedId);
+      return { ...prev, [selectedArea]: newOrder };
+    });
+    setOrderDirty(true);
   };
 
-  const handleToggleActive = async (id: string, isActive: boolean) => {
+  const handleDragStart = (event: DragEvent<HTMLDivElement>, propertyId: string) => {
+    if (selectedArea === 'All') return;
+    event.dataTransfer.effectAllowed = 'move';
+    setDraggedPropertyId(propertyId);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (selectedArea === 'All' || !draggedPropertyId) return;
+    event.preventDefault();
+  };
+
+  const handleDrop = (targetId: string) => {
+    if (selectedArea === 'All' || !draggedPropertyId) {
+      setDraggedPropertyId(null);
+      return;
+    }
+    reorderWithinArea(draggedPropertyId, targetId);
+    setDraggedPropertyId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedPropertyId(null);
+  };
+
+  const handleSaveOrder = async () => {
+    if (selectedArea === 'All') return;
+
+    const order =
+      areaOrderMap[selectedArea] ?? sortedFilteredProperties.map((property) => property.id);
+
+    if (order.length === 0) {
+      return;
+    }
+
+    setIsSavingOrder(true);
+
     try {
+      const updates = order.map((id, index) => ({
+        id,
+        displayOrder: index + 1,
+      }));
+
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/properties/${id}`, {
+      const response = await fetch('/api/properties/reorder', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ isActive: !isActive }),
+        body: JSON.stringify({ updates }),
       });
 
-      if (response.ok) {
-        setProperties(prev => 
-          prev.map(p => p.id === id ? { ...p, isActive: !isActive } : p)
-        );
-        setMessage(`Property ${!isActive ? 'activated' : 'deactivated'} successfully`);
-      } else {
-        setMessage('Failed to update property');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save order');
       }
+
+      setProperties((prev) =>
+        prev.map((property) => {
+          const update = updates.find((item) => item.id === property.id);
+          return update ? { ...property, displayOrder: update.displayOrder } : property;
+        })
+      );
+      setOrderDirty(false);
+      setMessage('Display order updated successfully.');
     } catch (error) {
-      setMessage('Network error. Please try again.');
+      console.error('Error saving order:', error);
+      setMessage('Failed to save property order.');
+    } finally {
+      setIsSavingOrder(false);
     }
   };
 
@@ -112,9 +281,66 @@ export default function PropertyList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Properties</h2>
-        <p className="text-gray-600">{properties.length} properties found</p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-sm font-semibold text-gray-700">Filter by Area:</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+                selectedArea === 'All'
+                  ? 'bg-[#a08efe] text-white border-[#a08efe]'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-[#a08efe] hover:text-[#a08efe]'
+              }`}
+              onClick={() => {
+                setSelectedArea('All');
+                setDraggedPropertyId(null);
+                setOrderDirty(false);
+              }}
+            >
+              All Areas
+            </button>
+            {uniqueAreas.map((area) => (
+              <button
+                key={area}
+                type="button"
+                onClick={() => {
+                  setSelectedArea(area);
+                  setDraggedPropertyId(null);
+                  setOrderDirty(false);
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+                  selectedArea === area
+                    ? 'bg-[#a08efe] text-white border-[#a08efe]'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#a08efe] hover:text-[#a08efe]'
+                }`}
+              >
+                {area}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col md:items-end gap-2 text-sm text-gray-500">
+          {selectedArea === 'All' ? (
+            <span>Select an area to reorder its properties.</span>
+          ) : (
+            <>
+              <span>
+                Drag property cards to change the order for {selectedArea}.
+              </span>
+              {sortedFilteredProperties.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleSaveOrder}
+                  disabled={!orderDirty || isSavingOrder}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-[#a08efe] text-white hover:bg-[#8c76ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSavingOrder ? 'Saving...' : 'Save Order'}
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {message && (
@@ -127,15 +353,30 @@ export default function PropertyList() {
         </div>
       )}
 
-      {properties.length === 0 ? (
+      {sortedFilteredProperties.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No properties found</p>
-          <p className="text-gray-400 mt-2">Add your first property to get started</p>
+          <p className="text-gray-500 text-lg">No properties found for the selected area</p>
+          <p className="text-gray-400 mt-2">
+            Try choosing another area or add new properties to this location.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <div key={property.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          {sortedFilteredProperties.map((property) => (
+            <div
+              key={property.id}
+              className={`bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+                selectedArea !== 'All' ? 'cursor-move' : ''
+              }`}
+              draggable={selectedArea !== 'All'}
+              onDragStart={(event) => handleDragStart(event, property.id)}
+              onDragOver={handleDragOver}
+              onDrop={(event) => {
+                event.preventDefault();
+                handleDrop(property.id);
+              }}
+              onDragEnd={handleDragEnd}
+            >
               <div className="relative h-48">
                 <img
                   src={property.image}
@@ -174,6 +415,19 @@ export default function PropertyList() {
                     ⭐ {property.rating}
                   </span>
                 </div>
+
+                {property.categories && property.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {property.categories.map((category) => (
+                      <span
+                        key={category}
+                        className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100"
+                      >
+                        {categoryLabelMap[category.toLowerCase()] ?? category}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="font-bold text-gray-900 text-lg">
@@ -183,23 +437,12 @@ export default function PropertyList() {
                     {property.size} sq ft
                   </div>
                 </div>
-                
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleToggleActive(property.id, property.isActive)}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-colors ${
-                      property.isActive
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                    }`}
+                    onClick={() => onEditProperty?.(property.id)}
+                    className="flex-1 py-2 px-3 rounded-lg text-sm font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors"
                   >
-                    {property.isActive ? 'Deactivate' : 'Activate'}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(property.id)}
-                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    Delete
+                    Edit Property
                   </button>
                 </div>
               </div>
