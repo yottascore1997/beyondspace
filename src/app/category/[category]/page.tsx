@@ -615,12 +615,13 @@ export default function CategoryPage() {
                       
                       // Add properties batch
                       batches.push(
-                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-4'}>
                           {batch.map((property) => (
                             <PropertyCard
                               key={property.id}
                               property={property}
                               onEnquireClick={handleEnquireClick}
+                              hideCategory={true}
                             />
                           ))}
                         </div>
@@ -647,12 +648,13 @@ export default function CategoryPage() {
                     
                     // Add paginated properties
                     batches.push(
-                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-4'}>
                         {currentPageProperties.map((property) => (
                           <PropertyCard
                             key={property.id}
                             property={property}
                             onEnquireClick={handleEnquireClick}
+                            hideCategory={true}
                           />
                         ))}
                       </div>

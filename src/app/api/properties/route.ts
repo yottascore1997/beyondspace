@@ -123,6 +123,18 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
     const data = await request.json();
     console.log('Received property data:', JSON.stringify(data, null, 2));
 
+    // Verify user exists in database
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: 'User not found in database' },
+        { status: 404 }
+      );
+    }
+
     // Extract images array and remove it from property data
     const { images, ...propertyData } = data;
 
@@ -131,10 +143,11 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       ...propertyData,
       purpose: propertyData.purpose?.toUpperCase(),
       type: propertyData.type?.toUpperCase(),
+      sublocation: propertyData.sublocation || null,
       categories: Array.isArray(propertyData.categories)
         ? propertyData.categories.map((category: string) => category.toLowerCase())
         : [],
-      userId: user.id,
+      userId: dbUser.id,
       // Convert string numbers to integers
       price: parseInt(propertyData.price) || 0,
       size: parseInt(propertyData.size) || 0,

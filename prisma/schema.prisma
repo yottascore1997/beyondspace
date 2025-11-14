@@ -65,6 +65,7 @@ model Property {
   title       String
   city        String
   area        String
+  sublocation String?
   purpose     PropertyPurpose
   type        PropertyType
   displayOrder Int @default(0)

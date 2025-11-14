@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Poppins } from 'next/font/google';
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap'
+});
 
 interface PropertyImage {
   id: string;
@@ -10,11 +17,19 @@ interface PropertyImage {
   createdAt: string;
 }
 
+interface SeatingPlan {
+  title: string;
+  description: string;
+  price: string;
+  seating: string;
+}
+
 interface Property {
   id: string;
   title: string;
   city: string;
   area: string;
+  sublocation?: string | null;
   purpose: string;
   type: string;
   displayOrder?: number;
@@ -27,14 +42,16 @@ interface Property {
   image: string;
   propertyImages?: PropertyImage[];
   tag?: string;
+  propertyOptions?: SeatingPlan[] | null;
 }
 
 interface PropertyCardProps {
   property: Property;
   onEnquireClick?: () => void;
+  hideCategory?: boolean;
 }
 
-export default function PropertyCard({ property, onEnquireClick }: PropertyCardProps) {
+export default function PropertyCard({ property, onEnquireClick, hideCategory = false }: PropertyCardProps) {
   const [isFav, setIsFav] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
@@ -47,6 +64,30 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
     meetingroom: 'Meeting Room',
     enterpriseoffices: 'Enterprise Offices',
   };
+
+  // Get minimum price from seating plans
+  const getMinSeatingPlanPrice = () => {
+    if (!property.propertyOptions || !Array.isArray(property.propertyOptions) || property.propertyOptions.length === 0) {
+      return null;
+    }
+
+    const prices = property.propertyOptions
+      .map((plan: SeatingPlan) => {
+        if (!plan.price || plan.price.trim() === '') return null;
+        // Remove currency symbols, commas, and spaces, then parse
+        const numericPrice = parseFloat(plan.price.replace(/[₹,\s]/g, ''));
+        return isNaN(numericPrice) ? null : numericPrice;
+      })
+      .filter((price): price is number => price !== null);
+
+    if (prices.length === 0) return null;
+
+    const minPrice = Math.min(...prices);
+    // Format back to currency format
+    return `₹ ${minPrice.toLocaleString('en-IN')}`;
+  };
+
+  const minSeatingPrice = getMinSeatingPlanPrice();
 
   // Get all available images (main image + additional images)
   const allImages = property.propertyImages && property.propertyImages.length > 0 
@@ -68,8 +109,8 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
       rel="noopener noreferrer"
       className="block"
     >
-      <article className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
-        <div className="relative h-64 sm:h-72 lg:h-80 overflow-hidden rounded-3xl group">
+      <article className={`${poppins.className} bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200`}>
+        <div className="relative h-72 sm:h-80 lg:h-96 overflow-hidden rounded-3xl group">
         <span className="absolute top-2 left-2 sm:top-2 sm:left-2 z-20 inline-flex items-center rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
           Premium
         </span>
@@ -144,24 +185,24 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
         )}
         </div>
       
-        <div className="p-5 space-y-4">
-        <h3 className="font-semibold text-gray-900 text-xl leading-tight cursor-pointer">
+        <div className="p-5 space-y-2">
+        <h3 className="font-semibold text-gray-900 text-2xl leading-tight cursor-pointer">
           {property.title}
         </h3>
         
-        <div className="flex items-center gap-3 text-sm text-gray-700 flex-wrap">
-          <span>{property.city}</span>
-          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+        <div className="flex items-center gap-2 text-lg text-gray-700 flex-wrap">
+          {property.sublocation && (
+            <>
+              <span>{property.sublocation}</span>
+              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+            </>
+          )}
           <span>{property.area}</span>
           <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-          <span>{property.type}</span>
-          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-          <span className="flex items-center gap-1">
-            ⭐ {property.rating}
-          </span>
+          <span>{property.city}</span>
         </div>
 
-        {property.categories && property.categories.length > 0 && (
+        {!hideCategory && property.categories && property.categories.length > 0 && (
           <div className="flex flex-wrap gap-2 text-xs text-blue-700 font-semibold">
             {property.categories.map((category) => (
               <span
@@ -174,9 +215,13 @@ export default function PropertyCard({ property, onEnquireClick }: PropertyCardP
           </div>
         )}
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-2">
           <div className="font-semibold text-gray-900 text-xl">
-            {property.priceDisplay}<span className="text-gray-600 font-normal">/month</span>
+            {minSeatingPrice ? (
+              <span>{minSeatingPrice}<span className="text-gray-600 font-normal">/month</span></span>
+            ) : (
+              <span>{property.priceDisplay}<span className="text-gray-600 font-normal">/month</span></span>
+            )}
           </div>
           <button
             onClick={(e) => {

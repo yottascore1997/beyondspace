@@ -21,6 +21,7 @@ interface PropertyFormData {
   title: string;
   city: string;
   area: string;
+  sublocation: string;
   purpose: string;
   type: string;
   displayOrder: number;
@@ -65,6 +66,14 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
     isSelected: false,
   },
   {
+    id: 'flexi-desk',
+    title: 'Flexi Desk',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+  {
     id: 'private-cabin',
     title: 'Private Cabin',
     description: '',
@@ -88,12 +97,37 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
     seating: '',
     isSelected: false,
   },
+  {
+    id: 'enterprise-office',
+    title: 'Enterprise Office',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+  {
+    id: 'managed-office-space',
+    title: 'Managed Office Space',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
+  {
+    id: 'day-pass',
+    title: 'Day Pass',
+    description: '',
+    price: '',
+    seating: '',
+    isSelected: false,
+  },
 ]);
 
 const createInitialFormData = (): PropertyFormData => ({
   title: '',
   city: 'Mumbai',
   area: 'Andheri',
+  sublocation: '',
   purpose: 'commercial',
   type: '',
   displayOrder: 0,
@@ -258,6 +292,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
       title: property.title || '',
       city: property.city || 'Mumbai',
       area: property.area || '',
+      sublocation: property.sublocation || '',
       purpose: (property.purpose || 'commercial').toLowerCase(),
       type: property.type || '',
       displayOrder: property.displayOrder ?? 0,
@@ -596,7 +631,7 @@ useEffect(() => {
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-              placeholder="e.g., 2BHK Luxury, Andheri West"
+              placeholder=""
             />
           </div>
 
@@ -654,6 +689,20 @@ useEffect(() => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Sub Location
+            </label>
+            <input
+              type="text"
+              name="sublocation"
+              value={formData.sublocation}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+              placeholder=""
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Categories *
             </label>
             <div className="flex flex-wrap gap-3">
@@ -688,7 +737,7 @@ useEffect(() => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Property Image *
+              Property Image {!isEditMode && '*'}
             </label>
             
             {/* Upload Method Selection */}
@@ -721,13 +770,13 @@ useEffect(() => {
             {uploadMethod === 'url' && (
               <div>
                 <input
-                  type="url"
+                  type={isEditMode ? "text" : "url"}
                   name="image"
                   value={formData.image}
                   onChange={handleChange}
-                  required
+                  required={!isEditMode}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder=""
                 />
                 {/* Show preview immediately when URL is entered */}
                 {formData.image && (
@@ -853,7 +902,7 @@ useEffect(() => {
                 required
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                placeholder="e.g., Sumer Plaza, Sankasth Pada Welfare Society, Marol, Andheri East, Mumbai, Maharashtra"
+                placeholder=""
               />
             </div>
 
@@ -867,7 +916,7 @@ useEffect(() => {
                 value={formData.metroStationDistance}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                placeholder="e.g., 2 km away from Marol Naka Metro Station"
+                placeholder=""
               />
             </div>
 
@@ -881,7 +930,7 @@ useEffect(() => {
                 value={formData.railwayStationDistance}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                placeholder="e.g., 3.5 km away from Andheri Railway Station"
+                placeholder=""
               />
             </div>
 
@@ -895,7 +944,7 @@ useEffect(() => {
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                placeholder="e.g., one of the best business centres in Marol, Work Square is located at Sumer Plaza. With over 10,000+ sq ft super area and a total capacity of 220+ seats, this is a perfect workspace for your next big business!"
+                placeholder=""
               />
             </div>
           </div>
@@ -925,7 +974,7 @@ useEffect(() => {
                   onChange={handleChange}
                   required={formData.type === 'COWORKING' || formData.type === 'MANAGED_OFFICE'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder={formData.type === 'COWORKING' ? 'e.g., Work Square - Sumer Plaza, Andheri (E)' : 'e.g., Enterprise Office Space, BKC'}
+                  placeholder=""
                 />
               </div>
 
@@ -940,7 +989,7 @@ useEffect(() => {
                   onChange={handleChange}
                   required={formData.type === 'COWORKING' || formData.type === 'MANAGED_OFFICE'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder={formData.type === 'COWORKING' ? 'e.g., 10:00 am - 6:00 pm (Mon to Sat)' : 'e.g., 9:00 am - 6:00 pm (Mon to Fri)'}
+                  placeholder=""
                 />
               </div>
 
@@ -954,7 +1003,7 @@ useEffect(() => {
                   value={formData.workspaceClosedDays}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder={formData.type === 'COWORKING' ? 'e.g., Closed (Sun)' : 'e.g., Closed (Weekends)'}
+                  placeholder=""
                 />
               </div>
 
@@ -968,7 +1017,7 @@ useEffect(() => {
                   value={formData.capacity}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder="e.g., 220"
+                  placeholder=""
                 />
               </div>
 
@@ -982,7 +1031,7 @@ useEffect(() => {
                   value={formData.superArea}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder="e.g., 10000"
+                  placeholder=""
                 />
               </div>
 
@@ -1080,7 +1129,7 @@ useEffect(() => {
         {/* Seating Plans Section */}
         <div className="border-t pt-6 mt-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Seating Plans</h3>
-          <p className="text-sm text-gray-600 mb-6">Select which seating plans to display on the property page. You can select 1, 2, or all 3 options.</p>
+          <p className="text-sm text-gray-600 mb-6">Select which seating plans to display on the property page. You can select one or more options based on your property type.</p>
           
           <div className="space-y-4">
             {formData.seatingPlans.map((plan) => (
@@ -1113,7 +1162,7 @@ useEffect(() => {
                           value={plan.description}
                           onChange={(e) => handleSeatingPlanUpdate(plan.id, 'description', e.target.value)}
                           className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                          placeholder="Enter description"
+                          placeholder=""
                         />
                       </div>
                       
@@ -1126,7 +1175,7 @@ useEffect(() => {
                           value={plan.price}
                           onChange={(e) => handleSeatingPlanUpdate(plan.id, 'price', e.target.value)}
                           className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                          placeholder="Enter price"
+                          placeholder=""
                         />
                       </div>
                       
@@ -1139,7 +1188,7 @@ useEffect(() => {
                           value={plan.seating}
                           onChange={(e) => handleSeatingPlanUpdate(plan.id, 'seating', e.target.value)}
                           className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                          placeholder="Enter seating"
+                          placeholder=""
                         />
                       </div>
                     </div>

@@ -72,6 +72,7 @@ export async function PUT(
       title: propertyData.title ?? existingProperty.title,
       city: propertyData.city ?? existingProperty.city,
       area: propertyData.area ?? existingProperty.area,
+      sublocation: propertyData.sublocation ?? existingProperty.sublocation,
       purpose: (propertyData.purpose ?? existingProperty.purpose)?.toUpperCase(),
       type: (propertyData.type ?? existingProperty.type)?.toUpperCase(),
       categories: normalizedCategories,

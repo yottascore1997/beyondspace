@@ -32,6 +32,7 @@ interface Property {
   title: string;
   city: string;
   area: string;
+  sublocation?: string | null;
   purpose: string;
   type: string;
   displayOrder?: number;
@@ -433,6 +434,20 @@ export default function PropertyDetails() {
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 leading-tight">
               {property.title}
             </h1>
+            
+            {/* Sub Location, Area, City */}
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4 flex-wrap">
+              {property.sublocation && (
+                <>
+                  <span>{property.sublocation}</span>
+                  <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                </>
+              )}
+              <span>{property.area}</span>
+              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+              <span>{property.city}</span>
+            </div>
+            
             {property.categories && property.categories.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
                 {property.categories.map((category) => (
