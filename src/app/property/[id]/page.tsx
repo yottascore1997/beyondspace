@@ -171,7 +171,7 @@ export default function PropertyDetails() {
   const handleEnquireClick = () => {
     const formSection = document.getElementById('contact-form-section');
     if (formSection) {
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Only trigger shake animation, no scrolling to prevent sticky form from shifting
       formSection.classList.add('animate-shake');
       setTimeout(() => {
         formSection.classList.remove('animate-shake');
@@ -427,16 +427,16 @@ export default function PropertyDetails() {
             </div>
 
         {/* Main Content Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Property Details - Left Side */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-7">
             {/* Property Title */}
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">
               {property.title}
             </h1>
             
             {/* Sub Location, Area, City */}
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4 flex-wrap">
+            <div className="flex items-center gap-2 text-lg font-medium text-gray-700 mb-4 flex-wrap">
               {property.sublocation && (
                 <>
                   <span>{property.sublocation}</span>
@@ -447,62 +447,45 @@ export default function PropertyDetails() {
               <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
               <span>{property.city}</span>
             </div>
-            
-            {property.categories && property.categories.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {property.categories.map((category) => (
-                  <span
-                    key={category}
-                    className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100 uppercase tracking-wide"
-                  >
-                    {formatCategoryLabel(category)}
-                  </span>
-                ))}
-              </div>
-            )}
 
-            {/* Location */}
-            <div className="mb-8">
-              <h3 className="text-xl font-medium text-gray-800 mb-3">Location Details</h3>
-              <p className="text-gray-600 text-lg">
-                {property.locationDetails || property.area}
-              </p>
+            {/* Metro Station and Railway Station */}
               {(property.metroStationDistance || property.railwayStationDistance) && (
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="mb-8">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {property.metroStationDistance && (
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg">🚇</span>
+                    <div className="flex items-start gap-3">
+                      <span className="text-3xl">🚇</span>
                       <div>
-                        <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                        <p className="text-base font-semibold text-gray-800 uppercase tracking-wide">
                           Metro Station
                         </p>
-                        <p className="text-gray-600 text-base">
+                        <p className="text-gray-700 text-lg font-normal">
                           {property.metroStationDistance}
                         </p>
                       </div>
                     </div>
                   )}
                   {property.railwayStationDistance && (
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg">🚆</span>
+                    <div className="flex items-start gap-3">
+                      <span className="text-3xl">🚆</span>
                       <div>
-                        <p className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                        <p className="text-base font-semibold text-gray-800 uppercase tracking-wide">
                           Railway Station
                         </p>
-                        <p className="text-gray-600 text-base">
+                        <p className="text-gray-700 text-lg font-normal">
                           {property.railwayStationDistance}
                         </p>
                       </div>
                     </div>
                   )}
                 </div>
-              )}
             </div>
+            )}
 
             {/* Seating Plans Section */}
             {property.propertyOptions && property.propertyOptions.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-xl font-medium text-gray-800 mb-5">Seating Plans</h3>
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
               
                 {property.propertyOptions.map((plan, index) => {
                   // Map seating plan titles to default images
@@ -517,13 +500,13 @@ export default function PropertyDetails() {
                   return (
                     <div
                       key={index}
-                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-lg p-3 md:p-4 ${
-                        index < property.propertyOptions!.length - 1 ? 'mb-3' : ''
+                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-lg py-2 px-2.5 ${
+                        index < property.propertyOptions!.length - 1 ? 'mb-5' : ''
                       }`}
                     >
-                      <div className="flex flex-col md:flex-row gap-3">
+                      <div className="flex flex-col md:flex-row gap-2.5">
                         {/* Image on Left - Square */}
-                        <div className="md:w-1/5">
+                        <div className="md:w-1/6 flex-shrink-0">
                           <img 
                             src={getImageForPlan(plan.title)} 
                             alt={plan.title} 
@@ -532,17 +515,17 @@ export default function PropertyDetails() {
               </div>
 
                         {/* Content on Right */}
-                        <div className="md:w-4/5 flex flex-col relative">
+                        <div className="md:w-5/6 flex flex-col relative min-h-0">
                           {/* Left Side - Title and Content */}
-                          <div className="flex-1 pr-3 pt-2">
-                            <h4 className="text-lg md:text-xl font-medium text-gray-800 mb-3">{plan.title}</h4>
+                          <div className="flex-1 pr-3 pt-4 pb-4">
+                            <h4 className="text-lg md:text-xl font-semibold text-gray-900 mb-3">{plan.title}</h4>
                             
                             {plan.description && (
-                              <p className="text-gray-700 mb-2 text-sm font-normal">{plan.description}</p>
+                              <p className="text-gray-700 mb-3 text-base font-normal leading-snug line-clamp-2">{plan.description}</p>
                             )}
                             
                             {plan.seating && (
-                              <p className="text-gray-600 mb-2 text-sm">
+                              <p className="text-gray-700 text-base font-medium mt-2">
                                 <span className="mr-1">👤</span>
                                 <span>Seating : {plan.seating}</span>
                               </p>
@@ -552,16 +535,16 @@ export default function PropertyDetails() {
                           {/* Right Side - Price and Button (Vertically Centered) */}
                           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end">
                             {plan.price && (
-                              <div className="text-right mb-3">
-                                <span className="text-2xl md:text-3xl font-bold text-gray-900">{plan.price}</span>
-                                <span className="text-xl md:text-2xl font-normal text-gray-600 ml-1">/month</span>
+                              <div className="text-right mb-2">
+                                <span className="text-xl md:text-2xl font-bold text-gray-900">{plan.price}</span>
+                                <span className="text-lg md:text-xl font-normal text-gray-600 ml-1">/month</span>
                   </div>
                             )}
                             
                             <button
                         type="button"
                               onClick={handleEnquireClick}
-                              className="bg-blue-400 text-white px-6 py-2 rounded-lg text-base font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                              className="bg-blue-400 text-white px-4 py-1.5 rounded-lg text-sm font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                             >
                         Enquire Now
                       </button>
@@ -574,8 +557,13 @@ export default function PropertyDetails() {
             </div>
             )}
 
-            {/* Managed Office Space and Enterprise Solutions Section */}
+            {/* Price Disclaimer */}
             <div className="mb-6">
+              <p className={`${poppins.className} text-base text-gray-600 italic`}>*Prices mentioned above are starting prices & as per availability</p>
+            </div>
+
+            {/* Managed Office Space and Enterprise Solutions Section */}
+            <div className="mb-6 mt-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Managed Office Space Card */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
@@ -627,19 +615,84 @@ export default function PropertyDetails() {
               </div>
             </div>
 
+            {/* Why book coworking space with Beyond Space Section */}
+            <div className="mb-8 mt-8">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6">Why book coworking space with Beyond Space?</h3>
+              <div className="bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-2xl shadow-lg p-6 md:p-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Left Side - Points in 2x2 grid */}
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-green-600 text-xl font-bold">✓</span>
+                      <p className="text-gray-800 text-base font-medium">Exclusive Pricing & Zero Booking fee</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-green-600 text-xl font-bold">✓</span>
+                      <p className="text-gray-800 text-base font-medium">Guided Office Space Tours</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-green-600 text-xl font-bold">✓</span>
+                      <p className="text-gray-800 text-base font-medium">Verified Spaces and Trusted Operators</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-green-600 text-xl font-bold">✓</span>
+                      <p className="text-gray-800 text-base font-medium">Dedicated Relationship Manager</p>
+                    </div>
+                  </div>
+                  {/* Right Side - Button */}
+                  <div className="flex items-center justify-center md:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleEnquireClick}
+                      className="bg-blue-400 text-white py-3 px-8 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                    >
+                      Enquire Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Description */}
             {(property.aboutWorkspace || property.description) && (
               <div className="mb-8">
-                <h3 className="text-xl font-medium text-gray-800 mb-3">About</h3>
-                <p className="text-gray-600 text-lg">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">About</h3>
+                <p className="text-gray-700 text-base font-normal leading-relaxed">
                   {property.aboutWorkspace || property.description}
                 </p>
               </div>
             )}
 
+            {/* Location Details */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Location Details</h3>
+              <p className="text-gray-700 text-base font-normal">
+                {property.locationDetails || property.area}
+              </p>
+            </div>
+
+            {/* Benefits Section */}
+            <div className="mb-8">
+              <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-pink-200 rounded-2xl shadow-lg p-6 md:p-8">
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-gray-800 text-base font-medium mb-2">Explore flexible workspace solutions just for you in Mumbai</p>
+                    <p className="text-gray-800 text-base font-medium">Zero pressure advice, recommendations and negotiations at no extra cost</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleEnquireClick}
+                    className="bg-blue-400 text-white py-3 px-8 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300 whitespace-nowrap"
+                  >
+                    Enquire Now
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Office Timing Section */}
             <div className="mb-8">
-              <h3 className="text-xl font-medium text-gray-800 mb-5">Office Timing</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-5">Office Timing</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Monday to Friday */}
@@ -661,7 +714,7 @@ export default function PropertyDetails() {
                 {/* Saturday */}
                 <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
                   <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -694,8 +747,9 @@ export default function PropertyDetails() {
 
             {/* Amenities Section */}
             <div className="mb-8">
-              <h3 className="text-xl font-medium text-gray-800 mb-5">Amenities</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-5">Amenities</h3>
               
+              <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 rounded-2xl p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* High Speed WiFi */}
                 <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
@@ -711,7 +765,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
                   <span className="font-medium text-gray-900">Meeting Rooms</span>
@@ -740,8 +794,8 @@ export default function PropertyDetails() {
                 {/* Car / Bike Parking */}
                 <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
                     </svg>
                   </div>
                   <span className="font-medium text-gray-900">Car / Bike Parking</span>
@@ -771,7 +825,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
                   <span className="font-medium text-gray-900">Reception</span>
@@ -781,7 +835,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
                   <span className="font-medium text-gray-900">Air Conditioning</span>
@@ -816,12 +870,13 @@ export default function PropertyDetails() {
                   </div>
                   <span className="font-medium text-gray-900">Lounge</span>
                 </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Contact Form - Right Side */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
+          <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="lg:sticky lg:top-24">
             <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl shadow-2xl border-2 border-blue-200/50 p-8 relative overflow-hidden">
               {/* Background Pattern */}
@@ -837,7 +892,6 @@ export default function PropertyDetails() {
 
                 <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-1">Name*</label>
                     <input
                       type="text"
                       name="name"
@@ -850,7 +904,6 @@ export default function PropertyDetails() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-black mb-1">Email*</label>
                     <input
                       type="email"
                       name="email"
@@ -863,7 +916,6 @@ export default function PropertyDetails() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-black mb-1">Phone*</label>
                     <div className="flex gap-2">
                       <div className="relative" ref={countryDropdownRef}>
                         <button
@@ -918,7 +970,6 @@ export default function PropertyDetails() {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-black mb-1">Type</label>
                       <select
                         name="type"
                         value={contactFormData.type}
@@ -932,7 +983,6 @@ export default function PropertyDetails() {
                     </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-black mb-1">No. Of Seats</label>
                       <select
                         name="seats"
                         value={contactFormData.seats}
@@ -970,46 +1020,32 @@ export default function PropertyDetails() {
                   </button>
                 </form>
 
-                <div className="mt-8">
-                  <p className="text-xs font-semibold text-black uppercase tracking-wider text-center">Workspace consultant</p>
-                  <div className="flex items-center gap-3 mt-4">
-                    <img
-                      src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80"
-                      alt="Workspace consultant"
-                      className="w-12 h-12 rounded-full object-cover border border-blue-200"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <div>
-                      <p className="text-sm font-semibold text-black">Workspace Consultant</p>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                        <span className="text-base font-bold text-orange-500">+91 98765 43210</span>
-                    </div>
-                  </div>
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="mb-6">
+                    <p className="text-base font-semibold text-gray-900 text-center">Connect with our space expert</p>
                   </div>
 
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-md shadow-purple-500/30">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-orange-50 via-pink-50 to-pink-100 rounded-lg flex-shrink-0">
+                      <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
+                      <div>
+                        <p className="text-xs text-gray-500 mb-0.5">Contact</p>
+                        <p className="text-sm font-semibold text-gray-900">+91 98765 43210</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-black">Connect with our space expert</p>
-                      <div className="flex items-center gap-2 text-black">
-                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                        <span className="text-base font-semibold text-orange-500">
-                          contact@beyondspacework.com
-                        </span>
+                    
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-orange-50 via-pink-50 to-pink-100 rounded-lg flex-1">
+                      <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-gray-500 mb-0.5">Email</p>
+                        <p className="text-sm font-semibold text-gray-900 break-words">contact@beyondspacework.com</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
             </div>
             </div>
@@ -1032,7 +1068,7 @@ export default function PropertyDetails() {
             {primeLocations.map((location) => (
               <Link
                 key={location.slug}
-                href={`/area/${encodeURIComponent(location.slug)}`}
+                href={`/category/coworking-space`}
                 className="bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 overflow-hidden transition-transform duration-300 hover:-translate-y-1 flex flex-col h-full"
               >
                 <div className="h-40 md:h-44 w-full overflow-hidden">
