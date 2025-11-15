@@ -296,7 +296,7 @@ export default function PropertyDetails() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
             <div className="h-64 bg-gray-300 rounded mb-6"></div>
@@ -316,7 +316,7 @@ export default function PropertyDetails() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
             <p className="text-gray-600 mb-6">{error || 'The property you are looking for does not exist.'}</p>
@@ -350,7 +350,7 @@ export default function PropertyDetails() {
       `}</style>
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Breadcrumb */}
         <nav className="mb-6">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
@@ -1059,7 +1059,7 @@ export default function PropertyDetails() {
       </div>
 
       <section className="py-12 md:py-16 bg-gradient-to-br from-white via-blue-50 to-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-10">
             <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Coworking Locations in Mumbai</h3>
           </div>
