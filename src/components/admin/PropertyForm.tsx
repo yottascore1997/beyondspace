@@ -2,6 +2,22 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+interface City {
+  id: string;
+  name: string;
+  areas: Area[];
+}
+
+interface Area {
+  id: string;
+  name: string;
+  cityId: string;
+  city: {
+    id: string;
+    name: string;
+  };
+}
+
 interface Amenity {
   icon: string;
   name: string;
@@ -43,6 +59,8 @@ interface PropertyFormData {
   locationDetails: string;
   metroStationDistance: string;
   railwayStationDistance: string;
+  googleMapLink: string;
+  propertyTier: string;
   aboutWorkspace: string;
   capacity: number;
   superArea: number;
@@ -148,6 +166,8 @@ const createInitialFormData = (): PropertyFormData => ({
   locationDetails: '',
   metroStationDistance: '',
   railwayStationDistance: '',
+  googleMapLink: '',
+  propertyTier: '',
   aboutWorkspace: '',
   capacity: 0,
   superArea: 0,
@@ -172,6 +192,9 @@ export default function PropertyForm({
   const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
   const [isFetchingProperty, setIsFetchingProperty] = useState(false);
   const [currentEditingId, setCurrentEditingId] = useState<string | null>(null);
+  const [cities, setCities] = useState<City[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [loadingAreas, setLoadingAreas] = useState(false);
 
   // Available amenities with icons
   const availableAmenities: Amenity[] = [
@@ -313,6 +336,8 @@ const loadPropertyForEdit = async (propertyId: string) => {
       locationDetails: property.locationDetails || '',
       metroStationDistance: property.metroStationDistance || '',
       railwayStationDistance: property.railwayStationDistance || '',
+      googleMapLink: property.googleMapLink || '',
+      propertyTier: property.propertyTier || '',
       aboutWorkspace: property.aboutWorkspace || '',
       capacity: property.capacity ?? 0,
       superArea: property.superArea ?? 0,
@@ -336,16 +361,72 @@ const loadPropertyForEdit = async (propertyId: string) => {
   }
 };
 
-useEffect(() => {
-  if (editingPropertyId) {
-    if (editingPropertyId !== currentEditingId) {
-      loadPropertyForEdit(editingPropertyId);
+  // Fetch cities on mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/cities', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const citiesData = await response.json();
+          setCities(citiesData);
+        }
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+      }
+    };
+    fetchCities();
+  }, []);
+
+  // Fetch areas when city changes
+  const fetchAreasForCity = async (cityName: string) => {
+    const city = cities.find(c => c.name === cityName);
+    if (!city) {
+      setAreas([]);
+      return;
     }
-  } else if (currentEditingId) {
-    resetFormState();
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [editingPropertyId]);
+
+    try {
+      setLoadingAreas(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/areas?cityId=${city.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const areasData = await response.json();
+        setAreas(areasData);
+      }
+    } catch (error) {
+      console.error('Error fetching areas:', error);
+    } finally {
+      setLoadingAreas(false);
+    }
+  };
+
+  useEffect(() => {
+    if (editingPropertyId) {
+      if (editingPropertyId !== currentEditingId) {
+        loadPropertyForEdit(editingPropertyId);
+      }
+    } else if (currentEditingId) {
+      resetFormState();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingPropertyId]);
+
+  // Fetch areas when city changes
+  useEffect(() => {
+    if (formData.city && cities.length > 0) {
+      fetchAreasForCity(formData.city);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.city, cities.length]);
 
   const handleAmenityToggle = (amenity: Amenity) => {
     setFormData(prev => ({
@@ -456,12 +537,27 @@ useEffect(() => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'price' || name === 'size' || name === 'rating' || name === 'capacity' || name === 'superArea' 
-        ? Number(value) || 0 
-        : value,
-    }));
+    
+    // If city changes, reset area and fetch new areas
+    if (name === 'city') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        area: '', // Reset area when city changes
+      }));
+      if (value) {
+        fetchAreasForCity(value);
+      } else {
+        setAreas([]);
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: name === 'price' || name === 'size' || name === 'rating' || name === 'capacity' || name === 'superArea' 
+          ? Number(value) || 0 
+          : value,
+      }));
+    }
     
     // Update preview when image URL changes
     if (name === 'image' && uploadMethod === 'url') {
@@ -646,8 +742,12 @@ useEffect(() => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
             >
-              <option value="Mumbai">Mumbai</option>
-              <option value="Pune">Pune</option>
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -660,30 +760,17 @@ useEffect(() => {
               value={formData.area}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+              disabled={!formData.city || loadingAreas}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value="">Select Area</option>
-              <option value="Andheri">Andheri</option>
-              <option value="Andheri West">Andheri West</option>
-              <option value="Andheri East">Andheri East</option>
-              <option value="Bandra">Bandra</option>
-              <option value="BKC">BKC</option>
-              <option value="Borivali">Borivali</option>
-              <option value="Borivali West">Borivali West</option>
-              <option value="Churchgate">Churchgate</option>
-              <option value="Dadar">Dadar</option>
-              <option value="Goregaon">Goregaon</option>
-              <option value="Lower Parel">Lower Parel</option>
-              <option value="Malad">Malad</option>
-              <option value="Marol">Marol</option>
-              <option value="Mulund">Mulund</option>
-              <option value="Navi Mumbai">Navi Mumbai</option>
-              <option value="Powai">Powai</option>
-              <option value="Thane">Thane</option>
-              <option value="Vashi">Vashi</option>
-              <option value="Vikhroli">Vikhroli</option>
-              <option value="Vile Parle">Vile Parle</option>
-              <option value="Worli">Worli</option>
+              <option value="">
+                {loadingAreas ? 'Loading areas...' : formData.city ? 'Select Area' : 'Select City first'}
+              </option>
+              {areas.map((area) => (
+                <option key={area.id} value={area.name}>
+                  {area.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -699,6 +786,23 @@ useEffect(() => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
               placeholder=""
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Type of Property
+            </label>
+            <select
+              name="propertyTier"
+              value={formData.propertyTier}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+            >
+              <option value="">Select Type</option>
+              <option value="Premium">Premium</option>
+              <option value="Luxury">Luxury</option>
+              <option value="Ultra Luxury">Ultra Luxury</option>
+            </select>
           </div>
 
           <div>
@@ -928,6 +1032,20 @@ useEffect(() => {
                 type="text"
                 name="railwayStationDistance"
                 value={formData.railwayStationDistance}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                placeholder=""
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Google Map Link
+              </label>
+              <input
+                type="url"
+                name="googleMapLink"
+                value={formData.googleMapLink}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
                 placeholder=""

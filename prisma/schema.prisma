@@ -91,6 +91,8 @@ model Property {
   locationDetails String? // e.g., "Sumer Plaza, Sankasth Pada Welfare Society, Marol, Andheri East, Mumbai, Maharashtra"
   metroStationDistance String? // e.g., "2 km away from Marol Naka Metro Station"
   railwayStationDistance String? // e.g., "3.5 km away from Andheri Railway Station"
+  googleMapLink String? // Google Maps link for the property location
+  propertyTier String? // Premium, Luxury, Ultra Luxury
   aboutWorkspace String? @db.Text // e.g., "one of the best business centres in Marol..."
   capacity Int? // e.g., 220+ seats
   superArea Int? // e.g., 10000+ sq ft

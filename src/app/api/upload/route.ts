@@ -1,3 +1,47 @@
+import { NextResponse } from "next/server";
+
+export async function POST(request: Request) {
+  try {
+    const incomingForm = await request.formData();
+    const file = incomingForm.get("file");
+
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const uploadForm = new FormData();
+    uploadForm.append("file", file);
+
+    const token = process.env.UPLOAD_TOKEN;
+    if (!token) {
+      return NextResponse.json(
+        { error: "Server misconfiguration: UPLOAD_TOKEN missing" },
+        { status: 500 }
+      );
+    }
+
+    const response = await fetch("https://files.beyondspacework.com/upload.php", {
+      method: "POST",
+      headers: {
+        "X-Upload-Token": token,
+      },
+      body: uploadForm,
+      // credentials not required; cross-origin POST to PHP endpoint
+    });
+
+    const data = await response
+      .json()
+      .catch(() => ({ error: "Invalid JSON from upstream" }));
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Unexpected error", details: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';

@@ -10,6 +10,7 @@ import PropertyList from '@/components/admin/PropertyList';
 import ContactList from '@/components/admin/ContactList';
 import RequirementsList from '@/components/admin/RequirementsList';
 import CustomerSubmissions from '@/components/admin/CustomerSubmissions';
+import AreasList from '@/components/admin/AreasList';
 
 interface User {
   id: string;
@@ -179,6 +180,13 @@ export default function AdminPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <h1 className="text-2xl font-bold text-gray-900 mb-6">Customer Submissions</h1>
                   <CustomerSubmissions />
+                </div>
+              </div>
+            )}
+            {activeTab === 'areas' && (
+              <div className="p-8">
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <AreasList />
                 </div>
               </div>
             )}

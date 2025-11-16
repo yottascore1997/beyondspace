@@ -93,6 +93,8 @@ export async function PUT(
       locationDetails: propertyData.locationDetails ?? existingProperty.locationDetails,
       metroStationDistance: propertyData.metroStationDistance ?? existingProperty.metroStationDistance,
       railwayStationDistance: propertyData.railwayStationDistance ?? existingProperty.railwayStationDistance,
+      googleMapLink: propertyData.googleMapLink ?? existingProperty.googleMapLink,
+      propertyTier: propertyData.propertyTier ?? existingProperty.propertyTier,
       aboutWorkspace: propertyData.aboutWorkspace ?? existingProperty.aboutWorkspace,
       capacity: toInt(propertyData.capacity, existingProperty.capacity),
       superArea: toInt(propertyData.superArea, existingProperty.superArea),

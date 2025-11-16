@@ -160,6 +160,8 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       locationDetails: propertyData.locationDetails || null,
       metroStationDistance: propertyData.metroStationDistance || null,
       railwayStationDistance: propertyData.railwayStationDistance || null,
+      googleMapLink: propertyData.googleMapLink || null,
+      propertyTier: propertyData.propertyTier || null,
       aboutWorkspace: propertyData.aboutWorkspace || null,
       capacity: propertyData.capacity ? parseInt(propertyData.capacity) : null,
       superArea: propertyData.superArea ? parseInt(propertyData.superArea) : null,
