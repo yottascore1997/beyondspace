@@ -856,6 +856,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
             >
               <option value="">Select Type</option>
+              <option value="Popular">Popular</option>
               <option value="Premium">Premium</option>
               <option value="Luxury">Luxury</option>
               <option value="Ultra Luxury">Ultra Luxury</option>
@@ -983,7 +984,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
             {uploadedImages.length > 0 && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Selected Images ({uploadedImages.length}/5)
+                  Selected Images ({uploadedImages.length}/10)
                 </label>
                 
                 {/* Main Image Preview - Large */}
@@ -1316,7 +1317,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
                     <div className="mb-2">
                       <h4 className="font-semibold text-gray-900">{plan.title}</h4>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className={plan.id === 'meeting-room' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-3 gap-3'}>
                       <div className={plan.id === 'meeting-room' ? 'col-span-2' : ''}>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           Description
@@ -1345,7 +1346,20 @@ const loadPropertyForEdit = async (propertyId: string) => {
                         )}
                       </div>
                       
-                      {/* Price column removed as requested */}
+                      {plan.id !== 'meeting-room' && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Price
+                          </label>
+                          <input
+                            type="text"
+                            value={plan.price}
+                            onChange={(e) => handleSeatingPlanUpdate(plan.id, 'price', e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                            placeholder=""
+                          />
+                        </div>
+                      )}
                       
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
