@@ -102,37 +102,39 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
 
   const purposes = [];
 
-  const cities = [
-    { value: 'all', label: 'Select City' },
-    { value: 'Mumbai', label: 'Mumbai' },
-    { value: 'Thane', label: 'Thane' },
-    { value: 'Navi Mumbai', label: 'Navi Mumbai' },
-  ];
+  const [cityOptions, setCityOptions] = useState<{ id: string; name: string }[]>([]);
+  const [areaOptions, setAreaOptions] = useState<{ id: string; name: string; cityId: string }[]>([]);
+  const [selectedCityId, setSelectedCityId] = useState<string>('');
 
-  const areas = [
-    { value: 'all', label: 'Any Area' },
-    { value: 'Thane', label: 'Thane' },
-    { value: 'Navi Mumbai', label: 'Navi Mumbai' },
-    { value: 'Andheri West', label: 'Andheri West' },
-    { value: 'Andheri East', label: 'Andheri East' },
-    { value: 'Andheri', label: 'Andheri' },
-    { value: 'BKC', label: 'BKC' },
-    { value: 'Lower Parel', label: 'Lower Parel' },
-    { value: 'Vashi', label: 'Vashi' },
-    { value: 'Powai', label: 'Powai' },
-    { value: 'Borivali', label: 'Borivali' },
-    { value: 'Goregaon', label: 'Goregaon' },
-    { value: 'Bandra', label: 'Bandra' },
-    { value: 'Malad', label: 'Malad' },
-    { value: 'Dadar', label: 'Dadar' },
-    { value: 'Mulund', label: 'Mulund' },
-    { value: 'Borivali West', label: 'Borivali West' },
-    { value: 'Vikhroli', label: 'Vikhroli' },
-    { value: 'Worli', label: 'Worli' },
-    { value: 'Churchgate', label: 'Churchgate' },
-    { value: 'Marol', label: 'Marol' },
-    { value: 'Vile Parle', label: 'Vile Parle' }
-  ];
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const res = await fetch('/api/public/cities', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setCityOptions(data);
+          // If filters.city already has a name, map to id
+          const match = data.find((c: { name: string }) => c.name === filters.city);
+          if (match) setSelectedCityId(match.id);
+        }
+      } catch {}
+    };
+    loadCities();
+  }, [filters.city]);
+
+  useEffect(() => {
+    const loadAreas = async () => {
+      try {
+        const url = selectedCityId ? `/api/public/areas?cityId=${encodeURIComponent(selectedCityId)}` : '/api/public/areas';
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setAreaOptions(data);
+        }
+      } catch {}
+    };
+    loadAreas();
+  }, [selectedCityId]);
 
   const quickFilters = [
     { key: 'coworking', label: 'Coworking' },
@@ -240,14 +242,19 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             <div className="group">
               <label className="block text-gray-800 text-xs font-semibold mb-1">City</label>
               <select
-                value={filters.city}
-                onChange={(e) => onFilterChange('city', e.target.value)}
+                value={selectedCityId || ''}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedCityId(id);
+                  const name = cityOptions.find(c => c.id === id)?.name || 'all';
+                  onFilterChange('city', name);
+                  onFilterChange('area', 'all');
+                }}
                 className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
               >
-                {cities.map((city) => (
-                  <option key={city.value} value={city.value}>
-                    {city.label}
-                  </option>
+                <option value="">Select City</option>
+                {cityOptions.map((city) => (
+                  <option key={city.id} value={city.id}>{city.name}</option>
                 ))}
               </select>
             </div>
@@ -259,10 +266,9 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
                 onChange={(e) => onFilterChange('area', e.target.value)}
                 className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
               >
-                {areas.map((area) => (
-                  <option key={area.value} value={area.value}>
-                    {area.label}
-                  </option>
+                <option value="all">Any Area</option>
+                {areaOptions.map((area) => (
+                  <option key={area.id} value={area.name}>{area.name}</option>
                 ))}
               </select>
             </div>

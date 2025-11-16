@@ -37,6 +37,9 @@ export default function AreasList() {
   const [bulkCityId, setBulkCityId] = useState<string>('');
   const [bulkText, setBulkText] = useState<string>('');
   const [bulkBusy, setBulkBusy] = useState<boolean>(false);
+  const [formBusy, setFormBusy] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string>('');
+  const [formOk, setFormOk] = useState<string>('');
 
   useEffect(() => {
     fetchData();
@@ -111,6 +114,8 @@ export default function AreasList() {
     setShowEditModal(true);
     setError('');
     setMessage('');
+    setFormError('');
+    setFormOk('');
   };
 
   const handleDelete = async (area: Area) => {
@@ -145,6 +150,9 @@ export default function AreasList() {
     e.preventDefault();
     setError('');
     setMessage('');
+    setFormError('');
+    setFormOk('');
+    setFormBusy(true);
 
     try {
       const token = localStorage.getItem('token');
@@ -161,21 +169,39 @@ export default function AreasList() {
       });
 
       if (response.ok) {
-        setMessage(editingArea ? 'Area updated successfully' : 'Area added successfully');
+        setFormOk(editingArea ? 'Area updated successfully' : 'Area added successfully');
         setShowAddModal(false);
         setShowEditModal(false);
         setEditingArea(null);
         setFormData({ name: '', cityId: '' });
         fetchData();
-        setTimeout(() => setMessage(''), 3000);
+        setTimeout(() => {
+          setFormOk('');
+          setMessage('');
+        }, 2000);
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to save area');
+        let msg = 'Failed to save area';
+        try {
+          const data = await response.json();
+          if (data?.error) msg = data.error;
+        } catch {
+          try {
+            const text = await response.text();
+            if (text) msg = `${msg}: ${text.slice(0, 200)}`;
+          } catch {}
+        }
+        if (response.status === 401) {
+          msg = 'Unauthorized. Please log in again.';
+        }
+        setFormError(msg);
+        setError(msg);
       }
     } catch (error) {
       console.error('Error saving area:', error);
+      setFormError('Failed to save area');
       setError('Failed to save area');
     }
+    setFormBusy(false);
   };
 
   const handleAddCity = async () => {
@@ -291,8 +317,15 @@ export default function AreasList() {
                 .filter(a => a.cityId === filterCityId)
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((area) => (
-                  <div key={area.id} className="flex items-center justify-start gap-2 px-3 py-2 border rounded-lg">
+                  <div key={area.id} className="flex items-center justify-between gap-2 px-3 py-2 border rounded-lg">
                     <span className="text-sm text-gray-800 truncate">{area.name}</span>
+                    <button
+                      onClick={() => handleEdit(area)}
+                      className="text-xs text-[#6b5bff] hover:text-[#4e3fff]"
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
                   </div>
               ))}
             </div>
@@ -310,12 +343,15 @@ export default function AreasList() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Area Name
                   </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {areas.length === 0 ? (
                   <tr>
-                    <td colSpan={2} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
                       No areas found. Click "Add Area" to create one.
                     </td>
                   </tr>
@@ -327,6 +363,14 @@ export default function AreasList() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {area.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleEdit(area)}
+                          className="text-[#a08efe] hover:text-[#7a66ff]"
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -403,6 +447,16 @@ export default function AreasList() {
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Area</h3>
             <form onSubmit={handleSubmit}>
+              {formError && (
+                <div className="mb-3 p-2 text-sm rounded bg-red-50 text-red-700 border border-red-200">
+                  {formError}
+                </div>
+              )}
+              {formOk && (
+                <div className="mb-3 p-2 text-sm rounded bg-green-50 text-green-700 border border-green-200">
+                  {formOk}
+                </div>
+              )}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   City *
@@ -441,6 +495,8 @@ export default function AreasList() {
                     setShowEditModal(false);
                     setEditingArea(null);
                     setFormData({ name: '', cityId: '' });
+                    setFormError('');
+                    setFormOk('');
                   }}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
@@ -448,9 +504,10 @@ export default function AreasList() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-gradient-to-r from-[#a08efe] to-[#7a66ff] text-white rounded-lg hover:from-[#8a7efe] hover:to-[#8a76ff] transition-colors"
+                  disabled={formBusy}
+                  className="px-4 py-2 bg-gradient-to-r from-[#a08efe] to-[#7a66ff] text-white rounded-lg disabled:opacity-50 hover:from-[#8a7efe] hover:to-[#8a76ff] transition-colors"
                 >
-                  Update Area
+                  {formBusy ? 'Updating...' : 'Update Area'}
                 </button>
               </div>
             </form>

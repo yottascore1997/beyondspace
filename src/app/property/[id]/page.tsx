@@ -460,9 +460,15 @@ export default function PropertyDetails() {
                         <p className="text-base font-semibold text-gray-800 uppercase tracking-wide">
                           Metro Station
                         </p>
-                        <p className="text-gray-700 text-lg font-normal">
-                          {property.metroStationDistance}
-                        </p>
+                        <div className="text-gray-700 text-lg font-normal">
+                          {property.metroStationDistance.split('/').map((seg, i) => {
+                            const text = seg.trim();
+                            if (!text) return null;
+                            return (
+                              <div key={i}>{text}</div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -473,9 +479,15 @@ export default function PropertyDetails() {
                         <p className="text-base font-semibold text-gray-800 uppercase tracking-wide">
                           Railway Station
                         </p>
-                        <p className="text-gray-700 text-lg font-normal">
-                          {property.railwayStationDistance}
-                        </p>
+                        <div className="text-gray-700 text-lg font-normal">
+                          {property.railwayStationDistance.split('/').map((seg, i) => {
+                            const text = seg.trim();
+                            if (!text) return null;
+                            return (
+                              <div key={i}>{text}</div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -506,7 +518,21 @@ export default function PropertyDetails() {
             <div className="mb-8">
               <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
               
-                {property.propertyOptions.map((plan, index) => {
+                {[...property.propertyOptions]
+                  .slice()
+                  .sort((a, b) => {
+                    const isMeetingA = a.title.toLowerCase().includes('meeting room');
+                    const isMeetingB = b.title.toLowerCase().includes('meeting room');
+                    if (isMeetingA && isMeetingB) {
+                      const num = (s: string) => {
+                        const m = s.match(/\d+/);
+                        return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+                      };
+                      return num(a.seating || '') - num(b.seating || '');
+                    }
+                    return 0;
+                  })
+                  .map((plan, index) => {
                   // Map seating plan titles to default images
                   const getImageForPlan = (title: string) => {
                     const titleLower = title.toLowerCase();

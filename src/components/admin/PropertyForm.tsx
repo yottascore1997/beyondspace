@@ -31,6 +31,7 @@ interface SeatingPlan {
   price: string;
   seating: string;
   isSelected: boolean;
+  seatingPrices?: Record<string, string>;
 }
 
 interface PropertyFormData {
@@ -55,10 +56,15 @@ interface PropertyFormData {
   workspaceName: string;
   workspaceTimings: string;
   workspaceClosedDays: string;
+  monFriTime: string;
+  saturdayTime: string;
+  sundayTime: string;
   amenities: Amenity[];
   locationDetails: string;
   metroStationDistance: string;
+  metroStationDistance2: string;
   railwayStationDistance: string;
+  railwayStationDistance2: string;
   googleMapLink: string;
   propertyTier: string;
   aboutWorkspace: string;
@@ -114,6 +120,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
     price: '',
     seating: '',
     isSelected: false,
+    seatingPrices: {},
   },
   {
     id: 'managed-office-space',
@@ -154,10 +161,15 @@ const createInitialFormData = (): PropertyFormData => ({
   workspaceName: '',
   workspaceTimings: '',
   workspaceClosedDays: '',
+  monFriTime: '',
+  saturdayTime: '',
+  sundayTime: '',
   amenities: [],
   locationDetails: '',
   metroStationDistance: '',
+  metroStationDistance2: '',
   railwayStationDistance: '',
+  railwayStationDistance2: '',
   googleMapLink: '',
   propertyTier: '',
   aboutWorkspace: '',
@@ -214,7 +226,6 @@ export default function PropertyForm({
     { key: 'flexidesk', label: 'Flexi Desk', type: 'COWORKING', purpose: 'commercial' },
     { key: 'virtualoffice', label: 'Virtual Office', type: 'COWORKING', purpose: 'commercial' },
     { key: 'meetingroom', label: 'Meeting Room', type: 'COMMERCIAL', purpose: 'commercial' },
-    { key: 'enterpriseoffices', label: 'Enterprise Offices', type: 'MANAGED_OFFICE', purpose: 'commercial' },
   ];
 
   const getCategoryLabels = (keys: string[]) =>
@@ -324,10 +335,15 @@ const loadPropertyForEdit = async (propertyId: string) => {
       workspaceName: property.workspaceName || '',
       workspaceTimings: property.workspaceTimings || '',
       workspaceClosedDays: property.workspaceClosedDays || '',
+      monFriTime: '',
+      saturdayTime: '',
+      sundayTime: '',
       amenities: Array.isArray(property.amenities) ? property.amenities : [],
       locationDetails: property.locationDetails || '',
       metroStationDistance: property.metroStationDistance || '',
+      metroStationDistance2: '',
       railwayStationDistance: property.railwayStationDistance || '',
+      railwayStationDistance2: '',
       googleMapLink: property.googleMapLink || '',
       propertyTier: property.propertyTier || '',
       aboutWorkspace: property.aboutWorkspace || '',
@@ -479,15 +495,64 @@ const loadPropertyForEdit = async (propertyId: string) => {
 
       const selectedPlans = formData.seatingPlans
         .filter(plan => plan.isSelected)
-        .map(plan => ({
-          title: plan.title,
-          description: plan.description,
-          price: plan.price,
-          seating: plan.seating,
-        }));
+        .flatMap(plan => {
+          if (plan.id === 'meeting-room') {
+            const selectedSeats = (plan.seating || '').split(',').map(s => s.trim()).filter(Boolean);
+            if (selectedSeats.length === 0) {
+              return [{
+                title: plan.title,
+                description: plan.description,
+                price: plan.price,
+                seating: '',
+              }];
+            }
+            return selectedSeats.map(seat => ({
+              title: plan.title,
+              description: plan.description,
+              price: (plan.seatingPrices && plan.seatingPrices[seat]) || '',
+              seating: seat,
+            }));
+          }
+          return [{
+            title: plan.title,
+            description: plan.description,
+            price: plan.price,
+            seating: plan.seating,
+          }];
+        });
+
+      // Combine dual distances into single strings to fit current schema
+      const metroParts = [
+        (formData.metroStationDistance || '').trim(),
+        (formData.metroStationDistance2 || '').trim(),
+      ];
+      const combinedMetro = metroParts
+        .map(s => (s || '').trim())
+        .filter(Boolean)
+        .join(' / ');
+      const railParts = [
+        (formData.railwayStationDistance || '').trim(),
+        (formData.railwayStationDistance2 || '').trim(),
+      ];
+      const combinedRail = railParts
+        .map(s => (s || '').trim())
+        .filter(Boolean)
+        .join(' / ');
+
+      // Build combined timings to fit existing schema fields
+      const timingsParts = [
+        formData.monFriTime ? `Mon-Fri: ${formData.monFriTime}` : '',
+        formData.saturdayTime ? `Sat: ${formData.saturdayTime}` : '',
+        formData.sundayTime ? `Sun: ${formData.sundayTime}` : '',
+      ].filter(Boolean);
+      const workspaceTimingsCombined = timingsParts.join(' | ');
 
       const submitData = {
         ...formData,
+        workspaceTimings: workspaceTimingsCombined,
+        workspaceClosedDays: '',
+        metroStationDistance: combinedMetro,
+        railwayStationDistance: combinedRail,
         images: uploadedImages,
         propertyOptions: selectedPlans.length > 0 ? selectedPlans : null,
         seatingPlans: undefined,
@@ -989,7 +1054,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location Details *
+                Address Details
               </label>
               <textarea
                 name="locationDetails"
@@ -1012,8 +1077,19 @@ const loadPropertyForEdit = async (propertyId: string) => {
                 value={formData.metroStationDistance}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                placeholder=""
               />
+              <div className="mt-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Secondary Metro Station (optional)
+                </label>
+                <input
+                  type="text"
+                  name="metroStationDistance2"
+                  value={formData.metroStationDistance2}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                />
+              </div>
             </div>
 
             <div>
@@ -1026,8 +1102,19 @@ const loadPropertyForEdit = async (propertyId: string) => {
                 value={formData.railwayStationDistance}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                placeholder=""
               />
+              <div className="mt-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Secondary Railway Station (optional)
+                </label>
+                <input
+                  type="text"
+                  name="railwayStationDistance2"
+                  value={formData.railwayStationDistance2}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                />
+              </div>
             </div>
 
             <div className="md:col-span-2">
@@ -1046,7 +1133,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                About Property
+                About Space
               </label>
               <textarea
                 name="aboutWorkspace"
@@ -1079,29 +1166,33 @@ const loadPropertyForEdit = async (propertyId: string) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {formData.type === 'COWORKING' ? 'Workspace Timings *' : 'Office Timings *'}
                 </label>
-                <input
-                  type="text"
-                  name="workspaceTimings"
-                  value={formData.workspaceTimings}
-                  onChange={handleChange}
-                  required={formData.type === 'COWORKING' || formData.type === 'MANAGED_OFFICE'}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder=""
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Closed Days
-                </label>
-                <input
-                  type="text"
-                  name="workspaceClosedDays"
-                  value={formData.workspaceClosedDays}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder=""
-                />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <input
+                    type="text"
+                    name="monFriTime"
+                    value={formData.monFriTime}
+                    onChange={handleChange}
+                    required={formData.type === 'COWORKING' || formData.type === 'MANAGED_OFFICE'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                    placeholder="Mon to Friday"
+                  />
+                  <input
+                    type="text"
+                    name="saturdayTime"
+                    value={formData.saturdayTime}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                    placeholder="Saturday"
+                  />
+                  <input
+                    type="text"
+                    name="sundayTime"
+                    value={formData.sundayTime}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                    placeholder="Sunday"
+                  />
+                </div>
               </div>
 
               <div>
@@ -1225,39 +1316,43 @@ const loadPropertyForEdit = async (propertyId: string) => {
                     <div className="mb-2">
                       <h4 className="font-semibold text-gray-900">{plan.title}</h4>
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className={plan.id === 'meeting-room' ? 'col-span-2' : ''}>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           Description
                         </label>
-                        <input
-                          type="text"
-                          value={plan.description}
-                          onChange={(e) => handleSeatingPlanUpdate(plan.id, 'description', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                          placeholder=""
-                        />
+                        {plan.id === 'meeting-room' ? (
+                          <textarea
+                            value={plan.description}
+                            onChange={(e) => handleSeatingPlanUpdate(plan.id, 'description', e.target.value)}
+                            rows={8}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                          />
+                        ) : plan.id === 'managed-office-space' || plan.id === 'day-pass' ? (
+                          <textarea
+                            value={plan.description}
+                            onChange={(e) => handleSeatingPlanUpdate(plan.id, 'description', e.target.value)}
+                            rows={6}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                          />
+                        ) : (
+                          <textarea
+                            value={plan.description}
+                            onChange={(e) => handleSeatingPlanUpdate(plan.id, 'description', e.target.value)}
+                            rows={4}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                          />
+                        )}
                       </div>
                       
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Price
-                        </label>
-                        <input
-                          type="text"
-                          value={plan.price}
-                          onChange={(e) => handleSeatingPlanUpdate(plan.id, 'price', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                          placeholder=""
-                        />
-                      </div>
+                      {/* Price column removed as requested */}
                       
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           Seating
                         </label>
                         {plan.id === 'meeting-room' ? (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-col gap-2">
                             {['04 Seater','06 Seater','08 Seater','10 Seater','12+ Seats'].map((opt) => {
                               const current = (plan.seating || '').split(',').map(s => s.trim()).filter(Boolean);
                               const checked = current.includes(opt);
@@ -1272,10 +1367,30 @@ const loadPropertyForEdit = async (propertyId: string) => {
                                 handleSeatingPlanUpdate(plan.id, 'seating', seatingValue);
                               };
                               return (
-                                <label key={opt} className="inline-flex items-center gap-1 border rounded-md px-2 py-1 text-xs">
-                                  <input type="checkbox" checked={checked} onChange={toggle} />
-                                  <span>{opt}</span>
-                                </label>
+                                <div key={opt} className="flex items-center gap-3">
+                                  <label className="inline-flex items-center gap-1 border rounded-md px-2 py-1 text-xs">
+                                    <input type="checkbox" checked={checked} onChange={toggle} />
+                                    <span>{opt}</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={(plan.seatingPrices && plan.seatingPrices[opt]) || ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        seatingPlans: prev.seatingPlans.map(p => {
+                                          if (p.id !== plan.id) return p;
+                                          const next = { ...(p.seatingPrices || {}) };
+                                          next[opt] = value;
+                                          return { ...p, seatingPrices: next };
+                                        })
+                                      }));
+                                    }}
+                                    placeholder="Price"
+                                    className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                                  />
+                                </div>
                               );
                             })}
                           </div>

@@ -14,6 +14,7 @@ interface Property {
   title: string;
   city: string;
   area: string;
+  sublocation?: string;
   purpose: string;
   type: string;
   displayOrder?: number;
@@ -81,6 +82,9 @@ export default function CategoryPage() {
   const locationMenuRef = useRef<HTMLDivElement | null>(null);
   const propertiesPerPage = 8;
   const initialPropertiesCount = 30; // Show first 30 without pagination
+  const [cityOptions, setCityOptions] = useState<{ id: string; name: string }[]>([]);
+  const [areaOptions, setAreaOptions] = useState<{ id: string; name: string; cityId: string }[]>([]);
+  const [mumbaiCityId, setMumbaiCityId] = useState<string>('');
 
   // Decode the category name from URL
   const categoryName = decodeURIComponent(category);
@@ -88,6 +92,30 @@ export default function CategoryPage() {
   useEffect(() => {
     fetchCategoryProperties();
   }, [category]);
+
+  useEffect(() => {
+    const loadCitiesAreas = async () => {
+      try {
+        const citiesRes = await fetch('/api/public/cities', { cache: 'no-store' });
+        if (citiesRes.ok) {
+          const cities = await citiesRes.json();
+          setCityOptions(cities);
+          const mumbai = cities.find((c: { name: string }) => c.name?.toLowerCase() === 'mumbai');
+          if (mumbai?.id) {
+            setMumbaiCityId(mumbai.id);
+            const areasRes = await fetch(`/api/public/areas?cityId=${encodeURIComponent(mumbai.id)}`, { cache: 'no-store' });
+            if (areasRes.ok) {
+              const areas = await areasRes.json();
+              setAreaOptions(areas);
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+    loadCitiesAreas();
+  }, []);
 
   useEffect(() => {
     filterAndSortProperties();
@@ -137,7 +165,8 @@ export default function CategoryPage() {
     if (searchQuery.trim() !== '') {
       filtered = filtered.filter(property => 
         property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.area.toLowerCase().includes(searchQuery.toLowerCase())
+        property.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (property.sublocation ? property.sublocation.toLowerCase().includes(searchQuery.toLowerCase()) : false)
       );
     }
 
@@ -272,48 +301,11 @@ export default function CategoryPage() {
 
   const categoryDisplayName = getCategoryDisplayName(categoryName);
 
-  const quickFilterAreas = [
-    { key: 'all', label: 'All Areas' },
-    { key: 'Thane', label: 'Thane' },
-    { key: 'Navi Mumbai', label: 'Navi Mumbai' },
-    { key: 'Andheri West', label: 'Andheri West' },
-    { key: 'Andheri East', label: 'Andheri East' },
-    { key: 'Andheri', label: 'Andheri' },
-    { key: 'BKC', label: 'BKC' },
-    { key: 'Lower Parel', label: 'Lower Parel' },
-    { key: 'Vashi', label: 'Vashi' },
-    { key: 'Powai', label: 'Powai' },
-    { key: 'Borivali', label: 'Borivali' },
-    { key: 'Goregaon', label: 'Goregaon' },
-    { key: 'Bandra', label: 'Bandra' },
-    { key: 'Malad', label: 'Malad' },
-    { key: 'Dadar', label: 'Dadar' },
-    { key: 'Mulund', label: 'Mulund' },
-    { key: 'Borivali West', label: 'Borivali West' },
-    { key: 'Vikhroli', label: 'Vikhroli' },
-    { key: 'Worli', label: 'Worli' },
-    { key: 'Churchgate', label: 'Churchgate' },
-    { key: 'Marol', label: 'Marol' },
-    { key: 'Vile Parle', label: 'Vile Parle' }
-  ];
+  const quickFilterAreas = [{ key: 'all', label: 'All Areas' }].concat(
+    areaOptions.map((a) => ({ key: a.name, label: a.name }))
+  );
 
-  const popularDropdownAreas = [
-    { key: 'Thane', label: 'Thane' },
-    { key: 'Navi Mumbai', label: 'Navi Mumbai' },
-    { key: 'Andheri West', label: 'Andheri West' },
-    { key: 'Andheri East', label: 'Andheri East' },
-    { key: 'Andheri', label: 'Andheri' },
-    { key: 'BKC', label: 'BKC' },
-    { key: 'Lower Parel', label: 'Lower Parel' },
-    { key: 'Vashi', label: 'Vashi' },
-    { key: 'Powai', label: 'Powai' },
-    { key: 'Borivali', label: 'Borivali' },
-    { key: 'Goregaon', label: 'Goregaon' },
-    { key: 'Bandra', label: 'Bandra' },
-    { key: 'Malad', label: 'Malad' },
-    { key: 'Dadar', label: 'Dadar' },
-    { key: 'Mulund', label: 'Mulund' }
-  ];
+  const popularDropdownAreas = areaOptions.slice(0, 16).map(a => ({ key: a.name, label: a.name }));
 
   const handleApplyArea = () => {
     setFilters(prev => ({ ...prev, area: pendingArea || 'all' }));

@@ -27,8 +27,13 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
   };
 }
 
-export function requireAuth(handler: (request: NextRequest, user: AuthUser) => Promise<Response>) {
-  return async (request: NextRequest) => {
+export function requireAuth(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handler: (request: NextRequest, user: AuthUser, context?: any) => Promise<Response>
+) {
+  // Support Next Route Handlers signature: (request, context)
+  // Pass through context (e.g., { params }) to handler
+  return async (request: NextRequest, context?: unknown) => {
     const user = await getAuthUser(request);
     
     if (!user) {
@@ -38,12 +43,16 @@ export function requireAuth(handler: (request: NextRequest, user: AuthUser) => P
       });
     }
 
-    return handler(request, user);
+    // @ts-expect-error context passthrough
+    return handler(request, user, context);
   };
 }
 
-export function requireAdmin(handler: (request: NextRequest, user: AuthUser) => Promise<Response>) {
-  return async (request: NextRequest) => {
+export function requireAdmin(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handler: (request: NextRequest, user: AuthUser, context?: any) => Promise<Response>
+) {
+  return async (request: NextRequest, context?: unknown) => {
     const user = await getAuthUser(request);
     
     if (!user || user.role !== 'ADMIN') {
@@ -53,7 +62,8 @@ export function requireAdmin(handler: (request: NextRequest, user: AuthUser) => 
       });
     }
 
-    return handler(request, user);
+    // @ts-expect-error context passthrough
+    return handler(request, user, context);
   };
 }
 
