@@ -52,6 +52,7 @@ interface Property {
   railwayStationDistance?: string | null;
   googleMapLink?: string | null;
   aboutWorkspace?: string;
+  workspaceTimings?: string | null;
   propertyOptions?: SeatingPlan[] | null;
   createdAt: string;
 }
@@ -84,6 +85,39 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const formatCategoryLabel = (key: string) => CATEGORY_LABELS[key.toLowerCase()] ?? key;
+
+// Helper function to parse workspace timings
+const parseWorkspaceTimings = (timings: string | null | undefined): {
+  monFri: string | null;
+  saturday: string | null;
+  sunday: string | null;
+} => {
+  if (!timings) {
+    return {
+      monFri: null,
+      saturday: null,
+      sunday: null,
+    };
+  }
+
+  const parts = timings.split('|').map(part => part.trim());
+  let monFri: string | null = null;
+  let saturday: string | null = null;
+  let sunday: string | null = null;
+
+  parts.forEach(part => {
+    const lowerPart = part.toLowerCase();
+    if (lowerPart.includes('mon-fri') || lowerPart.includes('mon - fri')) {
+      monFri = part.replace(/mon-fri:?\s*/i, '').replace(/mon - fri:?\s*/i, '').trim();
+    } else if (lowerPart.includes('sat')) {
+      saturday = part.replace(/sat:?\s*/i, '').trim();
+    } else if (lowerPart.includes('sun')) {
+      sunday = part.replace(/sun:?\s*/i, '').trim();
+    }
+  });
+
+  return { monFri, saturday, sunday };
+};
 
 export default function PropertyDetails() {
   const params = useParams();
@@ -750,59 +784,89 @@ export default function PropertyDetails() {
             </div>
 
             {/* Office Timing Section */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-5">Office Timing</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Monday to Friday */}
-                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+            {property.workspaceTimings && (() => {
+              const { monFri, saturday, sunday } = parseWorkspaceTimings(property.workspaceTimings);
+              return (
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-5">Office Timing</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Monday to Friday */}
+                    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
+                      <div className="flex items-center justify-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div className="text-left">
+                          <p className="font-bold text-gray-900">Mon - Fri</p>
+                          <p className="text-xs text-gray-600">Weekdays</p>
+                        </div>
+                      </div>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {monFri || 'Not specified'}
+                      </p>
                     </div>
-                    <div className="text-left">
-                      <p className="font-bold text-gray-900">Mon - Fri</p>
-                      <p className="text-xs text-gray-600">Weekdays</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold text-gray-900 text-sm">09:00 AM - 06:00 PM</p>
-                </div>
 
-                {/* Saturday */}
-                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                    {/* Saturday */}
+                    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
+                      <div className="flex items-center justify-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div className="text-left">
+                          <p className="font-bold text-gray-900">Sat</p>
+                          <p className="text-xs text-gray-600">Saturday</p>
+                        </div>
+                      </div>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {saturday || 'Not specified'}
+                      </p>
                     </div>
-                    <div className="text-left">
-                      <p className="font-bold text-gray-900">Sat</p>
-                      <p className="text-xs text-gray-600">Saturday</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold text-gray-900 text-sm">09:00 AM - 06:00 PM</p>
-                </div>
 
-                {/* Sunday */}
-                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="font-bold text-gray-900">Sun</p>
-                      <p className="text-xs text-gray-600">Sunday</p>
+                    {/* Sunday */}
+                    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
+                      <div className="flex items-center justify-center gap-3 mb-2">
+                        {(() => {
+                          const isClosed = sunday ? sunday.toLowerCase().includes('closed') : false;
+                          return (
+                            <>
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                isClosed
+                                  ? 'bg-red-500' 
+                                  : 'bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600'
+                              }`}>
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  {isClosed ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  )}
+                                </svg>
+                              </div>
+                              <div className="text-left">
+                                <p className="font-bold text-gray-900">Sun</p>
+                                <p className="text-xs text-gray-600">Sunday</p>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                      <p className={`font-semibold text-sm ${
+                        sunday && sunday.toLowerCase().includes('closed')
+                          ? 'text-red-600'
+                          : 'text-gray-900'
+                      }`}>
+                        {sunday || 'Not specified'}
+                      </p>
                     </div>
                   </div>
-                  <p className="font-semibold text-red-600 text-sm">Closed</p>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Amenities Section */}
             <div className="mb-8">

@@ -138,40 +138,68 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
     // Extract images array and remove it from property data
     const { images, ...propertyData } = data;
 
+    // Handle workspace timings - combine monFriTime, saturdayTime, sundayTime if present
+    let workspaceTimingsValue = propertyData.workspaceTimings || null;
+    if (propertyData.monFriTime || propertyData.saturdayTime || propertyData.sundayTime) {
+      const parts: string[] = [];
+      if (propertyData.monFriTime) parts.push(`Mon-Fri: ${propertyData.monFriTime}`);
+      if (propertyData.saturdayTime) parts.push(`Sat: ${propertyData.saturdayTime}`);
+      if (propertyData.sundayTime) parts.push(`Sun: ${propertyData.sundayTime}`);
+      workspaceTimingsValue = parts.join(' | ') || null;
+    }
+
     // Convert lowercase enum values to uppercase and handle data types
-    const finalPropertyData = {
-      ...propertyData,
-      purpose: propertyData.purpose?.toUpperCase(),
-      type: propertyData.type?.toUpperCase(),
-      sublocation: propertyData.sublocation || null,
-      categories: Array.isArray(propertyData.categories)
-        ? propertyData.categories.map((category: string) => category.toLowerCase())
+    const { 
+      monFriTime, 
+      saturdayTime, 
+      sundayTime, 
+      metroStationDistance2, 
+      railwayStationDistance2,
+      ...restPropertyData 
+    } = propertyData;
+    
+    // Explicitly construct finalPropertyData with only valid Prisma fields
+    const finalPropertyData: any = {
+      title: restPropertyData.title,
+      city: restPropertyData.city,
+      area: restPropertyData.area,
+      sublocation: restPropertyData.sublocation || null,
+      purpose: restPropertyData.purpose?.toUpperCase(),
+      type: restPropertyData.type?.toUpperCase(),
+      displayOrder: restPropertyData.displayOrder || 0,
+      categories: Array.isArray(restPropertyData.categories)
+        ? restPropertyData.categories.map((category: string) => category.toLowerCase())
         : [],
       userId: dbUser.id,
       // Convert string numbers to integers
-      price: parseInt(propertyData.price) || 0,
-      size: parseInt(propertyData.size) || 0,
-      rating: parseFloat(propertyData.rating) || 0,
+      price: parseInt(restPropertyData.price) || 0,
+      size: parseInt(restPropertyData.size) || 0,
+      beds: restPropertyData.beds || '',
+      rating: parseFloat(restPropertyData.rating) || 0,
+      image: restPropertyData.image || '',
+      tag: restPropertyData.tag || '',
+      description: restPropertyData.description || '',
+      priceDisplay: restPropertyData.priceDisplay || '',
       // Handle coworking specific fields
-      workspaceName: propertyData.workspaceName || null,
-      workspaceTimings: propertyData.workspaceTimings || null,
-      workspaceClosedDays: propertyData.workspaceClosedDays || null,
-      amenities: propertyData.amenities && Array.isArray(propertyData.amenities) ? propertyData.amenities : null,
-      locationDetails: propertyData.locationDetails || null,
-      metroStationDistance: propertyData.metroStationDistance || null,
-      railwayStationDistance: propertyData.railwayStationDistance || null,
+      workspaceName: restPropertyData.workspaceName || null,
+      workspaceTimings: workspaceTimingsValue,
+      workspaceClosedDays: restPropertyData.workspaceClosedDays || null,
+      amenities: restPropertyData.amenities && Array.isArray(restPropertyData.amenities) ? restPropertyData.amenities : null,
+      locationDetails: restPropertyData.locationDetails || null,
+      metroStationDistance: restPropertyData.metroStationDistance || null,
+      railwayStationDistance: restPropertyData.railwayStationDistance || null,
       // Truncate googleMapLink to fit VARCHAR(191) default in MySQL
-      googleMapLink: propertyData.googleMapLink
-        ? String(propertyData.googleMapLink).slice(0, 191)
+      googleMapLink: restPropertyData.googleMapLink
+        ? String(restPropertyData.googleMapLink).slice(0, 191)
         : null,
-      propertyTier: propertyData.propertyTier || null,
-      aboutWorkspace: propertyData.aboutWorkspace || null,
-      capacity: propertyData.capacity ? parseInt(propertyData.capacity) : null,
-      superArea: propertyData.superArea ? parseInt(propertyData.superArea) : null,
+      propertyTier: restPropertyData.propertyTier || null,
+      aboutWorkspace: restPropertyData.aboutWorkspace || null,
+      capacity: restPropertyData.capacity ? parseInt(restPropertyData.capacity) : null,
+      superArea: restPropertyData.superArea ? parseInt(restPropertyData.superArea) : null,
       // Handle property options
-      propertyOptions: propertyData.propertyOptions && Array.isArray(propertyData.propertyOptions) ? propertyData.propertyOptions : null,
+      propertyOptions: restPropertyData.propertyOptions && Array.isArray(restPropertyData.propertyOptions) ? restPropertyData.propertyOptions : null,
       // Handle office timing
-      officeTiming: propertyData.officeTiming && typeof propertyData.officeTiming === 'object' ? propertyData.officeTiming : null,
+      officeTiming: restPropertyData.officeTiming && typeof restPropertyData.officeTiming === 'object' ? restPropertyData.officeTiming : null,
     };
 
     // Create property with images in a transaction

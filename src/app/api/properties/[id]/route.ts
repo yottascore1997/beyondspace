@@ -52,6 +52,16 @@ export async function PUT(
     const data = await request.json();
     const { images, ...propertyData } = data;
 
+    // Handle workspace timings - combine monFriTime, saturdayTime, sundayTime if present
+    let workspaceTimingsValue = propertyData.workspaceTimings ?? existingProperty.workspaceTimings;
+    if (propertyData.monFriTime || propertyData.saturdayTime || propertyData.sundayTime) {
+      const parts: string[] = [];
+      if (propertyData.monFriTime) parts.push(`Mon-Fri: ${propertyData.monFriTime}`);
+      if (propertyData.saturdayTime) parts.push(`Sat: ${propertyData.saturdayTime}`);
+      if (propertyData.sundayTime) parts.push(`Sun: ${propertyData.sundayTime}`);
+      workspaceTimingsValue = parts.join(' | ') || existingProperty.workspaceTimings;
+    }
+
     const normalizedCategories = Array.isArray(propertyData.categories)
       ? propertyData.categories.map((category: string) => category.toLowerCase())
       : (existingProperty.categories as string[] | null) ?? [];
@@ -87,7 +97,7 @@ export async function PUT(
       tag: propertyData.tag ?? existingProperty.tag,
       description: propertyData.description ?? existingProperty.description,
       workspaceName: propertyData.workspaceName ?? existingProperty.workspaceName,
-      workspaceTimings: propertyData.workspaceTimings ?? existingProperty.workspaceTimings,
+      workspaceTimings: workspaceTimingsValue,
       workspaceClosedDays: propertyData.workspaceClosedDays ?? existingProperty.workspaceClosedDays,
       amenities: propertyData.amenities ?? existingProperty.amenities,
       locationDetails: propertyData.locationDetails ?? existingProperty.locationDetails,

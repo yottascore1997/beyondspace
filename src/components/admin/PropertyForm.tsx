@@ -335,15 +335,55 @@ const loadPropertyForEdit = async (propertyId: string) => {
       workspaceName: property.workspaceName || '',
       workspaceTimings: property.workspaceTimings || '',
       workspaceClosedDays: property.workspaceClosedDays || '',
-      monFriTime: '',
-      saturdayTime: '',
-      sundayTime: '',
+      // Parse workspace timings - format: "Mon-Fri: ... | Sat: ... | Sun: ..."
+      ...(() => {
+        const timingsStr = property.workspaceTimings || '';
+        let monFriTime = '';
+        let saturdayTime = '';
+        let sundayTime = '';
+        
+        if (timingsStr) {
+          const parts: string[] = timingsStr.split('|').map((p: string) => p.trim()).filter((p: string) => Boolean(p));
+          parts.forEach((part: string) => {
+            const lowerPart = part.toLowerCase();
+            if (lowerPart.includes('mon-fri') || lowerPart.includes('mon - fri')) {
+              monFriTime = part.replace(/mon-fri:?\s*/i, '').replace(/mon - fri:?\s*/i, '').trim();
+            } else if (lowerPart.includes('sat')) {
+              saturdayTime = part.replace(/sat:?\s*/i, '').trim();
+            } else if (lowerPart.includes('sun')) {
+              sundayTime = part.replace(/sun:?\s*/i, '').trim();
+            }
+          });
+        }
+        
+        return {
+          monFriTime,
+          saturdayTime,
+          sundayTime,
+        };
+      })(),
       amenities: Array.isArray(property.amenities) ? property.amenities : [],
       locationDetails: property.locationDetails || '',
-      metroStationDistance: property.metroStationDistance || '',
-      metroStationDistance2: '',
-      railwayStationDistance: property.railwayStationDistance || '',
-      railwayStationDistance2: '',
+      // Parse metro station distances - split by " / "
+      ...(() => {
+        const metroStr = property.metroStationDistance || '';
+        const metroParts: string[] = metroStr.split(' / ').map((p: string) => p.trim()).filter((p: string) => Boolean(p));
+        return {
+          metroStationDistance: metroParts[0] || '',
+          metroStationDistance2: metroParts[1] || '',
+        };
+      })(),
+      // Parse railway station distances - split by " / "
+      ...(() => {
+        const railStr = property.railwayStationDistance || '';
+        const railParts: string[] = railStr.split(' / ')
+          .map((p: string) => p.trim())
+          .filter((p: string) => Boolean(p)) as string[];
+        return {
+          railwayStationDistance: railParts[0] || '',
+          railwayStationDistance2: railParts[1] || '',
+        };
+      })(),
       googleMapLink: property.googleMapLink || '',
       propertyTier: property.propertyTier || '',
       aboutWorkspace: property.aboutWorkspace || '',
