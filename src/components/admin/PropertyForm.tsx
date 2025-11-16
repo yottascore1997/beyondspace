@@ -116,14 +116,6 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
     isSelected: false,
   },
   {
-    id: 'enterprise-office',
-    title: 'Enterprise Office',
-    description: '',
-    price: '',
-    seating: '',
-    isSelected: false,
-  },
-  {
     id: 'managed-office-space',
     title: 'Managed Office Space',
     description: '',
@@ -1081,20 +1073,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Workspace Name *
-                </label>
-                <input
-                  type="text"
-                  name="workspaceName"
-                  value={formData.workspaceName}
-                  onChange={handleChange}
-                  required={formData.type === 'COWORKING' || formData.type === 'MANAGED_OFFICE'}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder=""
-                />
-              </div>
+              {/* Workspace Name removed as requested */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1126,31 +1105,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Capacity (Seats)
-                </label>
-                <input
-                  type="number"
-                  name="capacity"
-                  value={formData.capacity}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder=""
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Super Area (sq ft)
-                </label>
-                <input
-                  type="number"
-                  name="superArea"
-                  value={formData.superArea}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder=""
-                />
+                {/* Capacity (Seats) and Super Area removed as requested */}
               </div>
 
             </div>
@@ -1301,13 +1256,38 @@ const loadPropertyForEdit = async (propertyId: string) => {
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           Seating
                         </label>
-                        <input
-                          type="text"
-                          value={plan.seating}
-                          onChange={(e) => handleSeatingPlanUpdate(plan.id, 'seating', e.target.value)}
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                          placeholder=""
-                        />
+                        {plan.id === 'meeting-room' ? (
+                          <div className="flex flex-wrap gap-2">
+                            {['04 Seater','06 Seater','08 Seater','10 Seater','12+ Seats'].map((opt) => {
+                              const current = (plan.seating || '').split(',').map(s => s.trim()).filter(Boolean);
+                              const checked = current.includes(opt);
+                              const toggle = () => {
+                                let next = new Set(current);
+                                if (checked) {
+                                  next.delete(opt);
+                                } else {
+                                  next.add(opt);
+                                }
+                                const seatingValue = Array.from(next).join(', ');
+                                handleSeatingPlanUpdate(plan.id, 'seating', seatingValue);
+                              };
+                              return (
+                                <label key={opt} className="inline-flex items-center gap-1 border rounded-md px-2 py-1 text-xs">
+                                  <input type="checkbox" checked={checked} onChange={toggle} />
+                                  <span>{opt}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            value={plan.seating}
+                            onChange={(e) => handleSeatingPlanUpdate(plan.id, 'seating', e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+                            placeholder=""
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

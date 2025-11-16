@@ -33,6 +33,7 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [selectedArea, setSelectedArea] = useState<string>('All');
+  const [areas, setAreas] = useState<{ id: string; name: string }[]>([]);
   const [areaOrderMap, setAreaOrderMap] = useState<Record<string, string[]>>({});
   const [draggedPropertyId, setDraggedPropertyId] = useState<string | null>(null);
   const [orderDirty, setOrderDirty] = useState(false);
@@ -50,6 +51,7 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
 
   useEffect(() => {
     fetchProperties();
+    fetchAreas();
   }, []);
 
   useEffect(() => {
@@ -82,6 +84,24 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
     }
   };
 
+  const fetchAreas = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/areas', {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Expecting array of { id, name }
+        setAreas(Array.isArray(data) ? data.map((a: any) => ({ id: a.id, name: a.name })) : []);
+      }
+    } catch {
+      // Ignore; filter will simply show none besides All
+    }
+  };
+
   useEffect(() => {
     if (orderDirty) {
       return;
@@ -111,33 +131,14 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
     setAreaOrderMap(newMap);
   }, [properties, orderDirty]);
 
-  const predefinedAreas = [
-    'Thane',
-    'Navi Mumbai',
-    'Andheri West',
-    'Andheri East',
-    'Andheri',
-    'BKC',
-    'Lower Parel',
-    'Vashi',
-    'Powai',
-    'Borivali',
-    'Goregaon',
-    'Bandra',
-    'Malad',
-    'Dadar',
-    'Mulund',
-    'Borivali West',
-    'Vikhroli',
-    'Worli',
-    'Churchgate',
-    'Marol',
-    'Vile Parle',
-  ];
-
-  const uniqueAreas = Array.from(
-    new Set([...predefinedAreas, ...properties.map((property) => property.area).filter(Boolean)])
-  );
+  // Use areas defined in Admin (API), fallback to areas present on properties
+  const uniqueAreas = useMemo(() => {
+    const adminAreaNames = areas.map((a) => a.name).filter(Boolean);
+    if (adminAreaNames.length > 0) {
+      return Array.from(new Set(adminAreaNames));
+    }
+    return Array.from(new Set(properties.map((p) => p.area).filter(Boolean)));
+  }, [areas, properties]);
 
   const filteredProperties =
     selectedArea === 'All'

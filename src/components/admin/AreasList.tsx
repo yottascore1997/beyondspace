@@ -27,11 +27,16 @@ export default function AreasList() {
   const [message, setMessage] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [filterCityId, setFilterCityId] = useState<string>('');
   const [editingArea, setEditingArea] = useState<Area | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     cityId: '',
   });
+  const [bulkCityId, setBulkCityId] = useState<string>('');
+  const [bulkText, setBulkText] = useState<string>('');
+  const [bulkBusy, setBulkBusy] = useState<boolean>(false);
 
   useEffect(() => {
     fetchData();
@@ -52,6 +57,14 @@ export default function AreasList() {
       if (citiesResponse.ok) {
         const citiesData = await citiesResponse.json();
         setCities(citiesData);
+        const mumbai = Array.isArray(citiesData)
+          ? citiesData.find((c: { name?: string }) => String(c?.name || '').toLowerCase() === 'mumbai')
+          : null;
+        if (mumbai && !filterCityId) {
+          setFilterCityId(mumbai.id);
+        } else if (!filterCityId && Array.isArray(citiesData) && citiesData.length > 0) {
+          setFilterCityId(citiesData[0].id);
+        }
       }
 
       // Fetch areas
@@ -82,6 +95,13 @@ export default function AreasList() {
     setMessage('');
   };
 
+  const handleBulk = () => {
+    setBulkCityId('');
+    setBulkText('');
+    setShowBulkModal(true);
+    setError('');
+    setMessage('');
+  };
   const handleEdit = (area: Area) => {
     setEditingArea(area);
     setFormData({
@@ -230,63 +250,92 @@ export default function AreasList() {
           >
             Add Area
           </button>
+          <button
+            onClick={handleBulk}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Bulk Add
+          </button>
         </div>
       </div>
 
+      {/* Filter by City */}
+      <div className="mb-4 flex items-center gap-3">
+        <label className="text-sm text-gray-700">Filter by City:</label>
+        <select
+          value={filterCityId}
+          onChange={(e) => setFilterCityId(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+        >
+          {cities.map((city) => (
+            <option key={city.id} value={city.id}>{city.name}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Areas List */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  City
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Area Name
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {areas.length === 0 ? (
+      {filterCityId ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {cities.find(c => c.id === filterCityId)?.name} — Areas ({areas.filter(a => a.cityId === filterCityId).length})
+            </h3>
+          </div>
+          {areas.filter(a => a.cityId === filterCityId).length === 0 ? (
+            <div className="py-8 text-center text-gray-500">
+              No areas found for this city.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {areas
+                .filter(a => a.cityId === filterCityId)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((area) => (
+                  <div key={area.id} className="flex items-center justify-start gap-2 px-3 py-2 border rounded-lg">
+                    <span className="text-sm text-gray-800 truncate">{area.name}</span>
+                  </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                    No areas found. Click "Add Area" to create one.
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    City
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Area Name
+                  </th>
                 </tr>
-              ) : (
-                areas.map((area) => (
-                  <tr key={area.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {area.city.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {area.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleEdit(area)}
-                        className="text-[#a08efe] hover:text-[#7a66ff] mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(area)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {areas.length === 0 ? (
+                  <tr>
+                    <td colSpan={2} className="px-6 py-8 text-center text-gray-500">
+                      No areas found. Click "Add Area" to create one.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  areas.map((area) => (
+                    <tr key={area.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {area.city.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {area.name}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (
@@ -405,6 +454,94 @@ export default function AreasList() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Add Modal */}
+      {showBulkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Bulk Add Areas</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+              <select
+                value={bulkCityId}
+                onChange={(e) => setBulkCityId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+              >
+                <option value="">Select City</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.id}>{city.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Area names (comma or newline separated)</label>
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                rows={6}
+                placeholder="Andheri East, Andheri West, BKC&#10;Powai&#10;Lower Parel"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBulkModal(false);
+                  setBulkCityId('');
+                  setBulkText('');
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={bulkBusy || !bulkCityId || !bulkText.trim()}
+                onClick={async () => {
+                  setBulkBusy(true);
+                  setError('');
+                  setMessage('');
+                  try {
+                    const token = localStorage.getItem('token');
+                    const raw = bulkText
+                      .split(/[\n,]/g)
+                      .map(s => s.trim())
+                      .filter(Boolean);
+                    const unique = Array.from(new Set(raw));
+                    let success = 0;
+                    let failed = 0;
+                    for (const name of unique) {
+                      const res = await fetch('/api/areas', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify({ name, cityId: bulkCityId }),
+                      });
+                      if (res.ok) success++; else failed++;
+                    }
+                    setMessage(`Added ${success} areas${failed ? `, ${failed} skipped/failed` : ''}.`);
+                    setShowBulkModal(false);
+                    setBulkCityId('');
+                    setBulkText('');
+                    fetchData();
+                    setTimeout(() => setMessage(''), 4000);
+                  } catch {
+                    setError('Bulk add failed. Please try again.');
+                  } finally {
+                    setBulkBusy(false);
+                  }
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-[#a08efe] to-[#7a66ff] text-white rounded-lg disabled:opacity-50 hover:from-[#8a7efe] hover:to-[#8a76ff] transition-colors"
+              >
+                {bulkBusy ? 'Adding...' : 'Add Areas'}
+              </button>
+            </div>
           </div>
         </div>
       )}

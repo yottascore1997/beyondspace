@@ -544,10 +544,24 @@ export default function PropertyDetails() {
                             )}
                             
                             {plan.seating && (
-                              <p className="text-gray-700 text-base font-medium mt-2">
-                                <span className="mr-1">👤</span>
-                                <span>Seating : {plan.seating}</span>
-                              </p>
+                              <div className="text-base font-medium mt-2">
+                                <span className="mr-2 inline-block align-middle">👤 Seating:</span>
+                                {plan.title.toLowerCase().includes('meeting room') ? (
+                                  <span className="inline-flex flex-wrap gap-1 align-middle">
+                                    {plan.seating.split(',').map((s) => {
+                                      const label = s.trim();
+                                      if (!label) return null;
+                                      return (
+                                        <span key={label} className="inline-block px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                                          {label}
+                                        </span>
+                                      );
+                                    })}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-700">{plan.seating}</span>
+                                )}
+                              </div>
                             )}
               </div>
 
