@@ -160,7 +160,10 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       locationDetails: propertyData.locationDetails || null,
       metroStationDistance: propertyData.metroStationDistance || null,
       railwayStationDistance: propertyData.railwayStationDistance || null,
-      googleMapLink: propertyData.googleMapLink || null,
+      // Truncate googleMapLink to fit VARCHAR(191) default in MySQL
+      googleMapLink: propertyData.googleMapLink
+        ? String(propertyData.googleMapLink).slice(0, 191)
+        : null,
       propertyTier: propertyData.propertyTier || null,
       aboutWorkspace: propertyData.aboutWorkspace || null,
       capacity: propertyData.capacity ? parseInt(propertyData.capacity) : null,
