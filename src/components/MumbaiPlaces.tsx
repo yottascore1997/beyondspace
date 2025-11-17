@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Place {
   id: string;
@@ -12,6 +13,7 @@ interface Place {
 }
 
 export default function MumbaiPlaces() {
+  const router = useRouter();
   const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<string>('');
@@ -21,6 +23,12 @@ export default function MumbaiPlaces() {
   const handleGetOffer = (placeName: string) => {
     setSelectedPlace(placeName);
     setShowModal(true);
+  };
+
+  const handleAreaClick = (areaName: string) => {
+    // Navigate to coworking category page with area filter
+    const encodedArea = encodeURIComponent(areaName);
+    router.push(`/category/coworking?area=${encodedArea}`);
   };
 
   const smoothScrollBy = (distance: number) => {
@@ -168,6 +176,7 @@ export default function MumbaiPlaces() {
             {orderedItems.map((item, index) => (
               <div
                 key={item.place.id}
+                onClick={() => handleAreaClick(item.place.name)}
                 onMouseEnter={() => setHoveredPlace(item.place.id)}
                 onMouseLeave={() => setHoveredPlace(null)}
                 className={`group relative flex-shrink-0 w-80 h-96 rounded-3xl overflow-hidden shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a08efe]/30 cursor-pointer ${
@@ -218,7 +227,10 @@ export default function MumbaiPlaces() {
                       {item.place.properties}
                     </span>
                     <button
-                      onClick={() => handleGetOffer(item.place.name)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click from triggering
+                        handleGetOffer(item.place.name);
+                      }}
                       className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300"
                     >
                       Get Offer

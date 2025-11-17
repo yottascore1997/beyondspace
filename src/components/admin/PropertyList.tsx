@@ -36,6 +36,7 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
   const [areas, setAreas] = useState<{ id: string; name: string }[]>([]);
   const [areaOrderMap, setAreaOrderMap] = useState<Record<string, string[]>>({});
   const [draggedPropertyId, setDraggedPropertyId] = useState<string | null>(null);
+  const [dragOverPropertyId, setDragOverPropertyId] = useState<string | null>(null);
   const [orderDirty, setOrderDirty] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
 
@@ -204,22 +205,30 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
     setDraggedPropertyId(propertyId);
   };
 
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
-    if (selectedArea === 'All' || !draggedPropertyId) return;
+  const handleDragOver = (event: DragEvent<HTMLDivElement>, propertyId: string) => {
+    if (selectedArea === 'All' || !draggedPropertyId || draggedPropertyId === propertyId) return;
     event.preventDefault();
+    setDragOverPropertyId(propertyId);
   };
 
   const handleDrop = (targetId: string) => {
     if (selectedArea === 'All' || !draggedPropertyId) {
       setDraggedPropertyId(null);
+      setDragOverPropertyId(null);
       return;
     }
     reorderWithinArea(draggedPropertyId, targetId);
     setDraggedPropertyId(null);
+    setDragOverPropertyId(null);
   };
 
   const handleDragEnd = () => {
     setDraggedPropertyId(null);
+    setDragOverPropertyId(null);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverPropertyId(null);
   };
 
   const handleSaveOrder = async () => {
@@ -366,18 +375,47 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
           {sortedFilteredProperties.map((property) => (
             <div
               key={property.id}
-              className={`bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+              className={`bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all relative ${
                 selectedArea !== 'All' ? 'cursor-move' : ''
+              } ${
+                draggedPropertyId === property.id 
+                  ? 'opacity-50 ring-2 ring-[#a08efe] border-[#a08efe]' 
+                  : dragOverPropertyId === property.id && draggedPropertyId
+                  ? 'ring-2 ring-blue-400 border-blue-400 shadow-lg'
+                  : 'border-gray-200'
               }`}
               draggable={selectedArea !== 'All'}
               onDragStart={(event) => handleDragStart(event, property.id)}
-              onDragOver={handleDragOver}
+              onDragOver={(event) => handleDragOver(event, property.id)}
+              onDragLeave={handleDragLeave}
               onDrop={(event) => {
                 event.preventDefault();
                 handleDrop(property.id);
               }}
               onDragEnd={handleDragEnd}
             >
+              {/* Drag Handle Icon - Only show when area is selected (not "All") */}
+              {selectedArea !== 'All' && (
+                <div 
+                  className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md cursor-grab active:cursor-grabbing hover:bg-white transition-colors"
+                  title="Drag to reorder"
+                >
+                  <svg 
+                    className="w-5 h-5 text-gray-600" 
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                    aria-label="Drag to reorder"
+                  >
+                    {/* Grip icon - 6 dots in 2 columns */}
+                    <circle cx="9" cy="5" r="1.5" />
+                    <circle cx="15" cy="5" r="1.5" />
+                    <circle cx="9" cy="12" r="1.5" />
+                    <circle cx="15" cy="12" r="1.5" />
+                    <circle cx="9" cy="19" r="1.5" />
+                    <circle cx="15" cy="19" r="1.5" />
+                  </svg>
+                </div>
+              )}
               <div className="relative h-48">
                 <img
                   src={property.image}

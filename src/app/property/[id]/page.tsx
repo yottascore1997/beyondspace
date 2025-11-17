@@ -654,25 +654,48 @@ export default function PropertyDetails() {
 
               if (filteredPlans.length === 0) return null;
 
+              // Separate Meeting Room plans from other plans
+              const meetingRoomPlans = filteredPlans.filter(plan => 
+                plan.title.toLowerCase().includes('meeting room')
+              );
+              const otherPlans = filteredPlans.filter(plan => 
+                !plan.title.toLowerCase().includes('meeting room')
+              );
+
+              // Combine Meeting Room plans into one
+              let combinedMeetingRoom: SeatingPlan & { seatingPrices?: Record<string, string> } | null = null;
+              if (meetingRoomPlans.length > 0) {
+                const firstMeetingRoom = meetingRoomPlans[0];
+                // Collect all seating options with their prices from all meeting room plans
+                const seatingWithPrices: Record<string, string> = {};
+                meetingRoomPlans.forEach(plan => {
+                  if (plan.seating && plan.price) {
+                    const seatingOption = plan.seating.trim();
+                    seatingWithPrices[seatingOption] = plan.price;
+                  }
+                });
+                
+                // Get all unique seating options and sort by seat count
+                const uniqueSeatingOptions = Object.keys(seatingWithPrices).sort((a, b) => {
+                  const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+                  const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+                  return numA - numB;
+                });
+                
+                combinedMeetingRoom = {
+                  ...firstMeetingRoom,
+                  seating: uniqueSeatingOptions.join(', '),
+                  seatingPrices: seatingWithPrices,
+                };
+              }
+
+              const finalPlans = [...(combinedMeetingRoom ? [combinedMeetingRoom] : []), ...otherPlans];
+
               return (
-                <div className="mb-8">
-                  <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
-                  
-                    {[...filteredPlans]
-                      .slice()
-                      .sort((a, b) => {
-                        const isMeetingA = a.title.toLowerCase().includes('meeting room');
-                        const isMeetingB = b.title.toLowerCase().includes('meeting room');
-                        if (isMeetingA && isMeetingB) {
-                          const num = (s: string) => {
-                            const m = s.match(/\d+/);
-                            return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
-                          };
-                          return num(a.seating || '') - num(b.seating || '');
-                        }
-                        return 0;
-                      })
-                      .map((plan, index) => {
+            <div className="mb-8">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
+              
+                    {finalPlans.map((plan, index) => {
                   // Map seating plan titles to default images
                   const getImageForPlan = (title: string) => {
                     const titleLower = title.toLowerCase();
@@ -686,7 +709,7 @@ export default function PropertyDetails() {
                     <div
                       key={index}
                       className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-lg py-2 px-2.5 ${
-                        index < filteredPlans.length - 1 ? 'mb-5' : ''
+                        index < finalPlans.length - 1 ? 'mb-5' : ''
                       }`}
                     >
                       <div className="flex flex-col md:flex-row gap-2.5">
@@ -713,13 +736,21 @@ export default function PropertyDetails() {
                               <div className="text-base font-medium mt-2">
                                 <span className="mr-2 inline-block align-middle">👤 Seating:</span>
                                 {plan.title.toLowerCase().includes('meeting room') ? (
-                                  <span className="inline-flex flex-wrap gap-1 align-middle">
+                                  <span className="inline-flex flex-wrap gap-2 align-middle">
                                     {plan.seating.split(',').map((s) => {
                                       const label = s.trim();
                                       if (!label) return null;
+                                      const seatingPrice = (plan as SeatingPlan & { seatingPrices?: Record<string, string> }).seatingPrices?.[label];
                                       return (
-                                        <span key={label} className="inline-block px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 border border-blue-200">
-                                          {label}
+                                        <span key={label} className="inline-flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg bg-white border border-blue-200 shadow-sm">
+                                          <span className="text-xs font-semibold text-blue-700">
+                                            {label}
+                                          </span>
+                                          {seatingPrice && (
+                                            <span className="text-xs font-bold text-gray-900">
+                                              {seatingPrice}
+                                            </span>
+                                          )}
                                         </span>
                                       );
                                     })}
@@ -733,7 +764,8 @@ export default function PropertyDetails() {
 
                           {/* Right Side - Price and Button (Vertically Centered) */}
                           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                            {plan.price && (
+                            {/* Don't show general price for Meeting Room as we show individual seating prices */}
+                            {plan.price && !plan.title.toLowerCase().includes('meeting room') && (
                               <div className="text-right mb-2">
                                 <span className="text-xl md:text-2xl font-bold text-gray-900">{plan.price}</span>
                                 <span className="text-lg md:text-xl font-normal text-gray-600 ml-1">/month</span>
@@ -753,7 +785,7 @@ export default function PropertyDetails() {
               </div>
                   );
                 })}
-                </div>
+            </div>
               );
             })() : null}
 
@@ -894,49 +926,49 @@ export default function PropertyDetails() {
             {property.workspaceTimings && (() => {
               const { monFri, saturday, sunday } = parseWorkspaceTimings(property.workspaceTimings);
               return (
-                <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-5">Office Timing</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Monday to Friday */}
-                    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                      <div className="flex items-center justify-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div className="text-left">
-                          <p className="font-bold text-gray-900">Mon - Fri</p>
-                          <p className="text-xs text-gray-600">Weekdays</p>
-                        </div>
-                      </div>
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-5">Office Timing</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Monday to Friday */}
+                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-gray-900">Mon - Fri</p>
+                      <p className="text-xs text-gray-600">Weekdays</p>
+                    </div>
+                  </div>
                       <p className="font-semibold text-gray-900 text-sm">
                         {monFri || 'Not specified'}
                       </p>
-                    </div>
+                </div>
 
-                    {/* Saturday */}
-                    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                      <div className="flex items-center justify-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div className="text-left">
-                          <p className="font-bold text-gray-900">Sat</p>
-                          <p className="text-xs text-gray-600">Saturday</p>
-                        </div>
-                      </div>
+                {/* Saturday */}
+                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-gray-900">Sat</p>
+                      <p className="text-xs text-gray-600">Saturday</p>
+                    </div>
+                  </div>
                       <p className="font-semibold text-gray-900 text-sm">
                         {saturday || 'Not specified'}
                       </p>
-                    </div>
+                </div>
 
-                    {/* Sunday */}
-                    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                      <div className="flex items-center justify-center gap-3 mb-2">
+                {/* Sunday */}
+                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-3 mb-2">
                         {(() => {
                           const isClosed = sunday ? sunday.toLowerCase().includes('closed') : false;
                           return (
@@ -946,22 +978,22 @@ export default function PropertyDetails() {
                                   ? 'bg-red-500' 
                                   : 'bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600'
                               }`}>
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   {isClosed ? (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                   ) : (
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   )}
-                                </svg>
-                              </div>
-                              <div className="text-left">
-                                <p className="font-bold text-gray-900">Sun</p>
-                                <p className="text-xs text-gray-600">Sunday</p>
-                              </div>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-gray-900">Sun</p>
+                      <p className="text-xs text-gray-600">Sunday</p>
+                    </div>
                             </>
                           );
                         })()}
-                      </div>
+                  </div>
                       <p className={`font-semibold text-sm ${
                         sunday && sunday.toLowerCase().includes('closed')
                           ? 'text-red-600'
@@ -969,9 +1001,9 @@ export default function PropertyDetails() {
                       }`}>
                         {sunday || 'Not specified'}
                       </p>
-                    </div>
-                  </div>
                 </div>
+              </div>
+            </div>
               );
             })()}
 

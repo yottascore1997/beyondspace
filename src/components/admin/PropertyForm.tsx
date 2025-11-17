@@ -281,21 +281,77 @@ const loadPropertyForEdit = async (propertyId: string) => {
     const basePlans = createDefaultSeatingPlans();
     const propertyOptions = Array.isArray(property.propertyOptions) ? property.propertyOptions : [];
 
+    // Special handling for Meeting Room - combine multiple entries into one with seatingPrices
+    const meetingRoomPlans = propertyOptions.filter(
+      (option: { title?: string }) => option?.title?.toLowerCase().includes('meeting room')
+    );
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Edit Mode] Meeting Room Plans:', meetingRoomPlans);
+      console.log('[Edit Mode] All Property Options:', propertyOptions);
+    }
+    
     const matchedPlans = basePlans.map((plan) => {
-      const match = propertyOptions.find(
-        (option: { title?: string; description?: string; price?: string; seating?: string }) =>
-          option?.title?.toLowerCase() === plan.title.toLowerCase()
-      );
-      if (match) {
-        // For Meeting Room and Managed Office Space, use default description if empty
-        const defaultDescription = (plan.id === 'meeting-room' || plan.id === 'managed-office-space') && !match.description
-          ? plan.description
-          : (match.description || '');
+      // Special handling for Meeting Room
+      if (plan.id === 'meeting-room' && meetingRoomPlans.length > 0) {
+        // Combine all Meeting Room plans
+        const allSeatingOptions: string[] = [];
+        const seatingPricesMap: Record<string, string> = {};
+        let description = '';
+        
+        meetingRoomPlans.forEach((mrPlan: { description?: string; price?: string; seating?: string }) => {
+          if (mrPlan.seating) {
+            const seatingOption = mrPlan.seating.trim();
+            allSeatingOptions.push(seatingOption);
+            if (mrPlan.price) {
+              seatingPricesMap[seatingOption] = mrPlan.price;
+            }
+          }
+          if (mrPlan.description && !description) {
+            description = mrPlan.description;
+          }
+        });
+        
+        const defaultDescription = !description ? plan.description : description;
+        const combinedSeating = Array.from(new Set(allSeatingOptions)).join(', ');
+        
+        // Debug logging
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Edit Mode] Combined Meeting Room:', {
+            seating: combinedSeating,
+            seatingPrices: seatingPricesMap,
+            description: defaultDescription
+          });
+        }
+        
         return {
           ...plan,
           description: defaultDescription,
-          price: match.price || '',
-          seating: match.seating || '',
+          price: '', // Meeting Room doesn't have general price
+          seating: combinedSeating,
+          isSelected: true,
+          seatingPrices: seatingPricesMap,
+        };
+      }
+      
+      // For other plans
+      const match = propertyOptions.find(
+        (option: { title?: string }) =>
+          option?.title?.toLowerCase() === plan.title.toLowerCase() &&
+          !option?.title?.toLowerCase().includes('meeting room') // Exclude Meeting Room entries
+      );
+      
+      if (match) {
+        // For Meeting Room and Managed Office Space, use default description if empty
+        const defaultDescription = (plan.id === 'meeting-room' || plan.id === 'managed-office-space') && !(match as { description?: string }).description
+          ? plan.description
+          : ((match as { description?: string }).description || '');
+        return {
+          ...plan,
+          description: defaultDescription,
+          price: (match as { price?: string }).price || '',
+          seating: (match as { seating?: string }).seating || '',
           isSelected: true,
         };
       }
@@ -550,12 +606,29 @@ const loadPropertyForEdit = async (propertyId: string) => {
                 seating: '',
               }];
             }
-            return selectedSeats.map(seat => ({
-              title: plan.title,
-              description: plan.description,
-              price: (plan.seatingPrices && plan.seatingPrices[seat]) || '',
-              seating: seat,
-            }));
+            // Ensure seatingPrices is initialized
+            const seatingPrices = plan.seatingPrices || {};
+            
+            // Debug logging before mapping
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[Meeting Room Save] Plan object:', plan);
+              console.log('[Meeting Room Save] Selected Seats:', selectedSeats);
+              console.log('[Meeting Room Save] Seating Prices:', seatingPrices);
+            }
+            
+            return selectedSeats.map(seat => {
+              const seatPrice = seatingPrices[seat] || '';
+              // Debug logging
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`[Meeting Room Save] Seat: "${seat}", Price: "${seatPrice}"`);
+              }
+              return {
+                title: plan.title,
+                description: plan.description,
+                price: seatPrice,
+                seating: seat,
+              };
+            });
           }
           return [{
             title: plan.title,
@@ -591,6 +664,12 @@ const loadPropertyForEdit = async (propertyId: string) => {
       ].filter(Boolean);
       const workspaceTimingsCombined = timingsParts.join(' | ');
 
+      // Debug: Log selected plans before sending
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Submit] Selected Plans:', selectedPlans);
+        console.log('[Submit] Meeting Room Plans:', selectedPlans.filter((p: { title?: string }) => p.title?.toLowerCase().includes('meeting room')));
+      }
+
       const submitData = {
         ...formData,
         workspaceTimings: workspaceTimingsCombined,
@@ -601,6 +680,11 @@ const loadPropertyForEdit = async (propertyId: string) => {
         propertyOptions: selectedPlans.length > 0 ? selectedPlans : null,
         seatingPlans: undefined,
       };
+
+      // Debug: Log final submit data
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Submit] Final Submit Data - propertyOptions:', submitData.propertyOptions);
+      }
 
       const targetPropertyId = currentEditingId ?? editingPropertyId;
       const endpoint = isEditMode && targetPropertyId ? `/api/properties/${targetPropertyId}` : '/api/properties';
@@ -1414,6 +1498,12 @@ const loadPropertyForEdit = async (propertyId: string) => {
                             {['04 Seater','06 Seater','08 Seater','10 Seater','12+ Seats'].map((opt) => {
                               const current = (plan.seating || '').split(',').map(s => s.trim()).filter(Boolean);
                               const checked = current.includes(opt);
+                              
+                              // Debug logging
+                              if (process.env.NODE_ENV === 'development' && plan.id === 'meeting-room') {
+                                console.log(`[Meeting Room UI] Option: "${opt}", Current Seating: [${current.join(', ')}], Checked: ${checked}, Price: ${(plan.seatingPrices && plan.seatingPrices[opt]) || 'empty'}`);
+                              }
+                              
                               const toggle = () => {
                                 let next = new Set(current);
                                 if (checked) {
@@ -1422,7 +1512,23 @@ const loadPropertyForEdit = async (propertyId: string) => {
                                   next.add(opt);
                                 }
                                 const seatingValue = Array.from(next).join(', ');
-                                handleSeatingPlanUpdate(plan.id, 'seating', seatingValue);
+                                // Ensure seatingPrices is initialized when adding a new seating option
+                                setFormData(prev => ({
+                                  ...prev,
+                                  seatingPlans: prev.seatingPlans.map(p => {
+                                    if (p.id !== plan.id) return p;
+                                    const currentPrices = p.seatingPrices || {};
+                                    // Initialize price for new seat if it doesn't exist
+                                    if (!checked && !currentPrices[opt]) {
+                                      currentPrices[opt] = '';
+                                    }
+                                    return {
+                                      ...p,
+                                      seating: seatingValue,
+                                      seatingPrices: currentPrices,
+                                    };
+                                  })
+                                }));
                               };
                               return (
                                 <div key={opt} className="flex items-center gap-3">
@@ -1439,7 +1545,9 @@ const loadPropertyForEdit = async (propertyId: string) => {
                                         ...prev,
                                         seatingPlans: prev.seatingPlans.map(p => {
                                           if (p.id !== plan.id) return p;
-                                          const next = { ...(p.seatingPrices || {}) };
+                                          // Ensure seatingPrices exists
+                                          const currentPrices = p.seatingPrices || {};
+                                          const next = { ...currentPrices };
                                           next[opt] = value;
                                           return { ...p, seatingPrices: next };
                                         })

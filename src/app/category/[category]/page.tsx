@@ -50,7 +50,7 @@ interface PropertyImage {
 
 interface Filters {
   sortBy: string;
-  area: string;
+  area: string | string[]; // Support both single and multiple areas
   price: string;
 }
 
@@ -70,7 +70,10 @@ export default function CategoryPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('grid');
   
   // Initialize filters from URL params if available
-  const initialArea = searchParams.get('area') || 'all';
+  const initialAreaParam = searchParams.get('area');
+  const initialArea = initialAreaParam 
+    ? (initialAreaParam.includes(',') ? initialAreaParam.split(',').map(a => decodeURIComponent(a.trim())) : decodeURIComponent(initialAreaParam))
+    : 'all';
   const [filters, setFilters] = useState<Filters>({
     sortBy: 'Popularity',
     area: initialArea,
@@ -82,8 +85,9 @@ export default function CategoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
-  const [pendingArea, setPendingArea] = useState('all');
+  const [pendingAreas, setPendingAreas] = useState<string[]>([]);
   const locationMenuRef = useRef<HTMLDivElement | null>(null);
+  const priceSelectRef = useRef<HTMLSelectElement | null>(null);
   const propertiesPerPage = 8;
   const initialPropertiesCount = 30; // Show first 30 without pagination
   const [cityOptions, setCityOptions] = useState<{ id: string; name: string }[]>([]);
@@ -95,7 +99,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchCategoryProperties();
-  }, [category]);
+  }, [category, searchQuery]);
 
   useEffect(() => {
     const loadCitiesAreas = async () => {
@@ -147,15 +151,31 @@ export default function CategoryPage() {
   }, [properties, filters, searchQuery]);
 
   useEffect(() => {
-    setPendingArea(filters.area === 'all' ? 'all' : filters.area);
+    if (filters.area === 'all') {
+      setPendingAreas([]);
+    } else if (Array.isArray(filters.area)) {
+      setPendingAreas(filters.area);
+    } else {
+      setPendingAreas([filters.area]);
+    }
   }, [filters.area]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        locationMenuRef.current &&
-        !locationMenuRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      
+      // Don't close if clicking inside location menu
+      if (locationMenuRef.current?.contains(target)) {
+        return;
+      }
+      
+      // Don't close if clicking on price select dropdown
+      if (priceSelectRef.current?.contains(target)) {
+        return;
+      }
+      
+      // Close location menu if clicking outside both
+      if (isLocationMenuOpen) {
         setIsLocationMenuOpen(false);
       }
     };
@@ -172,7 +192,13 @@ export default function CategoryPage() {
   const fetchCategoryProperties = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/properties?category=${encodeURIComponent(categoryName)}&city=Mumbai`);
+      // If search is active, fetch all properties (without category filter) so search can work on all data
+      // Otherwise, fetch only category-filtered properties for better performance
+      const url = searchQuery.trim() !== ''
+        ? `/api/properties?city=Mumbai` // Fetch all properties when searching
+        : `/api/properties?category=${encodeURIComponent(categoryName)}&city=Mumbai`; // Fetch category-filtered when not searching
+      
+      const response = await fetch(url);
       const data = await response.json();
       setProperties(data);
     } catch (error) {
@@ -185,6 +211,68 @@ export default function CategoryPage() {
   const filterAndSortProperties = () => {
     let filtered = [...properties];
 
+    // Category filter - Apply when search is active (since we fetch all properties when searching)
+    if (searchQuery.trim() !== '') {
+      // Category mapping same as API route
+      const categoryKeyMap: Record<string, string[]> = {
+        coworking: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+        managed: ['managed'],
+        dedicateddesk: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+        flexidesk: ['flexidesk', 'dedicateddesk'],
+        daypass: ['daypass'],
+        virtualoffice: ['virtualoffice'],
+        meetingroom: ['meetingroom'],
+        enterpriseoffices: ['enterpriseoffices'],
+      };
+
+      const normalizeCategoryKey = (value: string) => {
+        const cleaned = value.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const mapping: Record<string, string> = {
+          coworkingspace: 'coworking',
+          coworkingspaces: 'coworking',
+          managedoffice: 'managed',
+          managedoffices: 'managed',
+          dedicateddesk: 'dedicateddesk',
+          flexidesk: 'flexidesk',
+          virtualoffice: 'virtualoffice',
+          meetingroom: 'meetingroom',
+          daypass: 'daypass',
+        };
+        return mapping[cleaned] ?? cleaned;
+      };
+
+      const normalizedCategory = normalizeCategoryKey(categoryName);
+      const relatedCategoryKeys = categoryKeyMap[normalizedCategory] || [normalizedCategory];
+
+      filtered = filtered.filter(property => {
+        const propertyCategories = Array.isArray(property.categories)
+          ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
+          : [];
+
+        // Check if any property category matches any of the related category keys
+        const hasCategoryMatch = relatedCategoryKeys.some(key => {
+          const normalizedKey = key.toLowerCase();
+          return propertyCategories.includes(normalizedKey);
+        });
+
+        // Also check property type as fallback
+        const categoryTypeMap: Record<string, string[]> = {
+          coworking: ['COWORKING'],
+          dedicateddesk: ['COWORKING'],
+          flexidesk: ['COWORKING'],
+          daypass: ['COWORKING'],
+          managed: ['MANAGED_OFFICE'],
+          virtualoffice: ['COWORKING'],
+          meetingroom: ['COMMERCIAL'],
+          enterpriseoffices: ['MANAGED_OFFICE'],
+        };
+        const types = categoryTypeMap[normalizedCategory];
+        const hasTypeMatch = types ? types.includes(property.type) : false;
+
+        return hasCategoryMatch || hasTypeMatch;
+      });
+    }
+
     // Search filter
     if (searchQuery.trim() !== '') {
       filtered = filtered.filter(property => 
@@ -194,11 +282,21 @@ export default function CategoryPage() {
       );
     }
 
-    // Area filter
+    // Area filter - support both single area (string) and multiple areas (array)
     if (filters.area !== 'all') {
-      filtered = filtered.filter(property => 
-        property.area.toLowerCase() === filters.area.toLowerCase()
-      );
+      if (Array.isArray(filters.area)) {
+        // Multiple areas selected
+        const areaArray = filters.area as string[];
+        filtered = filtered.filter(property => 
+          areaArray.some((area: string) => property.area.toLowerCase() === area.toLowerCase())
+        );
+      } else {
+        // Single area (backward compatibility)
+        const singleArea = filters.area as string;
+        filtered = filtered.filter(property => 
+          property.area.toLowerCase() === singleArea.toLowerCase()
+        );
+      }
     }
 
     // Price filter
@@ -332,13 +430,29 @@ export default function CategoryPage() {
   const popularDropdownAreas = areaOptions.slice(0, 16).map(a => ({ key: a.name, label: a.name }));
 
   const handleApplyArea = () => {
-    setFilters(prev => ({ ...prev, area: pendingArea || 'all' }));
+    if (pendingAreas.length === 0) {
+      setFilters(prev => ({ ...prev, area: 'all' }));
+    } else if (pendingAreas.length === 1) {
+      setFilters(prev => ({ ...prev, area: pendingAreas[0] }));
+    } else {
+      setFilters(prev => ({ ...prev, area: pendingAreas }));
+    }
     setIsLocationMenuOpen(false);
   };
 
   const handleResetArea = () => {
-    setPendingArea('all');
+    setPendingAreas([]);
     setFilters(prev => ({ ...prev, area: 'all' }));
+  };
+
+  const handleToggleArea = (areaKey: string) => {
+    setPendingAreas(prev => {
+      if (prev.includes(areaKey)) {
+        return prev.filter(a => a !== areaKey);
+      } else {
+        return [...prev, areaKey];
+      }
+    });
   };
 
   return (
@@ -383,19 +497,52 @@ export default function CategoryPage() {
           {/* Quick Area Filters */}
           <div className="mb-6">
             <div className="flex flex-wrap gap-3">
-              {quickFilterAreas.map(area => (
-                <button
-                  key={area.key}
-                  onClick={() => setFilters(prev => ({ ...prev, area: area.key }))}
-                  className={`px-5 py-3 rounded-full text-sm sm:text-base font-medium border transition-all duration-200 ${
-                    filters.area === area.key
-                      ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                      : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
-                  }`}
-                >
-                  {area.label}
-                </button>
-              ))}
+              {quickFilterAreas.map(area => {
+                const isSelected = area.key === 'all' 
+                  ? filters.area === 'all'
+                  : Array.isArray(filters.area)
+                    ? filters.area.includes(area.key)
+                    : filters.area === area.key;
+                
+                return (
+                  <button
+                    key={area.key}
+                    onClick={() => {
+                      if (area.key === 'all') {
+                        setFilters(prev => ({ ...prev, area: 'all' }));
+                      } else {
+                        // Toggle area in multi-select
+                        setFilters(prev => {
+                          if (prev.area === 'all') {
+                            return { ...prev, area: [area.key] };
+                          } else if (Array.isArray(prev.area)) {
+                            if (prev.area.includes(area.key)) {
+                              const newAreas = prev.area.filter(a => a !== area.key);
+                              return { ...prev, area: newAreas.length === 0 ? 'all' : newAreas };
+                            } else {
+                              return { ...prev, area: [...prev.area, area.key] };
+                            }
+                          } else {
+                            // Single area, convert to array
+                            if (prev.area === area.key) {
+                              return { ...prev, area: 'all' };
+                            } else {
+                              return { ...prev, area: [prev.area, area.key] };
+                            }
+                          }
+                        });
+                      }
+                    }}
+                    className={`px-5 py-3 rounded-full text-sm sm:text-base font-medium border transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                        : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                    }`}
+                  >
+                    {area.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -438,16 +585,18 @@ export default function CategoryPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (filters.area === 'all') {
-                      setPendingArea(popularDropdownAreas[0]?.key ?? 'all');
-                    } else {
-                      setPendingArea(filters.area);
-                    }
                     setIsLocationMenuOpen(prev => !prev);
                   }}
                   className="flex items-center justify-between w-full px-4 sm:px-5 py-3 border border-gray-300 rounded-lg bg-white text-black text-sm sm:text-base font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 >
-                  <span>Popular Locations</span>
+                  <span>
+                    Popular Locations
+                    {pendingAreas.length > 0 && (
+                      <span className="ml-2 text-blue-500 font-semibold">
+                        ({pendingAreas.length} selected)
+                      </span>
+                    )}
+                  </span>
                   <svg
                     className={`h-4 w-4 ml-4 transform transition-transform duration-200 ${isLocationMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -461,19 +610,35 @@ export default function CategoryPage() {
                 {isLocationMenuOpen && (
                   <div className="absolute z-30 mt-3 w-72 sm:w-96 rounded-xl bg-white shadow-2xl border border-gray-100 p-4" onMouseDown={(e) => e.preventDefault()}>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {popularDropdownAreas.map(area => (
-                        <button
-                          key={area.key}
-                          onClick={() => setPendingArea(area.key)}
-                          className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-medium border transition-all duration-200 ${
-                            pendingArea === area.key
-                              ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                              : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
-                          }`}
-                        >
-                          {area.label}
-                        </button>
-                      ))}
+                      {popularDropdownAreas.map(area => {
+                        const isSelected = pendingAreas.includes(area.key);
+                        return (
+                          <button
+                            key={area.key}
+                            type="button"
+                            onClick={() => handleToggleArea(area.key)}
+                            className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-medium border transition-all duration-200 flex items-center justify-center gap-2 ${
+                              isSelected
+                                ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                                : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                            }`}
+                          >
+                            <svg
+                              className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-400'}`}
+                              fill={isSelected ? 'currentColor' : 'none'}
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              {isSelected ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              )}
+                            </svg>
+                            <span>{area.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                     <div className="flex items-center justify-between mt-4">
                       <button
@@ -496,6 +661,7 @@ export default function CategoryPage() {
               </div>
 
               <select
+                ref={priceSelectRef}
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
                 className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
