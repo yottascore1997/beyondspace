@@ -638,6 +638,7 @@ export default function CategoryPage() {
                               property={property}
                               onEnquireClick={handleEnquireClick}
                               hideCategory={true}
+                              category={categoryName}
                             />
                           ))}
                         </div>

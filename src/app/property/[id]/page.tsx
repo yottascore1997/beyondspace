@@ -2,7 +2,7 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
 import { Poppins } from 'next/font/google';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -121,6 +121,7 @@ const parseWorkspaceTimings = (timings: string | null | undefined): {
 
 export default function PropertyDetails() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -312,6 +313,11 @@ export default function PropertyDetails() {
       
       if (response.ok) {
         const data = await response.json();
+        // Debug: Log property categories
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Property Fetch] Property Categories:', data.categories);
+          console.log('[Property Fetch] Property Options:', data.propertyOptions?.length, 'plans');
+        }
         setProperty(data);
       } else {
         setError('Property not found');
@@ -548,25 +554,125 @@ export default function PropertyDetails() {
             )}
 
             {/* Seating Plans Section */}
-            {property.propertyOptions && property.propertyOptions.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
+            {property.propertyOptions && property.propertyOptions.length > 0 ? (() => {
+              // Get category from URL if available (user came from category page)
+              const urlCategory = searchParams.get('category');
               
-                {[...property.propertyOptions]
-                  .slice()
-                  .sort((a, b) => {
-                    const isMeetingA = a.title.toLowerCase().includes('meeting room');
-                    const isMeetingB = b.title.toLowerCase().includes('meeting room');
-                    if (isMeetingA && isMeetingB) {
-                      const num = (s: string) => {
-                        const m = s.match(/\d+/);
-                        return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
-                      };
-                      return num(a.seating || '') - num(b.seating || '');
-                    }
-                    return 0;
-                  })
-                  .map((plan, index) => {
+              // Filter seating plans based on property categories or URL category
+              const propertyCategories = Array.isArray(property.categories)
+                ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
+                : [];
+
+              // Normalize URL category
+              const normalizeCategory = (cat: string | null): string | null => {
+                if (!cat) return null;
+                const cleaned = cat.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const mapping: Record<string, string> = {
+                  coworkingspace: 'coworking',
+                  coworkingspaces: 'coworking',
+                  managedoffice: 'managed',
+                  managedoffices: 'managed',
+                  dedicateddesk: 'dedicateddesk',
+                  flexidesk: 'flexidesk',
+                  virtualoffice: 'virtualoffice',
+                  meetingroom: 'meetingroom',
+                  daypass: 'daypass',
+                };
+                return mapping[cleaned] ?? cleaned;
+              };
+
+              const activeCategory = normalizeCategory(urlCategory);
+
+              // Debug: Log property categories for filtering
+              if (process.env.NODE_ENV === 'development') {
+                console.log('[Seating Plan Filter] URL Category:', activeCategory);
+                console.log('[Seating Plan Filter] Property Categories:', propertyCategories);
+                console.log('[Seating Plan Filter] Total Plans:', property.propertyOptions?.length);
+              }
+
+              // Map seating plan title to property categories that should show this plan
+              const getSeatingPlanCategory = (title: string): string[] => {
+                const titleLower = title.toLowerCase();
+                // Dedicated Desk: shows if property has Private Cabin, Dedicated Desk, Flexi Desk, or Coworking
+                if (titleLower.includes('dedicated desk')) return ['dedicateddesk', 'privatecabin', 'flexidesk', 'coworking'];
+                // Flexi Desk: shows if property has Flexi Desk, Dedicated Desk, or Coworking
+                if (titleLower.includes('flexi desk')) return ['flexidesk', 'dedicateddesk', 'coworking'];
+                // Private Cabin: shows if property has Private Cabin, Dedicated Desk, Flexi Desk, or Coworking
+                if (titleLower.includes('private cabin')) return ['privatecabin', 'dedicateddesk', 'flexidesk', 'coworking'];
+                // Virtual Office: only shows if property has Virtual Office
+                if (titleLower.includes('virtual office')) return ['virtualoffice'];
+                // Meeting Room: only shows if property has Meeting Room
+                if (titleLower.includes('meeting room')) return ['meetingroom'];
+                // Managed Office Space: only shows if property has Managed
+                if (titleLower.includes('managed office')) return ['managed'];
+                // Day Pass: only shows if property has Day Pass
+                if (titleLower.includes('day pass')) return ['daypass'];
+                return [];
+              };
+
+              const shouldShowSeatingPlan = (plan: SeatingPlan): boolean => {
+                const planCategories = getSeatingPlanCategory(plan.title);
+                if (planCategories.length === 0) return false; // Don't show if no category match found
+
+                // If URL has category filter, only show plans for that category
+                if (activeCategory) {
+                  // Check if plan's allowed categories include the active category from URL
+                  const shouldShow = planCategories.includes(activeCategory);
+                  
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log(`[Seating Plan Filter] Plan: "${plan.title}"`);
+                    console.log(`  URL Category: ${activeCategory}`);
+                    console.log(`  Allowed Categories: [${planCategories.join(', ')}]`);
+                    console.log(`  Should Show: ${shouldShow}`);
+                    console.log('---');
+                  }
+                  
+                  return shouldShow;
+                }
+
+                // If property has no categories, don't show any plans
+                if (propertyCategories.length === 0) {
+                  return false;
+                }
+
+                // Check if any property category matches any of the plan's allowed categories
+                const shouldShow = planCategories.some(planCat => propertyCategories.includes(planCat));
+                
+                // Debug logging
+                if (process.env.NODE_ENV === 'development') {
+                  console.log(`[Seating Plan Filter] Plan: "${plan.title}"`);
+                  console.log(`  Allowed Categories: [${planCategories.join(', ')}]`);
+                  console.log(`  Property Categories: [${propertyCategories.join(', ')}]`);
+                  console.log(`  Should Show: ${shouldShow}`);
+                  console.log('---');
+                }
+                
+                return shouldShow;
+              };
+
+              const filteredPlans = (property.propertyOptions || []).filter(shouldShowSeatingPlan);
+
+              if (filteredPlans.length === 0) return null;
+
+              return (
+                <div className="mb-8">
+                  <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
+                  
+                    {[...filteredPlans]
+                      .slice()
+                      .sort((a, b) => {
+                        const isMeetingA = a.title.toLowerCase().includes('meeting room');
+                        const isMeetingB = b.title.toLowerCase().includes('meeting room');
+                        if (isMeetingA && isMeetingB) {
+                          const num = (s: string) => {
+                            const m = s.match(/\d+/);
+                            return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+                          };
+                          return num(a.seating || '') - num(b.seating || '');
+                        }
+                        return 0;
+                      })
+                      .map((plan, index) => {
                   // Map seating plan titles to default images
                   const getImageForPlan = (title: string) => {
                     const titleLower = title.toLowerCase();
@@ -580,7 +686,7 @@ export default function PropertyDetails() {
                     <div
                       key={index}
                       className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-lg py-2 px-2.5 ${
-                        index < property.propertyOptions!.length - 1 ? 'mb-5' : ''
+                        index < filteredPlans.length - 1 ? 'mb-5' : ''
                       }`}
                     >
                       <div className="flex flex-col md:flex-row gap-2.5">
@@ -647,8 +753,9 @@ export default function PropertyDetails() {
               </div>
                   );
                 })}
-            </div>
-            )}
+                </div>
+              );
+            })() : null}
 
             {/* Price Disclaimer */}
             <div className="mb-6">

@@ -17,11 +17,19 @@ export async function GET(request: NextRequest) {
     };
 
     const categoryKeyMap: Record<string, string[]> = {
-      coworking: ['coworking', 'dedicateddesk', 'flexidesk', 'virtualoffice'],
-      managed: ['managed', 'enterpriseoffices'],
-      dedicateddesk: ['dedicateddesk'],
-      flexidesk: ['flexidesk'],
+      // Co-working: Private Cabin, Dedicated Desk, Flexi Desk
+      coworking: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+      // Managed Office Space: Only Managed Office Space
+      managed: ['managed'],
+      // Dedicated Desk: Private Cabin, Dedicated Desk, Flexi Desk
+      dedicateddesk: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+      // Flexi Desk: Flexi Desk / Dedicated Desk
+      flexidesk: ['flexidesk', 'dedicateddesk'],
+      // Day Pass: Only Day Pass
+      daypass: ['daypass'],
+      // Virtual Office: Only Virtual Office
       virtualoffice: ['virtualoffice'],
+      // Meeting Rooms: Only Meeting Rooms
       meetingroom: ['meetingroom'],
       enterpriseoffices: ['enterpriseoffices'],
     };
@@ -38,10 +46,14 @@ export async function GET(request: NextRequest) {
         dedicateddesks: 'dedicateddesk',
         flexidesk: 'flexidesk',
         flexidesks: 'flexidesk',
+        daypass: 'daypass',
+        daypasses: 'daypass',
         virtualoffice: 'virtualoffice',
         virtualoffices: 'virtualoffice',
         meetingroom: 'meetingroom',
         meetingrooms: 'meetingroom',
+        privatecabin: 'dedicateddesk',
+        privatecabins: 'dedicateddesk',
         enterpriseoffice: 'enterpriseoffices',
         enterpriseoffices: 'enterpriseoffices',
       };
@@ -62,32 +74,6 @@ export async function GET(request: NextRequest) {
       where.purpose = purpose.toUpperCase();
     }
 
-    // Category filtering - Map frontend category names to database property types
-    if (category) {
-      const categoryTypeMap: Record<string, string[]> = {
-        coworking: ['COWORKING'],
-        managed: ['MANAGED_OFFICE'],
-        dedicateddesk: ['COWORKING'],
-        flexidesk: ['COWORKING'],
-        virtualoffice: ['COWORKING'],
-        meetingroom: ['COMMERCIAL'],
-        enterpriseoffices: ['MANAGED_OFFICE'],
-      };
-
-      const relatedCategoryKeys = categoryKeyMap[category] || [category];
-      const types = categoryTypeMap[category];
-
-      const categoryFilters: Record<string, unknown>[] = relatedCategoryKeys.map((key) => ({
-        categories: { array_contains: [key] },
-      }));
-
-      if (types) {
-        categoryFilters.push({ type: { in: types } });
-      }
-
-      where.AND = [...(where.AND || []), { OR: categoryFilters }];
-    }
-
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
@@ -97,7 +83,8 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const properties = await prisma.property.findMany({
+    // Fetch properties first (category filtering will be done in JavaScript)
+    let properties = await prisma.property.findMany({
       where,
       include: {
         propertyImages: true,
@@ -107,6 +94,46 @@ export async function GET(request: NextRequest) {
         { createdAt: 'desc' },
       ],
     });
+
+    // Category filtering - Filter based on categories array to support multiple categories
+    if (category) {
+      const categoryTypeMap: Record<string, string[]> = {
+        // Co-working, Dedicated Desk, Flexi Desk all check for COWORKING type
+        coworking: ['COWORKING'],
+        dedicateddesk: ['COWORKING'],
+        flexidesk: ['COWORKING'],
+        // Day Pass checks for COWORKING type (but only shows daypass category)
+        daypass: ['COWORKING'],
+        // Managed Office Space checks for MANAGED_OFFICE type
+        managed: ['MANAGED_OFFICE'],
+        // Virtual Office checks for COWORKING type (but only shows virtualoffice category)
+        virtualoffice: ['COWORKING'],
+        // Meeting Rooms checks for COMMERCIAL type
+        meetingroom: ['COMMERCIAL'],
+        enterpriseoffices: ['MANAGED_OFFICE'],
+      };
+
+      const relatedCategoryKeys = categoryKeyMap[category] || [category];
+      const types = categoryTypeMap[category];
+
+      properties = properties.filter(property => {
+        // Check if property categories array contains any of the related category keys
+        const propertyCategories = Array.isArray(property.categories)
+          ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
+          : [];
+
+        // Check if any of the related category keys exist in property's categories array
+        const hasCategoryMatch = relatedCategoryKeys.some(key => {
+          const normalizedKey = key.toLowerCase();
+          return propertyCategories.includes(normalizedKey);
+        });
+
+        // Also check property type as fallback
+        const hasTypeMatch = types ? types.includes(property.type) : false;
+
+        return hasCategoryMatch || hasTypeMatch;
+      });
+    }
 
     return NextResponse.json(properties);
   } catch (error) {

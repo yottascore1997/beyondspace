@@ -49,9 +49,10 @@ interface PropertyCardProps {
   property: Property;
   onEnquireClick?: () => void;
   hideCategory?: boolean;
+  category?: string; // Category from which page user is viewing (for filtering seating plans)
 }
 
-export default function PropertyCard({ property, onEnquireClick, hideCategory = false }: PropertyCardProps) {
+export default function PropertyCard({ property, onEnquireClick, hideCategory = false, category }: PropertyCardProps) {
   const [isFav, setIsFav] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
@@ -102,9 +103,14 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
+  // Build property URL with category query param if provided
+  const propertyUrl = category 
+    ? `/property/${property.id}?category=${encodeURIComponent(category)}`
+    : `/property/${property.id}`;
+
   return (
     <Link 
-      href={`/property/${property.id}`} 
+      href={propertyUrl}
       target="_blank"
       rel="noopener noreferrer"
       className="block"
