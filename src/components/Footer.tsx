@@ -47,7 +47,7 @@ export default function Footer() {
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="relative container mx-auto px-4 py-16 text-white">
+      <div className="relative mx-auto" style={{ maxWidth: '1280px', width: 'calc(100% - 40px)', padding: '64px 16px' }}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Logo and Description Section */}
           <div className="lg:col-span-4">

@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import PropertyCard from '@/components/PropertyCard';
 import Footer from '@/components/Footer';
 import ShareRequirementsModal from '@/components/ShareRequirementsModal';
+import GetOfferModal from '@/components/GetOfferModal';
 import Link from 'next/link';
 
 interface Property {
@@ -27,6 +28,7 @@ interface Property {
   image: string;
   propertyImages?: PropertyImage[];
   tag?: string;
+  propertyTier?: string | null;
   description?: string;
   // Coworking specific fields
   workspaceName?: string;
@@ -81,6 +83,7 @@ export default function CategoryPage() {
   });
   const [isGridShaking, setIsGridShaking] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGetOfferModalOpen, setIsGetOfferModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -347,12 +350,16 @@ export default function CategoryPage() {
 
   const handleEnquireClick = () => {
     setIsGridShaking(true);
-    setIsModalOpen(true);
+    setIsGetOfferModalOpen(true);
     setTimeout(() => setIsGridShaking(false), 500); // Shake for 0.5 seconds
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const closeGetOfferModal = () => {
+    setIsGetOfferModalOpen(false);
   };
 
   // Category info mapping
@@ -456,8 +463,11 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className={`${poppins.className} min-h-screen bg-gray-50`}>
-      <style jsx>{`
+    <div className={`${poppins.className} min-h-screen bg-gray-50`} style={{ fontFamily: 'Poppins, sans-serif' }}>
+      <style jsx global>{`
+        * {
+          font-family: Poppins, sans-serif !important;
+        }
         .line-clamp-1 {
           display: -webkit-box;
           -webkit-line-clamp: 1;
@@ -483,20 +493,19 @@ export default function CategoryPage() {
       
 
       {/* Main Header */}
-      <div className="bg-white">
-        <div className="container mx-auto px-4 py-6 sm:py-8">
-          <div className="mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">
-              <span className="text-gray-900">
+      <div className="bg-white border-b border-gray-100">
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1280px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
+          <div className="mb-1.5 sm:mb-2">
+            <h1 className={`${poppins.className} text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
+              <span className="text-gray-800">
                 {categoryDisplayName} in Mumbai
               </span>
             </h1>
-            <p className="text-black mt-2 text-sm sm:text-base">{currentCategoryInfo.description}</p>
           </div>
 
           {/* Quick Area Filters */}
-          <div className="mb-6">
-            <div className="flex flex-wrap gap-3">
+          <div className="mb-1.5 sm:mb-2">
+            <div className="flex flex-wrap gap-1 sm:gap-1.5">
               {quickFilterAreas.map(area => {
                 const isSelected = area.key === 'all' 
                   ? filters.area === 'all'
@@ -533,10 +542,10 @@ export default function CategoryPage() {
                         });
                       }
                     }}
-                    className={`px-5 py-3 rounded-full text-sm sm:text-base font-medium border transition-all duration-200 ${
+                    className={`${poppins.className} px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 md:py-1.5 rounded-full text-[9px] sm:text-[10px] md:text-xs font-medium border transition-all duration-200 ${
                       isSelected
                         ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                        : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
                     }`}
                   >
                     {area.label}
@@ -547,12 +556,12 @@ export default function CategoryPage() {
           </div>
 
           {/* Search Bar and Filters */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4 sm:items-center">
+          <div className="mb-0 flex flex-col sm:flex-row gap-1.5 sm:gap-2 md:gap-3 sm:items-center">
             {/* Search Bar */}
-            <div className="flex flex-1 w-full max-w-xl items-stretch sm:items-center gap-3">
-              <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-1 w-full max-w-full sm:max-w-xl items-stretch sm:items-center gap-1.5 sm:gap-2">
+              <div className="relative flex-1 w-full">
+              <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -567,38 +576,38 @@ export default function CategoryPage() {
                       handleSearch();
                     }
                   }}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-transparent sm:text-sm"
+                className={`${poppins.className} block w-full pl-6 sm:pl-7 md:pl-8 pr-2 sm:pr-2.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-400 text-[10px] sm:text-xs md:text-sm focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
               </div>
               <button
                 type="button"
                 onClick={handleSearch}
-                className="px-7 sm:px-9 py-3 bg-blue-400 text-white font-semibold rounded-lg shadow-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-colors duration-200"
+                className={`${poppins.className} px-3 sm:px-3.5 md:px-4 py-1 sm:py-1.5 md:py-2 bg-blue-500 text-white text-[10px] sm:text-xs md:text-sm font-medium rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-colors duration-200 whitespace-nowrap`}
               >
                 Search
               </button>
             </div>
 
             {/* Filters */}
-            <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-3 sm:ml-auto">
-              <div className="relative flex-1 sm:flex-none" ref={locationMenuRef}>
+            <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2 sm:gap-3 sm:ml-auto">
+              <div className="relative flex-1 sm:flex-none w-full sm:w-auto" ref={locationMenuRef}>
                 <button
                   type="button"
                   onClick={() => {
                     setIsLocationMenuOpen(prev => !prev);
                   }}
-                  className="flex items-center justify-between w-full px-4 sm:px-5 py-3 border border-gray-300 rounded-lg bg-white text-black text-sm sm:text-base font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  className={`${poppins.className} flex items-center justify-between w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
                 >
-                  <span>
+                  <span className="truncate">
                     Popular Locations
                     {pendingAreas.length > 0 && (
-                      <span className="ml-2 text-blue-500 font-semibold">
-                        ({pendingAreas.length} selected)
+                      <span className="ml-1 sm:ml-2 text-blue-500 font-semibold">
+                        ({pendingAreas.length})
                       </span>
                     )}
                   </span>
                   <svg
-                    className={`h-4 w-4 ml-4 transform transition-transform duration-200 ${isLocationMenuOpen ? 'rotate-180' : ''}`}
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 sm:ml-4 flex-shrink-0 transform transition-transform duration-200 ${isLocationMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -608,8 +617,8 @@ export default function CategoryPage() {
                 </button>
 
                 {isLocationMenuOpen && (
-                  <div className="absolute z-30 mt-3 w-72 sm:w-96 rounded-xl bg-white shadow-2xl border border-gray-100 p-4" onMouseDown={(e) => e.preventDefault()}>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className={`${poppins.className} absolute z-30 mt-2 left-0 right-0 sm:left-auto sm:right-auto w-full sm:w-64 md:w-72 lg:w-80 rounded-lg bg-white shadow-2xl border border-gray-100 p-2.5 sm:p-3`} onMouseDown={(e) => e.preventDefault()}>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-2">
                       {popularDropdownAreas.map(area => {
                         const isSelected = pendingAreas.includes(area.key);
                         return (
@@ -617,14 +626,14 @@ export default function CategoryPage() {
                             key={area.key}
                             type="button"
                             onClick={() => handleToggleArea(area.key)}
-                            className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-medium border transition-all duration-200 flex items-center justify-center gap-2 ${
+                            className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded text-[10px] sm:text-xs md:text-xs font-medium border transition-all duration-200 flex items-center justify-center gap-1 ${
                               isSelected
                                 ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                                : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
                             }`}
                           >
                             <svg
-                              className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-400'}`}
+                              className={`w-3 h-3 sm:w-3 sm:h-3 ${isSelected ? 'text-white' : 'text-gray-400'}`}
                               fill={isSelected ? 'currentColor' : 'none'}
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -635,23 +644,23 @@ export default function CategoryPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               )}
                             </svg>
-                            <span>{area.label}</span>
+                            <span className="truncate">{area.label}</span>
                           </button>
                         );
                       })}
                     </div>
-                    <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center justify-between mt-3 sm:mt-2.5">
                       <button
                         type="button"
                         onClick={handleResetArea}
-                        className="text-sm font-medium text-black hover:text-black"
+                        className="text-xs sm:text-xs md:text-sm font-medium text-gray-700 hover:text-gray-900"
                       >
                         Reset
                       </button>
                       <button
                         type="button"
                         onClick={handleApplyArea}
-                        className="px-5 py-2.5 bg-blue-500 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-600"
+                        className="px-3 sm:px-3.5 py-1.5 sm:py-1 bg-blue-500 text-white text-xs sm:text-xs md:text-sm font-medium rounded-lg shadow-sm hover:bg-blue-600"
                       >
                         Apply
                       </button>
@@ -664,7 +673,7 @@ export default function CategoryPage() {
                 ref={priceSelectRef}
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
-                className="block w-full sm:w-48 px-4 py-3 border border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                className={`${poppins.className} block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent`}
               >
                 <option value="all">Select Price</option>
                 <option value="under-10000">Less than ₹10,000</option>
@@ -678,13 +687,13 @@ export default function CategoryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1280px', width: '100%', paddingTop: '12px', paddingBottom: '20px' }}>
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
           {/* Properties List */}
           <div className="flex-1">
             
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-white rounded-2xl shadow-lg animate-pulse">
                     <div className="h-96 bg-gray-300 rounded-t-2xl"></div>
@@ -702,13 +711,13 @@ export default function CategoryPage() {
                   const batches: any[] = [];
                   
                   const promoSection = (
-                    <div className="my-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 md:p-12">
-                      <div className="text-center mb-8">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <div className="my-8 sm:my-10 md:my-12 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12">
+                      <div className="text-center mb-6 sm:mb-8">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
                           Find Your Perfect Office Solution
                         </h2>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
                         {[
                           {
                             title: 'Private Office',
@@ -726,16 +735,16 @@ export default function CategoryPage() {
                             image: '/images/co3.jpeg'
                           }
                         ].map((card) => (
-                          <div key={card.title} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                            <div className="relative h-48 overflow-hidden">
+                          <div key={card.title} className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div className="relative h-40 sm:h-44 md:h-48 overflow-hidden">
                               <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
                             </div>
-                            <div className="p-6">
-                              <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
-                              <p className="text-black mb-4 leading-relaxed">{card.description}</p>
+                            <div className="p-4 sm:p-5 md:p-6">
+                              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{card.title}</h3>
+                              <p className="text-sm sm:text-base text-black mb-3 sm:mb-4 leading-relaxed">{card.description}</p>
                               <button
                                 onClick={handleEnquireClick}
-                                className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-500 transition-all duration-300"
+                                className="w-full bg-blue-400 text-white py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-500 transition-all duration-300"
                               >
                                 Enquire Now
                               </button>
@@ -747,12 +756,12 @@ export default function CategoryPage() {
                   );
 
                   const customSection = (
-                    <div className="my-12 rounded-3xl bg-gradient-to-r from-blue-50 to-blue-100 p-10 md:p-14 flex flex-col lg:flex-row items-center gap-10">
-                      <div className="flex-1 space-y-6">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                    <div className="my-8 sm:my-10 md:my-12 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-blue-50 to-blue-100 p-6 sm:p-8 md:p-10 lg:p-14 flex flex-col lg:flex-row items-center gap-6 sm:gap-8 lg:gap-10">
+                      <div className="flex-1 space-y-4 sm:space-y-5 md:space-y-6">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                           Customized office solutions for your team
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-base md:text-lg text-black font-medium">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base md:text-lg text-black font-medium">
                           {[
                             'Customized Office Spaces',
                             'Prime Locations',
@@ -767,7 +776,7 @@ export default function CategoryPage() {
                         </div>
                         <button
                           onClick={handleEnquireClick}
-                          className="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 w-fit"
+                          className="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white text-sm sm:text-base font-semibold px-5 sm:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg shadow-md transition-all duration-200 w-full sm:w-fit"
                         >
                           Enquire Now
                         </button>
@@ -797,7 +806,7 @@ export default function CategoryPage() {
                       
                       // Add properties batch
                       batches.push(
-                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-4'}>
+                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
                           {batch.map((property) => (
                             <PropertyCard
                               key={property.id}
@@ -831,7 +840,7 @@ export default function CategoryPage() {
                     
                     // Add paginated properties
                     batches.push(
-                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4' : 'space-y-4'}>
+                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
                         {currentPageProperties.map((property) => (
                           <PropertyCard
                             key={property.id}
@@ -845,7 +854,7 @@ export default function CategoryPage() {
                     
                     // Add pagination component
                     batches.push(
-                      <div key="pagination" className="mt-12 flex items-center justify-center gap-2">
+                      <div key="pagination" className="mt-8 sm:mt-10 md:mt-12 flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
                         {(() => {
                           const getPageNumbers = () => {
                             const pages: (number | string)[] = [];
@@ -887,7 +896,7 @@ export default function CategoryPage() {
                               <button
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
-                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
                                   currentPage === 1
                                     ? 'bg-gray-200 text-black cursor-not-allowed'
                                     : 'bg-blue-400 text-white hover:bg-blue-500'
@@ -904,7 +913,7 @@ export default function CategoryPage() {
                                   <button
                                     key={page}
                                     onClick={() => setCurrentPage(page as number)}
-                                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
                                       currentPage === page
                                         ? 'bg-blue-400 text-white'
                                         : 'bg-gray-200 text-black hover:bg-gray-300'
@@ -919,7 +928,7 @@ export default function CategoryPage() {
                               <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
-                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
                                   currentPage === totalPages
                                     ? 'bg-gray-200 text-black cursor-not-allowed'
                                     : 'bg-blue-400 text-white hover:bg-blue-500'
@@ -938,15 +947,15 @@ export default function CategoryPage() {
                 })()}
               </>
             ) : (
-              <div className="text-center py-16 bg-white rounded-lg">
-                <div className="text-6xl mb-4">🏠</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h3>
-                <p className="text-black mb-8">
+              <div className="text-center py-10 sm:py-12 md:py-16 bg-white rounded-lg px-4">
+                <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🏠</div>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">No Properties Found</h3>
+                <p className="text-sm sm:text-base text-black mb-6 sm:mb-8">
                   No properties match your current filters. Try adjusting your search criteria.
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="bg-orange-400 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition-colors"
+                  className="bg-orange-400 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-900 transition-colors"
                 >
                   Reset Filters
                 </button>
@@ -959,6 +968,7 @@ export default function CategoryPage() {
 
       <Footer />
       <ShareRequirementsModal isOpen={isModalOpen} onClose={closeModal} />
+      <GetOfferModal isOpen={isGetOfferModalOpen} onClose={closeGetOfferModal} />
     </div>
   );
 }
