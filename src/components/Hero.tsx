@@ -290,7 +290,23 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </div>
 
             <button
-              onClick={() => router.push('/properties')}
+              onClick={() => {
+                // Handle navigation based on filters
+                if (filters.purpose) {
+                  // If category/purpose is selected, go to category page
+                  // Add area query param if area is selected
+                  const url = filters.area && filters.area !== 'all'
+                    ? `/category/${filters.purpose}?area=${encodeURIComponent(filters.area)}`
+                    : `/category/${filters.purpose}`;
+                  router.push(url);
+                } else if (filters.area && filters.area !== 'all') {
+                  // If only area is selected (no category), go to default category (coworking) with area filter
+                  router.push(`/category/coworking?area=${encodeURIComponent(filters.area)}`);
+                } else {
+                  // Default: show all properties or first category
+                  router.push('/category/coworking');
+                }
+              }}
               className="w-full mt-2 py-2 rounded-lg bg-blue-400 text-white text-sm font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
             >
               Search Spaces

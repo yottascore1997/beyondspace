@@ -116,7 +116,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'meeting-room',
     title: 'Meeting Room',
-    description: '',
+    description: 'Perfect for Meetings, Team huddles, and Presentations – Pick Your Room, Book it, & Impress! Meeting Rooms Come Equip With Monitor/TV, Whiteboard, WIFI, and Unlimited Tea and Coffee.',
     price: '',
     seating: '',
     isSelected: false,
@@ -125,7 +125,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'managed-office-space',
     title: 'Managed Office Space',
-    description: '',
+    description: 'A) Provider offer customized office setups according to company\'s specific needs and brand ethos. \nB) The provider manages day-to-day operations, including maintenance, IT support, and cleaning.\nC) Businesses of all sizes: From startups and SMEs to large enterprises and MNCs, companies use managed spaces for their flexibility and convenience. \nTo know more about managed office space, reach out to us, and let\'s discuss how our managed office solutions can cater to your specific business needs.',
     price: '',
     seating: '',
     isSelected: false,
@@ -287,9 +287,13 @@ const loadPropertyForEdit = async (propertyId: string) => {
           option?.title?.toLowerCase() === plan.title.toLowerCase()
       );
       if (match) {
+        // For Meeting Room and Managed Office Space, use default description if empty
+        const defaultDescription = (plan.id === 'meeting-room' || plan.id === 'managed-office-space') && !match.description
+          ? plan.description
+          : (match.description || '');
         return {
           ...plan,
-          description: match.description || '',
+          description: defaultDescription,
           price: match.price || '',
           seating: match.seating || '',
           isSelected: true,

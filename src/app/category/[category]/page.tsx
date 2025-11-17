@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Poppins } from 'next/font/google';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import PropertyCard from '@/components/PropertyCard';
 import Footer from '@/components/Footer';
@@ -62,14 +62,18 @@ const poppins = Poppins({
 
 export default function CategoryPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const category = params.category as string;
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('grid');
+  
+  // Initialize filters from URL params if available
+  const initialArea = searchParams.get('area') || 'all';
   const [filters, setFilters] = useState<Filters>({
     sortBy: 'Popularity',
-    area: 'all',
+    area: initialArea,
     price: 'all'
   });
   const [isGridShaking, setIsGridShaking] = useState(false);
@@ -116,6 +120,26 @@ export default function CategoryPage() {
     };
     loadCitiesAreas();
   }, []);
+
+  // Update filters from URL params when they change
+  useEffect(() => {
+    const urlArea = searchParams.get('area');
+    if (urlArea) {
+      setFilters(prev => {
+        if (prev.area !== urlArea) {
+          return { ...prev, area: urlArea };
+        }
+        return prev;
+      });
+    } else {
+      setFilters(prev => {
+        if (prev.area !== 'all') {
+          return { ...prev, area: 'all' };
+        }
+        return prev;
+      });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     filterAndSortProperties();
