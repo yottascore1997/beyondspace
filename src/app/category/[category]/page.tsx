@@ -496,7 +496,7 @@ export default function CategoryPage() {
       <div className="bg-white border-b border-gray-100">
         <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1280px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
           <div className="mb-1.5 sm:mb-2">
-            <h1 className={`${poppins.className} text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
+            <h1 className={`${poppins.className} text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
               <span className="text-gray-800">
                 {categoryDisplayName} in Mumbai
               </span>
@@ -542,7 +542,7 @@ export default function CategoryPage() {
                         });
                       }
                     }}
-                    className={`${poppins.className} px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 md:py-1.5 rounded-full text-[9px] sm:text-[10px] md:text-xs font-medium border transition-all duration-200 ${
+                    className={`${poppins.className} px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-medium border transition-all duration-200 ${
                       isSelected
                         ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
                         : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'

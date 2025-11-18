@@ -391,10 +391,10 @@ export default function PropertyDetails() {
       `}</style>
       <Header />
       
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-3 py-5 max-w-7xl" style={{ maxWidth: '1280px', width: 'calc(100% - 24px)' }}>
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm text-gray-500">
+        <nav className="mb-3">
+          <ol className="flex items-center space-x-1.5 text-xs text-gray-500">
             <li><Link href="/" className="hover:text-gray-700">Home</Link></li>
             <li>/</li>
             <li><Link href="/" className="hover:text-gray-700">Properties</Link></li>
@@ -412,7 +412,7 @@ export default function PropertyDetails() {
                   : [property.image];
 
                 return (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[500px] md:h-[600px] lg:h-[700px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[350px] md:h-[400px] lg:h-[450px]">
                 {/* Large Image (Left) */}
                 <div className="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group">
                     <img
@@ -423,9 +423,9 @@ export default function PropertyDetails() {
                   {/* View All Images Button */}
                         <button
                     onClick={() => setShowGallery(true)}
-                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md hover:bg-white hover:scale-105 transition-all duration-300"
+                    className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md hover:bg-white hover:scale-105 transition-all duration-300"
                         >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                     View All Images
@@ -433,7 +433,7 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* 2x2 Grid of Smaller Images (Right) */}
-                <div className="grid grid-cols-2 gap-2 h-full">
+                <div className="grid grid-cols-2 gap-1.5 h-full">
                   {allImages.slice(1, 5).map((image, index) => (
                     <div key={index} className="relative rounded-xl overflow-hidden shadow-md">
                       <img
@@ -445,9 +445,9 @@ export default function PropertyDetails() {
                       {index === 3 && allImages.length > 5 && (
                         <button
                           onClick={() => setShowGallery(true)}
-                          className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white text-lg font-semibold rounded-xl group hover:bg-black/70 transition-colors"
+                          className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white text-sm font-semibold rounded-xl group hover:bg-black/70 transition-colors"
                         >
-                          <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-6 h-6 mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           View All Photos
@@ -471,41 +471,62 @@ export default function PropertyDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Property Details - Left Side */}
           <div className="lg:col-span-7">
+            {/* Property Header */}
+            <div className="mb-5">
             {/* Property Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+              <h1 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 mb-3 leading-tight">
               {property.title}
             </h1>
             
-            {/* Sub Location, Area, City */}
-            <div className="flex items-center gap-2 text-lg font-medium text-gray-700 mb-4 flex-wrap">
+              {/* Sub Location, Area, City with Google Maps Button */}
+              <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                <div className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-600 flex-wrap">
               {property.sublocation && (
                 <>
                   <span>{property.sublocation}</span>
-                  <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                      <span className="text-gray-400">•</span>
                 </>
               )}
               <span>{property.area}</span>
-              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                  <span className="text-gray-400">•</span>
               <span>{property.city}</span>
+                </div>
+                {property.googleMapLink && (
+                  <a
+                    href={property.googleMapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-all duration-300 text-xs font-semibold shadow-md flex-shrink-0"
+                  >
+                    <div className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors">
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <span>View on Google Maps</span>
+                  </a>
+                )}
             </div>
 
             {/* Metro Station and Railway Station */}
               {(property.metroStationDistance || property.railwayStationDistance) && (
-              <div className="mb-8">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="mb-4 flex flex-col sm:flex-row gap-3">
                   {property.metroStationDistance && (
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl">🚇</span>
-                      <div>
-                        <p className="text-base font-semibold text-gray-800 uppercase tracking-wide">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <span className="text-xl">🚇</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                           Metro Station
                         </p>
-                        <div className="text-gray-700 text-lg font-normal">
+                        <div className="space-y-1.5">
                           {property.metroStationDistance.split('/').map((seg, i) => {
                             const text = seg.trim();
                             if (!text) return null;
                             return (
-                              <div key={i}>{text}</div>
+                              <div key={i} className="text-sm text-gray-700 font-medium leading-relaxed">{text}</div>
                             );
                           })}
                         </div>
@@ -513,45 +534,29 @@ export default function PropertyDetails() {
                     </div>
                   )}
                   {property.railwayStationDistance && (
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl">🚆</span>
-                      <div>
-                        <p className="text-base font-semibold text-gray-800 uppercase tracking-wide">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <span className="text-xl">🚆</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                           Railway Station
                         </p>
-                        <div className="text-gray-700 text-lg font-normal">
+                        <div className="space-y-1.5">
                           {property.railwayStationDistance.split('/').map((seg, i) => {
                             const text = seg.trim();
                             if (!text) return null;
                             return (
-                              <div key={i}>{text}</div>
+                              <div key={i} className="text-sm text-gray-700 font-medium leading-relaxed">{text}</div>
                             );
                           })}
-                        </div>
                       </div>
-                    </div>
-                  )}
                 </div>
             </div>
             )}
-
-            {/* Google Map Link */}
-            {property.googleMapLink && (
-              <div className="mb-6">
-                <a
-                  href={property.googleMapLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  View on Google Maps
-                </a>
               </div>
             )}
+            </div>
 
             {/* Seating Plans Section */}
             {property.propertyOptions && property.propertyOptions.length > 0 ? (() => {
@@ -692,8 +697,8 @@ export default function PropertyDetails() {
               const finalPlans = [...(combinedMeetingRoom ? [combinedMeetingRoom] : []), ...otherPlans];
 
               return (
-            <div className="mb-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-5 mt-6">Seating Plans</h3>
+            <div className="mb-5">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 mt-4">Seating Plans</h3>
               
                     {finalPlans.map((plan, index) => {
                   // Map seating plan titles to default images
@@ -708,11 +713,11 @@ export default function PropertyDetails() {
                   return (
                     <div
                       key={index}
-                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-lg py-2 px-2.5 ${
-                        index < finalPlans.length - 1 ? 'mb-5' : ''
+                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg py-2 px-2 ${
+                        index < finalPlans.length - 1 ? 'mb-3' : ''
                       }`}
                     >
-                      <div className="flex flex-col md:flex-row gap-2.5">
+                      <div className="flex flex-col md:flex-row gap-2">
                         {/* Image on Left - Square */}
                         <div className="md:w-1/6 flex-shrink-0">
                           <img 
@@ -725,15 +730,15 @@ export default function PropertyDetails() {
                         {/* Content on Right */}
                         <div className="md:w-5/6 flex flex-col relative min-h-0">
                           {/* Left Side - Title and Content */}
-                          <div className="flex-1 pr-3 pt-4 pb-4">
-                            <h4 className="text-lg md:text-xl font-semibold text-gray-900 mb-3">{plan.title}</h4>
+                          <div className="flex-1 pr-2 pt-2 pb-2">
+                            <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2">{plan.title}</h4>
                             
                             {plan.description && (
-                              <p className="text-gray-700 mb-3 text-base font-normal leading-snug line-clamp-2">{plan.description}</p>
+                              <p className="text-gray-700 mb-2 text-sm font-normal leading-snug line-clamp-2">{plan.description}</p>
                             )}
                             
                             {plan.seating && (
-                              <div className="text-base font-medium mt-2">
+                              <div className="text-sm font-medium mt-1.5">
                                 <span className="mr-2 inline-block align-middle">👤 Seating:</span>
                                 {plan.title.toLowerCase().includes('meeting room') ? (
                                   <span className="inline-flex flex-wrap gap-2 align-middle">
@@ -742,12 +747,12 @@ export default function PropertyDetails() {
                                       if (!label) return null;
                                       const seatingPrice = (plan as SeatingPlan & { seatingPrices?: Record<string, string> }).seatingPrices?.[label];
                                       return (
-                                        <span key={label} className="inline-flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg bg-white border border-blue-200 shadow-sm">
-                                          <span className="text-xs font-semibold text-blue-700">
+                                        <span key={label} className="inline-flex flex-col items-center gap-0.5 px-1.5 py-1 rounded bg-white border border-blue-200 shadow-sm">
+                                          <span className="text-[10px] font-semibold text-blue-700">
                                             {label}
                                           </span>
                                           {seatingPrice && (
-                                            <span className="text-xs font-bold text-gray-900">
+                                            <span className="text-[10px] font-bold text-gray-900">
                                               {seatingPrice}
                                             </span>
                                           )}
@@ -766,16 +771,16 @@ export default function PropertyDetails() {
                           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end">
                             {/* Don't show general price for Meeting Room as we show individual seating prices */}
                             {plan.price && !plan.title.toLowerCase().includes('meeting room') && (
-                              <div className="text-right mb-2">
-                                <span className="text-xl md:text-2xl font-bold text-gray-900">{plan.price}</span>
-                                <span className="text-lg md:text-xl font-normal text-gray-600 ml-1">/month</span>
+                              <div className="text-right mb-1.5">
+                                <span className="text-base md:text-lg font-bold text-gray-900">{plan.price}</span>
+                                <span className="text-sm md:text-base font-normal text-gray-600 ml-0.5">/month</span>
                   </div>
                             )}
                             
                             <button
                         type="button"
                               onClick={handleEnquireClick}
-                              className="bg-blue-400 text-white px-4 py-1.5 rounded-lg text-sm font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                              className="bg-blue-400 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                             >
                         Enquire Now
                       </button>
@@ -790,31 +795,31 @@ export default function PropertyDetails() {
             })() : null}
 
             {/* Price Disclaimer */}
-            <div className="mb-6">
-              <p className={`${poppins.className} text-base text-gray-600 italic`}>*Prices mentioned above are starting prices & as per availability</p>
+            <div className="mb-4">
+              <p className={`${poppins.className} text-sm text-gray-600 italic`}>*Prices mentioned above are starting prices & as per availability</p>
             </div>
 
             {/* Managed Office Space and Enterprise Solutions Section */}
-            <div className="mb-6 mt-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="mb-5 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Managed Office Space Card */}
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-56 md:h-72 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
+                  <div className="w-full h-40 md:h-48 overflow-hidden">
                     <img 
                       src="/images/1.jpeg" 
                       alt="Managed Office Space" 
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="p-5 space-y-3">
-                    <h4 className="text-lg font-semibold text-gray-900">Managed Office Space</h4>
-                    <p className="text-gray-600 text-base leading-relaxed">
+                  <div className="p-3 space-y-2">
+                    <h4 className="text-base font-semibold text-gray-900">Managed Office Space</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed">
                       An end-to-end office space solution customized to your needs including sourcing, design, building and operations
                     </p>
                     <button 
                       type="button"
                       onClick={handleEnquireClick}
-                      className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                      className="w-full bg-blue-400 text-white py-2 px-4 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -822,23 +827,23 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* Enterprise Solutions Card */}
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-56 md:h-72 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
+                  <div className="w-full h-40 md:h-48 overflow-hidden">
                     <img 
                       src="/images/2.jpeg" 
                       alt="Enterprise Solutions" 
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="p-5 space-y-3">
-                    <h4 className="text-lg font-semibold text-gray-900">Enterprise Solutions</h4>
-                    <p className="text-gray-600 text-base leading-relaxed">
+                  <div className="p-3 space-y-2">
+                    <h4 className="text-base font-semibold text-gray-900">Enterprise Solutions</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed">
                       Fully equipped offices for larger teams with flexibility to scale and customize your office in prime locations & LEED certified buildings
                     </p>
                     <button 
                       type="button"
                       onClick={handleEnquireClick}
-                      className="w-full bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                      className="w-full bg-blue-400 text-white py-2 px-4 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -848,27 +853,27 @@ export default function PropertyDetails() {
             </div>
 
             {/* Why book coworking space with Beyond Space Section */}
-            <div className="mb-8 mt-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6">Why book coworking space with Beyond Space?</h3>
-              <div className="bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-2xl shadow-lg p-6 md:p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mb-5 mt-5">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3">Why book coworking space with Beyond Space?</h3>
+              <div className="bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg p-4 md:p-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {/* Left Side - Points in 2x2 grid */}
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start gap-3">
-                      <span className="text-green-600 text-xl font-bold">✓</span>
-                      <p className="text-gray-800 text-base font-medium">Exclusive Pricing & Zero Booking fee</p>
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs font-medium">Exclusive Pricing & Zero Booking fee</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-green-600 text-xl font-bold">✓</span>
-                      <p className="text-gray-800 text-base font-medium">Guided Office Space Tours</p>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs font-medium">Guided Office Space Tours</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-green-600 text-xl font-bold">✓</span>
-                      <p className="text-gray-800 text-base font-medium">Verified Spaces and Trusted Operators</p>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs font-medium">Verified Spaces and Trusted Operators</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-green-600 text-xl font-bold">✓</span>
-                      <p className="text-gray-800 text-base font-medium">Dedicated Relationship Manager</p>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs font-medium">Dedicated Relationship Manager</p>
                     </div>
                   </div>
                   {/* Right Side - Button */}
@@ -876,7 +881,7 @@ export default function PropertyDetails() {
                     <button
                       type="button"
                       onClick={handleEnquireClick}
-                      className="bg-blue-400 text-white py-3 px-8 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                      className="bg-blue-400 text-white py-2 px-5 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -887,8 +892,8 @@ export default function PropertyDetails() {
 
             {/* Description */}
             {(property.aboutWorkspace || property.description) && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">About</h3>
+              <div className="mb-5">
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">About</h3>
                 <p className="text-gray-700 text-base font-normal leading-relaxed">
                   {property.aboutWorkspace || property.description}
                 </p>
@@ -896,25 +901,25 @@ export default function PropertyDetails() {
             )}
 
             {/* Location Details */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Location Details</h3>
+            <div className="mb-5">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Location Details</h3>
               <p className="text-gray-700 text-base font-normal">
                 {property.locationDetails || property.area}
               </p>
             </div>
 
             {/* Benefits Section */}
-            <div className="mb-8">
-              <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-pink-200 rounded-2xl shadow-lg p-6 md:p-8">
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="mb-5">
+              <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-pink-200 rounded-lg shadow-lg p-4 md:p-5">
+                <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-gray-800 text-base font-medium mb-2">Explore flexible workspace solutions just for you in Mumbai</p>
-                    <p className="text-gray-800 text-base font-medium">Zero pressure advice, recommendations and negotiations at no extra cost</p>
+                    <p className="text-gray-800 text-sm font-medium mb-1.5">Explore flexible workspace solutions just for you in Mumbai</p>
+                    <p className="text-gray-800 text-sm font-medium">Zero pressure advice, recommendations and negotiations at no extra cost</p>
                   </div>
                   <button
                     type="button"
                     onClick={handleEnquireClick}
-                    className="bg-blue-400 text-white py-3 px-8 rounded-lg font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300 whitespace-nowrap"
+                    className="bg-blue-400 text-white py-2 px-5 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300 whitespace-nowrap"
                   >
                     Enquire Now
                   </button>
@@ -926,20 +931,20 @@ export default function PropertyDetails() {
             {property.workspaceTimings && (() => {
               const { monFri, saturday, sunday } = parseWorkspaceTimings(property.workspaceTimings);
               return (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-5">Office Timing</h3>
+            <div className="mb-5">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3">Office Timing</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {/* Monday to Friday */}
-                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1.5">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900">Mon - Fri</p>
+                      <p className="font-bold text-gray-900 text-sm">Mon - Fri</p>
                       <p className="text-xs text-gray-600">Weekdays</p>
                     </div>
                   </div>
@@ -949,15 +954,15 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* Saturday */}
-                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1.5">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900">Sat</p>
+                      <p className="font-bold text-gray-900 text-sm">Sat</p>
                       <p className="text-xs text-gray-600">Saturday</p>
                     </div>
                   </div>
@@ -967,18 +972,18 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* Sunday */}
-                <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1.5">
                         {(() => {
                           const isClosed = sunday ? sunday.toLowerCase().includes('closed') : false;
                           return (
                             <>
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                                 isClosed
                                   ? 'bg-red-500' 
                                   : 'bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600'
                               }`}>
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   {isClosed ? (
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                   ) : (
@@ -987,7 +992,7 @@ export default function PropertyDetails() {
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900">Sun</p>
+                      <p className="font-bold text-gray-900 text-sm">Sun</p>
                       <p className="text-xs text-gray-600">Sunday</p>
                     </div>
                             </>
@@ -1140,19 +1145,19 @@ export default function PropertyDetails() {
           {/* Contact Form - Right Side */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="lg:sticky lg:top-24">
-            <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl shadow-2xl border-2 border-blue-200/50 p-8 relative overflow-hidden">
+            <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 relative overflow-hidden">
               {/* Background Pattern */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-16 -translate-x-16"></div>
-              <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-gradient-to-r from-blue-100/30 to-cyan-100/30 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+              <div className="absolute top-1/2 left-1/2 w-20 h-20 bg-gradient-to-r from-blue-100/30 to-cyan-100/30 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
               
               <div className="relative z-10">
-                <div className="mb-6">
-                  <h4 className="text-lg md:text-xl font-semibold text-black mb-2">Tell Us About Your Workspace Needs</h4>
-                  <p className="text-black">Share your requirements and we'll tailor a proposal for you.</p>
+                <div className="mb-4">
+                  <h4 className="text-sm md:text-base font-semibold text-black mb-1.5">Tell Us About Your Workspace Needs</h4>
+                  <p className="text-xs text-gray-700">Share your requirements and we'll tailor a proposal for you.</p>
                 </div>
 
-                <form onSubmit={handleContactSubmit} className="space-y-4">
+                <form onSubmit={handleContactSubmit} className="space-y-3">
                   <div>
                     <input
                       type="text"
@@ -1161,7 +1166,7 @@ export default function PropertyDetails() {
                       onChange={handleContactInputChange}
                       placeholder="Enter your name"
                       required
-                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                   </div>
                   
@@ -1173,7 +1178,7 @@ export default function PropertyDetails() {
                       onChange={handleContactInputChange}
                       placeholder="Enter your email"
                       required
-                      className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                   </div>
                   
@@ -1183,12 +1188,12 @@ export default function PropertyDetails() {
                         <button
                           type="button"
                           onClick={() => setCountryDropdownOpen(prev => !prev)}
-                          className="flex w-32 items-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-3 py-3 text-sm font-semibold text-black shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
+                          className="flex w-28 items-center gap-1.5 rounded-lg border-2 border-gray-300 bg-white px-2.5 py-2 text-xs font-semibold text-black shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                         >
-                          <span className="text-lg leading-none">{selectedCountry.flag}</span>
+                          <span className="text-base leading-none">{selectedCountry.flag}</span>
                           <span>{selectedCountry.code}</span>
                           <svg
-                            className={`ml-auto h-3 w-3 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
+                            className={`ml-auto h-2.5 w-2.5 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -1197,7 +1202,7 @@ export default function PropertyDetails() {
                           </svg>
                         </button>
                         {isCountryDropdownOpen && (
-                          <div className="absolute left-0 bottom-full z-30 mb-2 w-64 max-h-64 overflow-y-auto rounded-xl border border-blue-100 bg-white shadow-2xl">
+                          <div className="absolute left-0 bottom-full z-30 mb-2 w-56 max-h-56 overflow-y-auto rounded-lg border border-blue-100 bg-white shadow-xl">
                             {countryCodes.map(country => (
                               <button
                                 type="button"
@@ -1206,12 +1211,12 @@ export default function PropertyDetails() {
                                   setContactFormData(prev => ({ ...prev, countryCode: country.code }));
                                   setCountryDropdownOpen(false);
                                 }}
-                                className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-blue-50"
+                                className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left transition hover:bg-blue-50"
                               >
-                                <span className="text-lg leading-none">{country.flag}</span>
+                                <span className="text-base leading-none">{country.flag}</span>
                                 <div className="flex flex-col">
-                                  <span className="text-sm font-semibold text-gray-900">{country.name}</span>
-                                  <span className="text-xs text-gray-500">{country.code}</span>
+                                  <span className="text-xs font-semibold text-gray-900">{country.name}</span>
+                                  <span className="text-[10px] text-gray-500">{country.code}</span>
                                 </div>
                               </button>
                             ))}
@@ -1225,18 +1230,18 @@ export default function PropertyDetails() {
                         onChange={handleContactInputChange}
                         placeholder="Enter your phone number"
                         required
-                        className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                        className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                       />
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <select
                         name="type"
                         value={contactFormData.type}
                         onChange={handleContactInputChange}
-                        className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
                       >
                         <option value="">Select Type</option>
                         {workspaceTypes.map((type) => (
@@ -1249,7 +1254,7 @@ export default function PropertyDetails() {
                         name="seats"
                         value={contactFormData.seats}
                         onChange={handleContactInputChange}
-                        className="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl bg-white text-black font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
                       >
                         <option value="">Select Seats</option>
                         {seatOptions.map(option => (
@@ -1260,21 +1265,21 @@ export default function PropertyDetails() {
                   </div>
                   
                   {contactSubmitMessage && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-800">{contactSubmitMessage}</p>
+                    <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-xs text-green-800">{contactSubmitMessage}</p>
                   </div>
                   )}
 
                   {contactSubmitError && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-800">{contactSubmitError}</p>
+                    <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-xs text-red-800">{contactSubmitError}</p>
                     </div>
                   )}
                   
                   <button
                     type="submit"
                     disabled={contactIsSubmitting}
-                    className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl ${
+                    className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
                       contactIsSubmitting ? 'bg-blue-300 cursor-not-allowed text-white' : 'bg-blue-400 text-white hover:bg-blue-500'
                     }`}
                   >
@@ -1282,29 +1287,29 @@ export default function PropertyDetails() {
                   </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <div className="mb-6">
-                    <p className="text-base font-semibold text-gray-900 text-center">Connect with our space expert</p>
+                <div className="mt-5 pt-4 border-t border-gray-200">
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-900 text-center">Connect with our space expert</p>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-orange-50 via-pink-50 to-pink-100 rounded-lg flex-shrink-0">
-                      <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex items-center gap-2 p-2 bg-gradient-to-br from-orange-50 via-pink-50 to-pink-100 rounded-lg flex-shrink-0">
+                      <svg className="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Contact</p>
-                        <p className="text-sm font-semibold text-gray-900">+91 98765 43210</p>
+                        <p className="text-[10px] text-gray-500 mb-0.5">Contact</p>
+                        <p className="text-xs font-semibold text-gray-900">+91 98765 43210</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-orange-50 via-pink-50 to-pink-100 rounded-lg flex-1">
-                      <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-2 p-2 bg-gradient-to-br from-orange-50 via-pink-50 to-pink-100 rounded-lg flex-1">
+                      <svg className="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                        <p className="text-sm font-semibold text-gray-900 break-words">contact@beyondspacework.com</p>
+                        <p className="text-[10px] text-gray-500 mb-0.5">Email</p>
+                        <p className="text-xs font-semibold text-gray-900 break-words">contact@beyondspacework.com</p>
                       </div>
                     </div>
                   </div>
