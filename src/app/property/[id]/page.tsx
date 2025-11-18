@@ -391,7 +391,7 @@ export default function PropertyDetails() {
       `}</style>
       <Header />
       
-      <div className="container mx-auto px-3 py-5 max-w-7xl" style={{ maxWidth: '1280px', width: 'calc(100% - 24px)' }}>
+      <div className="container mx-auto px-3 py-5 max-w-7xl" style={{ maxWidth: '1440px', width: 'calc(100% - 24px)' }}>
         {/* Breadcrumb */}
         <nav className="mb-3">
           <ol className="flex items-center space-x-1.5 text-xs text-gray-500">

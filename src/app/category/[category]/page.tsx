@@ -494,7 +494,7 @@ export default function CategoryPage() {
 
       {/* Main Header */}
       <div className="bg-white border-b border-gray-100">
-        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1280px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1440px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
           <div className="mb-1.5 sm:mb-2">
             <h1 className={`${poppins.className} text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
               <span className="text-gray-800">
@@ -687,7 +687,7 @@ export default function CategoryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1280px', width: '100%', paddingTop: '12px', paddingBottom: '20px' }}>
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1440px', width: '100%', paddingTop: '12px', paddingBottom: '20px' }}>
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
           {/* Properties List */}
           <div className="flex-1">
