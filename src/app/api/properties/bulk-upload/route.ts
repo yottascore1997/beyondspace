@@ -410,12 +410,35 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
           metroStationDistance: combinedMetro,
           railwayStationDistance: combinedRail,
           googleMapLink: (() => {
-            const mapLink = row.googleMapLink ? String(row.googleMapLink).trim() : '';
-            // Debug log for google map link
-            if (process.env.NODE_ENV === 'development' && mapLink) {
-              console.log(`[Row ${rowNumber}] Google Map Link:`, mapLink);
+            // Try multiple possible key names for googleMapLink (case-insensitive, with/without spaces)
+            let mapLink = '';
+            
+            // Check direct key
+            if (row.googleMapLink) {
+              mapLink = String(row.googleMapLink).trim();
+            } else {
+              // Try case-insensitive lookup (handle spaces, different cases)
+              const possibleKeys = Object.keys(row).filter(key => {
+                const normalizedKey = key.toLowerCase().replace(/\s+/g, '');
+                return normalizedKey === 'googlemaplink' || normalizedKey === 'googlemap' || normalizedKey === 'maplink';
+              });
+              if (possibleKeys.length > 0) {
+                mapLink = String(row[possibleKeys[0]]).trim();
+              }
             }
-            return mapLink && mapLink.length > 0 ? mapLink.slice(0, 191) : null;
+            
+            // Debug log for google map link
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[Row ${rowNumber}] Google Map Link - Raw value:`, row.googleMapLink);
+              console.log(`[Row ${rowNumber}] Google Map Link - Processed:`, mapLink);
+              console.log(`[Row ${rowNumber}] All row keys:`, Object.keys(row));
+            }
+            
+            // Truncate to 191 characters (database limit) but only if not empty
+            if (mapLink && mapLink.length > 0) {
+              return mapLink.length > 191 ? mapLink.slice(0, 191) : mapLink;
+            }
+            return null;
           })(),
           propertyTier: row.propertyTier ? String(row.propertyTier).trim() : null,
           aboutWorkspace: row.aboutWorkspace ? String(row.aboutWorkspace).trim() : null,

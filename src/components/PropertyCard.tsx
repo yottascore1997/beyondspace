@@ -123,12 +123,26 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
             {property.propertyTier}
           </span>
         )}
-        <img
-          src={allImages[currentImageIndex]}
-          alt={property.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
+        <div className="relative w-full h-full overflow-hidden">
+          <div 
+            className="flex h-full will-change-transform"
+            style={{ 
+              transform: `translateX(-${currentImageIndex * 100}%)`,
+              transition: 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            {allImages.map((image, index) => (
+              <img
+                key={image}
+                src={image}
+                alt={property.title}
+                className="w-full h-full object-cover flex-shrink-0"
+                style={{ minWidth: '100%', width: '100%' }}
+                loading={index === 0 ? "lazy" : "eager"}
+              />
+            ))}
+          </div>
+        </div>
         
         {/* Image Navigation Arrows - Only show if multiple images */}
         {allImages.length > 1 && (
@@ -139,7 +153,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 e.stopPropagation();
                 prevImage();
               }}
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -151,7 +165,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 e.stopPropagation();
                 nextImage();
               }}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -162,7 +176,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
         
         {/* Image Indicators */}
         {allImages.length > 1 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-30">
             {allImages.map((_, index) => (
               <button
                 key={index}
@@ -176,13 +190,6 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 }`}
               />
             ))}
-          </div>
-        )}
-        
-        {/* Image Counter */}
-        {allImages.length > 1 && (
-          <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded">
-            {currentImageIndex + 1}/{allImages.length}
           </div>
         )}
         </div>

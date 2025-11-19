@@ -494,7 +494,7 @@ export default function CategoryPage() {
 
       {/* Main Header */}
       <div className="bg-white border-b border-gray-100">
-        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1440px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
           <div className="mb-1.5 sm:mb-2">
             <h1 className={`${poppins.className} text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
               <span className="text-gray-800">
@@ -617,8 +617,8 @@ export default function CategoryPage() {
                 </button>
 
                 {isLocationMenuOpen && (
-                  <div className={`${poppins.className} absolute z-30 mt-2 left-0 right-0 sm:left-auto sm:right-auto w-full sm:w-64 md:w-72 lg:w-80 rounded-lg bg-white shadow-2xl border border-gray-100 p-2.5 sm:p-3`} onMouseDown={(e) => e.preventDefault()}>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-2">
+                  <div className={`${poppins.className} absolute z-30 mt-2 left-0 right-0 sm:left-auto sm:right-auto w-full sm:w-72 md:w-80 lg:w-96 rounded-lg bg-white shadow-2xl border border-gray-100 p-2.5 sm:p-3 max-w-[95vw]`} onMouseDown={(e) => e.preventDefault()}>
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-2">
                       {popularDropdownAreas.map(area => {
                         const isSelected = pendingAreas.includes(area.key);
                         return (
@@ -626,25 +626,13 @@ export default function CategoryPage() {
                             key={area.key}
                             type="button"
                             onClick={() => handleToggleArea(area.key)}
-                            className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded text-[10px] sm:text-xs md:text-xs font-medium border transition-all duration-200 flex items-center justify-center gap-1 ${
+                            className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded text-[10px] sm:text-xs md:text-xs font-medium border transition-all duration-200 flex items-center w-full justify-center text-center ${
                               isSelected
                                 ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
                                 : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
                             }`}
                           >
-                            <svg
-                              className={`w-3 h-3 sm:w-3 sm:h-3 ${isSelected ? 'text-white' : 'text-gray-400'}`}
-                              fill={isSelected ? 'currentColor' : 'none'}
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              {isSelected ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              )}
-                            </svg>
-                            <span className="truncate">{area.label}</span>
+                            <span className="w-full text-center whitespace-nowrap overflow-hidden text-ellipsis">{area.label}</span>
                           </button>
                         );
                       })}
@@ -687,13 +675,13 @@ export default function CategoryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8" style={{ maxWidth: '1440px', width: '100%', paddingTop: '12px', paddingBottom: '20px' }}>
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%', paddingTop: '12px', paddingBottom: '20px' }}>
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
           {/* Properties List */}
           <div className="flex-1">
             
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-white rounded-2xl shadow-lg animate-pulse">
                     <div className="h-96 bg-gray-300 rounded-t-2xl"></div>
@@ -806,7 +794,7 @@ export default function CategoryPage() {
                       
                       // Add properties batch
                       batches.push(
-                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
+                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
                           {batch.map((property) => (
                             <PropertyCard
                               key={property.id}
@@ -840,7 +828,7 @@ export default function CategoryPage() {
                     
                     // Add paginated properties
                     batches.push(
-                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
+                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
                         {currentPageProperties.map((property) => (
                           <PropertyCard
                             key={property.id}

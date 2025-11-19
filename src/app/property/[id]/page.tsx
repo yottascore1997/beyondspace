@@ -337,7 +337,7 @@ export default function PropertyDetails() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-8" style={{ maxWidth: '1920px', width: '100%' }}>
           <div className="animate-pulse">
             <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
             <div className="h-64 bg-gray-300 rounded mb-6"></div>
@@ -357,7 +357,7 @@ export default function PropertyDetails() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-8" style={{ maxWidth: '1920px', width: '100%' }}>
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
             <p className="text-gray-600 mb-6">{error || 'The property you are looking for does not exist.'}</p>
@@ -391,7 +391,7 @@ export default function PropertyDetails() {
       `}</style>
       <Header />
       
-      <div className="container mx-auto px-3 py-5 max-w-7xl" style={{ maxWidth: '1440px', width: 'calc(100% - 24px)' }}>
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-5" style={{ maxWidth: '1920px', width: '100%' }}>
         {/* Breadcrumb */}
         <nav className="mb-3">
           <ol className="flex items-center space-x-1.5 text-xs text-gray-500">
@@ -470,7 +470,7 @@ export default function PropertyDetails() {
         {/* Main Content Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Property Details - Left Side */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8">
             {/* Property Header */}
             <div className="mb-5">
             {/* Property Title */}
@@ -1143,7 +1143,7 @@ export default function PropertyDetails() {
           </div>
 
           {/* Contact Form - Right Side */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="lg:sticky lg:top-24">
             <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 relative overflow-hidden">
               {/* Background Pattern */}
@@ -1326,7 +1326,7 @@ export default function PropertyDetails() {
       </div>
 
       <section className="py-12 md:py-16 bg-gradient-to-br from-white via-blue-50 to-white">
-        <div className="container mx-auto px-4 max-w-7xl">
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
           <div className="text-center mb-10">
             <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Coworking Locations in Mumbai</h3>
           </div>

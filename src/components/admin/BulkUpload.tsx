@@ -127,11 +127,50 @@ export default function BulkUpload() {
               return result;
             };
 
-            const headers = parseCSVLine(lines[0]).map(h => h.replace(/^["']+|["']+$/g, '').trim());
+            // Normalize headers: remove spaces, convert to camelCase, handle common variations
+            const normalizeHeader = (header: string): string => {
+              let normalized = header.replace(/^["']+|["']+$/g, '').trim();
+              // Handle common header variations
+              const headerMap: Record<string, string> = {
+                'google map link': 'googleMapLink',
+                'Google Map Link': 'googleMapLink',
+                'googleMapLink': 'googleMapLink',
+                'location details': 'locationDetails',
+                'Location Details': 'locationDetails',
+                'locationDetails': 'locationDetails',
+                'metro station distance': 'metroStationDistance',
+                'Metro Station Distance': 'metroStationDistance',
+                'metroStationDistance': 'metroStationDistance',
+                'railway station distance': 'railwayStationDistance',
+                'Railway Station Distance': 'railwayStationDistance',
+                'railwayStationDistance': 'railwayStationDistance',
+                'about space': 'aboutWorkspace',
+                'About Space': 'aboutWorkspace',
+                'aboutWorkspace': 'aboutWorkspace',
+                'workspace name': 'workspaceName',
+                'Workspace Name': 'workspaceName',
+                'workspaceName': 'workspaceName',
+                'property tier': 'propertyTier',
+                'Property Tier': 'propertyTier',
+                'propertyTier': 'propertyTier',
+              };
+              
+              const lowerHeader = normalized.toLowerCase();
+              if (headerMap[lowerHeader]) {
+                return headerMap[lowerHeader];
+              }
+              
+              // Default: convert to camelCase if needed
+              return normalized;
+            };
+            
+            const rawHeaders = parseCSVLine(lines[0]);
+            const headers = rawHeaders.map(normalizeHeader);
             
             // Debug: Log headers
             if (process.env.NODE_ENV === 'development') {
-              console.log('[CSV Parse] Headers:', headers);
+              console.log('[CSV Parse] Raw Headers:', rawHeaders);
+              console.log('[CSV Parse] Normalized Headers:', headers);
               console.log('[CSV Parse] Header count:', headers.length);
             }
             
@@ -155,15 +194,18 @@ export default function BulkUpload() {
                   // Ensure we don't go out of bounds
                   obj[header] = values[index] !== undefined ? values[index] : '';
                   
-                  // Debug: Log first row mapping
-                  if (process.env.NODE_ENV === 'development' && lineIndex === 0 && index < 10) {
-                    console.log(`[CSV Parse] ${header} = "${values[index]}"`);
+                  // Debug: Log first row mapping (including googleMapLink)
+                  if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
+                    if (header === 'googleMapLink' || index < 10) {
+                      console.log(`[CSV Parse] ${header} = "${values[index]}"`);
+                    }
                   }
                 });
                 
                 // Debug: Log first row object
                 if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
                   console.log('[CSV Parse] First row object:', obj);
+                  console.log('[CSV Parse] googleMapLink value:', obj.googleMapLink);
                 }
                 
                 return obj;
@@ -190,7 +232,58 @@ export default function BulkUpload() {
               defval: '',
               raw: false // Convert all values to strings
             });
-            resolve(jsonData);
+            
+            // Normalize Excel headers (similar to CSV normalization)
+            const normalizeHeader = (header: string): string => {
+              let normalized = String(header || '').trim();
+              const headerMap: Record<string, string> = {
+                'google map link': 'googleMapLink',
+                'Google Map Link': 'googleMapLink',
+                'googleMapLink': 'googleMapLink',
+                'location details': 'locationDetails',
+                'Location Details': 'locationDetails',
+                'locationDetails': 'locationDetails',
+                'metro station distance': 'metroStationDistance',
+                'Metro Station Distance': 'metroStationDistance',
+                'metroStationDistance': 'metroStationDistance',
+                'railway station distance': 'railwayStationDistance',
+                'Railway Station Distance': 'railwayStationDistance',
+                'railwayStationDistance': 'railwayStationDistance',
+                'about space': 'aboutWorkspace',
+                'About Space': 'aboutWorkspace',
+                'aboutWorkspace': 'aboutWorkspace',
+                'workspace name': 'workspaceName',
+                'Workspace Name': 'workspaceName',
+                'workspaceName': 'workspaceName',
+                'property tier': 'propertyTier',
+                'Property Tier': 'propertyTier',
+                'propertyTier': 'propertyTier',
+              };
+              
+              const lowerHeader = normalized.toLowerCase();
+              if (headerMap[lowerHeader]) {
+                return headerMap[lowerHeader];
+              }
+              return normalized;
+            };
+            
+            // Normalize all keys in Excel data
+            const normalizedData = jsonData.map((row: any) => {
+              const normalizedRow: any = {};
+              Object.keys(row).forEach(key => {
+                const normalizedKey = normalizeHeader(key);
+                normalizedRow[normalizedKey] = row[key];
+              });
+              return normalizedRow;
+            });
+            
+            // Debug: Log Excel parsing
+            if (process.env.NODE_ENV === 'development' && normalizedData.length > 0) {
+              console.log('[Excel Parse] First row keys:', Object.keys(normalizedData[0]));
+              console.log('[Excel Parse] First row googleMapLink:', normalizedData[0].googleMapLink);
+            }
+            
+            resolve(normalizedData);
           } catch (error) {
             reject(new Error('Failed to parse Excel file. Please check the format.'));
           }

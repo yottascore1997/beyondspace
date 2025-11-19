@@ -40,8 +40,8 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-200 shadow-lg">
       
       <div className="w-full px-0 relative">
-        <div className="mx-auto" style={{ maxWidth: '1280px', width: 'calc(100% - 40px)' }}>
-          <div className="flex items-center justify-between py-1.5 sm:py-2 pl-0 pr-2 md:px-3">
+        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
+          <div className="flex items-center justify-between py-1.5 sm:py-2">
           {/* Premium Logo Section */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="relative">
@@ -111,7 +111,7 @@ export default function Header() {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-3 border-t border-gray-200 bg-white/95 backdrop-blur-lg">
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-2 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12">
               <button
                 type="button"
                 onClick={openRequirementModal}
