@@ -21,6 +21,18 @@ export async function GET(
       );
     }
 
+    // Debug: Log property data before sending
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Property API] Property Data:', {
+        id: property.id,
+        locationDetails: property.locationDetails,
+        metroStationDistance: property.metroStationDistance,
+        railwayStationDistance: property.railwayStationDistance,
+        googleMapLink: property.googleMapLink,
+        aboutWorkspace: property.aboutWorkspace,
+      });
+    }
+
     return NextResponse.json(property);
   } catch (error) {
     console.error('Error fetching property:', error);

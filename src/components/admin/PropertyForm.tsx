@@ -226,10 +226,25 @@ export default function PropertyForm({
     { key: 'flexidesk', label: 'Flexi Desk', type: 'COWORKING', purpose: 'commercial' },
     { key: 'virtualoffice', label: 'Virtual Office', type: 'COWORKING', purpose: 'commercial' },
     { key: 'meetingroom', label: 'Meeting Room', type: 'COMMERCIAL', purpose: 'commercial' },
+    { key: 'daypass', label: 'Day Pass', type: 'COWORKING', purpose: 'commercial' },
+    { key: 'popular', label: 'Popular', type: 'COWORKING', purpose: 'commercial' },
   ];
 
-  const getCategoryLabels = (keys: string[]) =>
-    keys.map((key) => categoryOptions.find((option) => option.key === key)?.label ?? key);
+  const getCategoryLabels = (keys: string[]) => {
+    const labels = keys.map((key) => {
+      const normalizedKey = String(key).toLowerCase().trim();
+      const found = categoryOptions.find((option) => option.key.toLowerCase() === normalizedKey);
+      return found?.label ?? key;
+    });
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[getCategoryLabels] Input keys:', keys);
+      console.log('[getCategoryLabels] Output labels:', labels);
+    }
+    
+    return labels;
+  };
 
 const primaryCategoryLabel = selectedCategoryNames[0]
   || (formData.type === 'COWORKING'
@@ -266,6 +281,17 @@ const loadPropertyForEdit = async (propertyId: string) => {
 
     const property = await response.json();
 
+    // Debug: Log property data received from API
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Edit Mode] Property Data Received:', {
+        locationDetails: property.locationDetails,
+        metroStationDistance: property.metroStationDistance,
+        railwayStationDistance: property.railwayStationDistance,
+        googleMapLink: property.googleMapLink,
+        aboutWorkspace: property.aboutWorkspace,
+      });
+    }
+
     const primaryImage = property.image || '';
     const galleryImages = Array.isArray(property.propertyImages)
       ? property.propertyImages
@@ -275,8 +301,15 @@ const loadPropertyForEdit = async (propertyId: string) => {
     const combinedImages = Array.from(new Set([primaryImage, ...galleryImages].filter(Boolean)));
 
     const normalizedCategories = Array.isArray(property.categories)
-      ? property.categories.map((cat: string) => cat.toLowerCase())
+      ? property.categories.map((cat: string) => String(cat).toLowerCase().trim())
       : [];
+    
+    // Debug logging for categories
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Edit Mode] Property Categories (raw):', property.categories);
+      console.log('[Edit Mode] Normalized Categories:', normalizedCategories);
+      console.log('[Edit Mode] Category Options Keys:', categoryOptions.map(opt => opt.key));
+    }
 
     const basePlans = createDefaultSeatingPlans();
     const propertyOptions = Array.isArray(property.propertyOptions) ? property.propertyOptions : [];
@@ -451,6 +484,19 @@ const loadPropertyForEdit = async (propertyId: string) => {
       superArea: property.superArea ?? 0,
       seatingPlans: updatedSeatingPlans,
     };
+
+    // Debug: Log final form data before setting
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Edit Mode] Final Form Data:', {
+        locationDetails: updatedFormData.locationDetails,
+        metroStationDistance: updatedFormData.metroStationDistance,
+        metroStationDistance2: updatedFormData.metroStationDistance2,
+        railwayStationDistance: updatedFormData.railwayStationDistance,
+        railwayStationDistance2: updatedFormData.railwayStationDistance2,
+        googleMapLink: updatedFormData.googleMapLink,
+        aboutWorkspace: updatedFormData.aboutWorkspace,
+      });
+    }
 
     setFormData(updatedFormData);
     setUploadedImages(combinedImages);
