@@ -34,10 +34,10 @@ export default function FeaturedCoworking() {
   }, [currentSlide, totalSlides]);
 
   return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="relative text-center mb-12">
-          <h2 className="relative inline-block text-3xl md:text-4xl font-bold text-slate-900">
+    <section className="py-8 md:py-10 bg-white overflow-hidden">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+        <div className="relative text-center mb-6 md:mb-8">
+          <h2 className="relative inline-block text-2xl md:text-3xl font-bold text-slate-900">
             <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
               Trusted Partners
             </span>{' '}
@@ -46,36 +46,36 @@ export default function FeaturedCoworking() {
               Premier Brands
             </span>
           </h2>
-          <span className="mt-4 block h-1 w-24 mx-auto rounded-full bg-blue-500" />
+          <span className="mt-2 md:mt-3 block h-0.5 md:h-1 w-16 md:w-20 mx-auto rounded-full bg-blue-500" />
         </div>
 
-        <div className="relative">
+        <div className="relative px-6 md:px-10 lg:px-12">
           {totalSlides > 1 && (
             <>
-              <div className="hidden md:flex absolute -left-10 top-1/2 -translate-y-1/2 z-10">
+              <div className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10">
                 <button
                   type="button"
                   onClick={() =>
                     setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides)
                   }
                   aria-label="Previous partners"
-                  className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-rose-500 text-white shadow-lg transition hover:scale-105"
+                  className="h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-rose-500 text-white shadow-lg transition hover:scale-105"
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
               </div>
-              <div className="hidden md:flex absolute -right-10 top-1/2 -translate-y-1/2 z-10">
+              <div className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10">
                 <button
                   type="button"
                   onClick={() =>
                     setCurrentSlide(prev => (prev + 1) % totalSlides)
                   }
                   aria-label="Next partners"
-                  className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-rose-500 text-white shadow-lg transition hover:scale-105"
+                  className="h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-rose-500 text-white shadow-lg transition hover:scale-105"
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -90,7 +90,7 @@ export default function FeaturedCoworking() {
               {slides.map((group, slideIndex) => (
                 <div
                   key={`brand-slide-${slideIndex}`}
-                  className="w-full flex-shrink-0 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 md:grid-rows-2 gap-6 md:gap-8 items-center justify-items-center"
+                  className="w-full flex-shrink-0 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 md:grid-rows-2 gap-4 md:gap-5 items-center justify-items-center"
                 >
                   {group.map((brand) => {
                     const lowerName = brand.name.toLowerCase();
@@ -100,26 +100,26 @@ export default function FeaturedCoworking() {
                     const isWeWork = lowerName === 'wework';
                     const isSpringboard = lowerName === '91springboard';
                     const imageClasses = isConnect
-                      ? 'max-h-16 md:max-h-20'
+                      ? 'max-h-12 md:max-h-16'
                       : isSmartworks
-                        ? 'max-h-8 md:max-h-10'
+                        ? 'max-h-6 md:max-h-8'
                         : isWorkAvenue
-                          ? 'max-h-28 md:max-h-32'
+                          ? 'max-h-20 md:max-h-24'
                           : isWeWork
-                            ? 'max-h-32 md:max-h-36'
+                            ? 'max-h-24 md:max-h-28'
                             : isSpringboard
-                              ? 'max-h-20 md:max-h-24'
-                        : 'max-h-12';
+                              ? 'max-h-16 md:max-h-20'
+                        : 'max-h-10';
 
                     return (
                       <div
                         key={brand.name}
-                        className="flex h-24 w-full max-w-[220px] items-center justify-center rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-sm transition-transform hover:-translate-y-1"
+                        className="flex h-16 md:h-20 w-full max-w-[160px] md:max-w-[180px] items-center justify-center rounded-xl md:rounded-2xl border border-slate-200 bg-white/90 px-2 md:px-3 py-3 md:py-4 shadow-sm transition-transform hover:-translate-y-1 overflow-hidden"
                       >
                         <img
                           src={brand.src}
                           alt={brand.name}
-                          className={`${imageClasses} max-w-full object-contain`}
+                          className={`${imageClasses} max-w-full max-h-full object-contain`}
                           loading="lazy"
                         />
                       </div>
@@ -130,13 +130,13 @@ export default function FeaturedCoworking() {
             </div>
           </div>
           {totalSlides > 1 && (
-            <div className="mt-6 flex justify-center gap-2">
+            <div className="mt-4 md:mt-5 flex justify-center gap-2">
               {slides.map((_, index) => (
                 <button
                   key={`brand-dot-${index}`}
                   type="button"
                   onClick={() => setCurrentSlide(index)}
-                  className={`h-2.5 w-2.5 rounded-full transition ${
+                  className={`h-2 w-2 md:h-2.5 md:w-2.5 rounded-full transition ${
                     currentSlide === index ? 'bg-blue-500' : 'bg-blue-200'
                   }`}
                   aria-label={`Go to brand slide ${index + 1}`}

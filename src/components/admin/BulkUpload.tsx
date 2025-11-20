@@ -130,82 +130,284 @@ export default function BulkUpload() {
             // Normalize headers: remove spaces, convert to camelCase, handle common variations
             const normalizeHeader = (header: string): string => {
               let normalized = header.replace(/^["']+|["']+$/g, '').trim();
-              // Handle common header variations
+              const lowerHeader = normalized.toLowerCase().replace(/\s+/g, '');
+              
+              // Handle common header variations - prioritize exact matches
               const headerMap: Record<string, string> = {
+                // Google Map Link - exact matches first
+                'googlemaplink': 'googleMapLink',
                 'google map link': 'googleMapLink',
-                'Google Map Link': 'googleMapLink',
-                'googleMapLink': 'googleMapLink',
+                'googlemap': 'googleMapLink',
+                // Location Details - exact matches first
+                'locationdetails': 'locationDetails',
                 'location details': 'locationDetails',
-                'Location Details': 'locationDetails',
-                'locationDetails': 'locationDetails',
+                // Metro Station Distance - exact matches first
+                'metrostationdistance': 'metroStationDistance',
                 'metro station distance': 'metroStationDistance',
-                'Metro Station Distance': 'metroStationDistance',
-                'metroStationDistance': 'metroStationDistance',
+                // Metro Station Distance 2 - exact matches first
+                'metrostationdistance2': 'metroStationDistance2',
+                'metro station distance 2': 'metroStationDistance2',
+                'metrostationdistance 2': 'metroStationDistance2',
+                // Railway Station Distance - exact matches first
+                'railwaystationdistance': 'railwayStationDistance',
                 'railway station distance': 'railwayStationDistance',
-                'Railway Station Distance': 'railwayStationDistance',
-                'railwayStationDistance': 'railwayStationDistance',
+                // Railway Station Distance 2 - exact matches first
+                'railwaystationdistance2': 'railwayStationDistance2',
+                'railway station distance 2': 'railwayStationDistance2',
+                'railwaystationdistance 2': 'railwayStationDistance2',
+                // About Workspace - exact matches first
+                'aboutworkspace': 'aboutWorkspace',
+                'about workspace': 'aboutWorkspace',
                 'about space': 'aboutWorkspace',
-                'About Space': 'aboutWorkspace',
-                'aboutWorkspace': 'aboutWorkspace',
+                // Workspace Name
+                'workspacename': 'workspaceName',
                 'workspace name': 'workspaceName',
-                'Workspace Name': 'workspaceName',
-                'workspaceName': 'workspaceName',
+                // Property Tier
+                'propertytier': 'propertyTier',
                 'property tier': 'propertyTier',
-                'Property Tier': 'propertyTier',
-                'propertyTier': 'propertyTier',
               };
               
-              const lowerHeader = normalized.toLowerCase();
+              // Check exact match first (most important)
               if (headerMap[lowerHeader]) {
                 return headerMap[lowerHeader];
               }
               
-              // Default: convert to camelCase if needed
-              return normalized;
+              // Check if header already matches camelCase format exactly
+              if (normalized === 'locationDetails' || normalized === 'metroStationDistance' || 
+                  normalized === 'metroStationDistance2' || normalized === 'railwayStationDistance' ||
+                  normalized === 'railwayStationDistance2' || normalized === 'googleMapLink' ||
+                  normalized === 'aboutWorkspace') {
+                return normalized;
+              }
+              
+              // Check for partial matches only for known truncated patterns (be more strict)
+              const strictPartialMap: Record<string, string> = {
+                'locationdetail': 'locationDetails', // truncated "locationDetails"
+                'metrostation': 'metroStationDistance', // truncated "metroStationDistance"
+                'metrostation2': 'metroStationDistance2', // truncated "metroStationDistance2"
+                'railwaystation': 'railwayStationDistance', // truncated "railwayStationDistance"
+                'railwaystation2': 'railwayStationDistance2', // truncated "railwayStationDistance2"
+                'googlemap': 'googleMapLink',
+                'aboutwork': 'aboutWorkspace', // truncated "aboutWorkspace"
+              };
+              
+              for (const [key, value] of Object.entries(strictPartialMap)) {
+                if (lowerHeader.startsWith(key) && lowerHeader.length >= key.length) {
+                  return value;
+                }
+              }
+              
+              // Default: convert to camelCase if needed, but preserve original if already camelCase
+              if (normalized.match(/^[a-z][a-zA-Z0-9]*$/)) {
+                return normalized; // Already camelCase
+              }
+              // Try to convert to camelCase
+              return normalized.replace(/\s+(.)/g, (_, c) => c.toUpperCase()).replace(/^./, c => c.toLowerCase());
             };
             
-            const rawHeaders = parseCSVLine(lines[0]);
+            // Remove BOM if present and trim first line
+            let firstLine = lines[0];
+            if (firstLine.charCodeAt(0) === 0xFEFF) {
+              firstLine = firstLine.slice(1); // Remove BOM
+            }
+            
+            const rawHeaders = parseCSVLine(firstLine);
             const headers = rawHeaders.map(normalizeHeader);
             
-            // Debug: Log headers
+            // Debug: Log headers with index mapping
             if (process.env.NODE_ENV === 'development') {
-              console.log('[CSV Parse] Raw Headers:', rawHeaders);
-              console.log('[CSV Parse] Normalized Headers:', headers);
+              console.log('[CSV Parse] Raw Headers with index:', rawHeaders.map((h, i) => `${i}: "${h}"`));
+              console.log('[CSV Parse] Normalized Headers with index:', headers.map((h, i) => `${i}: "${h}"`));
               console.log('[CSV Parse] Header count:', headers.length);
             }
             
             const rows = lines.slice(1)
               .filter(line => line.trim())
               .map((line, lineIndex) => {
-                const values = parseCSVLine(line).map(v => {
-                  // Remove quotes and trim, but preserve the value
-                  let cleaned = v.replace(/^["']+|["']+$/g, '').trim();
-                  return cleaned;
+                const rawValues = parseCSVLine(line);
+                const values: string[] = [];
+                let i = 0;
+                let categoriesIndex = -1;
+                
+                // Find categories column index
+                rawHeaders.forEach((h, idx) => {
+                  const normalized = normalizeHeader(h).toLowerCase();
+                  if (normalized === 'categories' || normalized.includes('categor')) {
+                    categoriesIndex = idx;
+                  }
                 });
+                
+                // Process values, handling categories column specially
+                while (i < rawValues.length) {
+                  const cleaned = rawValues[i].replace(/^["']+|["']+$/g, '').trim();
+                  
+                  // If this is the categories column and it contains commas, combine with next values until we hit a known header
+                  if (i === categoriesIndex && cleaned.includes(',')) {
+                    // Start with the first value
+                    let combinedCategories = cleaned;
+                    i++;
+                    
+                    // Keep combining until we find a value that matches the next expected header
+                    while (i < rawValues.length && i < headers.length) {
+                      const nextValue = rawValues[i].replace(/^["']+|["']+$/g, '').trim();
+                      const nextHeader = headers[i]?.toLowerCase() || '';
+                      
+                      // If next value looks like a category (no numbers, short, lowercase) and next header is not a known field, combine it
+                      const looksLikeCategory = nextValue && 
+                        !nextValue.match(/^\d+\.?\d*$/) && // Not a number
+                        nextValue.length < 20 && // Short
+                        !nextHeader.match(/^(rating|price|size|beds|capacity|superarea)/); // Not a numeric field
+                      
+                      if (looksLikeCategory && i < headers.length - 1) {
+                        combinedCategories += ',' + nextValue;
+                        i++;
+                      } else {
+                        break;
+                      }
+                    }
+                    
+                    values.push(combinedCategories);
+                  } else {
+                    values.push(cleaned);
+                    i++;
+                  }
+                }
+                
+                // Ensure values array matches headers length (pad with empty strings if needed)
+                while (values.length < headers.length) {
+                  values.push('');
+                }
+                // Truncate if too many values
+                if (values.length > headers.length) {
+                  values.splice(headers.length);
+                }
                 
                 // Debug: Log parsed values
                 if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
                   console.log('[CSV Parse] First row values count:', values.length);
-                  console.log('[CSV Parse] First row values:', values);
+                  console.log('[CSV Parse] First row values with index:', values.map((v, i) => `${i}: "${v}"`));
+                  console.log('[CSV Parse] Header vs Value mapping:', headers.map((h, i) => `${i}. ${h} = "${values[i]}"`));
                 }
                 
                 const obj: any = {};
+                
+                // First, map by position (standard approach)
                 headers.forEach((header, index) => {
                   // Ensure we don't go out of bounds
-                  obj[header] = values[index] !== undefined ? values[index] : '';
+                  if (values[index] !== undefined) {
+                    obj[header] = values[index];
+                  } else {
+                    obj[header] = '';
+                  }
+                });
+                
+                // Then, create a reverse lookup map for critical fields to fix any misalignments
+                // This helps if columns are shifted due to extra/missing columns
+                const criticalFieldMap: Record<string, string[]> = {
+                  'locationDetails': ['locationdetails', 'location details', 'locationdetail'],
+                  'metroStationDistance': ['metrostationdistance', 'metro station distance', 'metrostation'],
+                  'metroStationDistance2': ['metrostationdistance2', 'metro station distance 2', 'metrostationdistance 2', 'metrostation2'],
+                  'railwayStationDistance': ['railwaystationdistance', 'railway station distance', 'railwaystation'],
+                  'railwayStationDistance2': ['railwaystationdistance2', 'railway station distance 2', 'railwaystationdistance 2', 'railwaystation2'],
+                  'googleMapLink': ['googlemaplink', 'google map link', 'googlemap', 'maplink'],
+                  'aboutWorkspace': ['aboutworkspace', 'about workspace', 'about space', 'aboutwork']
+                };
+                
+                // Helper to check if value looks like URL
+                const looksLikeUrl = (val: string): boolean => {
+                  if (!val) return false;
+                  return /^https?:\/\//i.test(val) || val.includes('maps.google') || val.includes('goo.gl') || val.includes('http');
+                };
+                
+                // First, check if workspace timing fields have URL data - move it to googleMapLink
+                const workspaceTimingFields = ['monFriTime', 'saturdayTime', 'sundayTime'];
+                workspaceTimingFields.forEach(field => {
+                  const value = obj[field] || '';
+                  if (looksLikeUrl(value)) {
+                    // This is URL data, should be in googleMapLink
+                    if (!obj.googleMapLink || !obj.googleMapLink.trim()) {
+                      obj.googleMapLink = value.trim();
+                      if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
+                        console.log(`[CSV Parse] Moved URL from ${field} to googleMapLink: "${value}"`);
+                      }
+                    }
+                    // Clear the workspace timing field
+                    obj[field] = '';
+                  }
+                });
+                
+                // For critical fields, try to find them by header name if not found by position
+                Object.entries(criticalFieldMap).forEach(([targetField, possibleNames]) => {
+                  // Only override if the field is empty or seems wrong (like if locationDetails has a distance value)
+                  const currentValue = obj[targetField] || '';
+                  const looksWrong = currentValue && (
+                    (targetField === 'locationDetails' && (currentValue.match(/\d+\s*(km|m)/i) || currentValue.length < 5)) ||
+                    (targetField.includes('Distance') && !currentValue.match(/\d/)) ||
+                    (targetField === 'googleMapLink' && !looksLikeUrl(currentValue))
+                  );
                   
-                  // Debug: Log first row mapping (including googleMapLink)
-                  if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
-                    if (header === 'googleMapLink' || index < 10) {
-                      console.log(`[CSV Parse] ${header} = "${values[index]}"`);
+                  if (!currentValue || looksWrong) {
+                    // Search through all headers to find a match
+                    rawHeaders.forEach((rawHeader, idx) => {
+                      const normalizedRaw = rawHeader.toLowerCase().replace(/\s+/g, '');
+                      if (possibleNames.some(name => normalizedRaw.includes(name) || name.includes(normalizedRaw))) {
+                        const foundValue = values[idx]?.trim() || '';
+                        // For googleMapLink, also check if it looks like URL
+                        if (targetField === 'googleMapLink' && foundValue && !looksLikeUrl(foundValue)) {
+                          return; // Skip if it doesn't look like URL
+                        }
+                        if (foundValue) {
+                          obj[targetField] = foundValue;
+                          if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
+                            console.log(`[CSV Parse] Fixed mapping: Found "${targetField}" at column ${idx} (header: "${rawHeader}") = "${foundValue}"`);
+                          }
+                        }
+                      }
+                    });
+                    
+                    // Also search in workspace timing fields for googleMapLink
+                    if (targetField === 'googleMapLink' && !obj.googleMapLink) {
+                      workspaceTimingFields.forEach(field => {
+                        const value = obj[field] || '';
+                        if (looksLikeUrl(value)) {
+                          obj.googleMapLink = value.trim();
+                          obj[field] = ''; // Clear from workspace timing
+                          if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
+                            console.log(`[CSV Parse] Found googleMapLink in ${field}: "${value}"`);
+                          }
+                        }
+                      });
                     }
                   }
                 });
                 
-                // Debug: Log first row object
+                // Debug: Log first row mapping for location-related fields
+                if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
+                  const locationFields = ['locationDetails', 'metroStationDistance', 'metroStationDistance2', 
+                                         'railwayStationDistance', 'railwayStationDistance2', 'googleMapLink', 'aboutWorkspace'];
+                  locationFields.forEach(field => {
+                    const idx = headers.indexOf(field);
+                    if (idx >= 0) {
+                      console.log(`[CSV Parse] Column ${idx}: "${rawHeaders[idx]}" → "${field}" = "${obj[field]}"`);
+                    } else {
+                      console.log(`[CSV Parse] Field "${field}" not found in headers, searched and found: "${obj[field]}"`);
+                    }
+                  });
+                }
+                
+                // Debug: Log first row object with location fields
                 if (process.env.NODE_ENV === 'development' && lineIndex === 0) {
                   console.log('[CSV Parse] First row object:', obj);
-                  console.log('[CSV Parse] googleMapLink value:', obj.googleMapLink);
+                  console.log('[CSV Parse] Location fields:', {
+                    locationDetails: obj.locationDetails,
+                    metroStationDistance: obj.metroStationDistance,
+                    metroStationDistance2: obj.metroStationDistance2,
+                    railwayStationDistance: obj.railwayStationDistance,
+                    railwayStationDistance2: obj.railwayStationDistance2,
+                    googleMapLink: obj.googleMapLink,
+                    aboutWorkspace: obj.aboutWorkspace
+                  });
+                  console.log('[CSV Parse] All headers with values:', headers.map((h, i) => `${h}: "${values[i]}"`));
                 }
                 
                 return obj;
@@ -236,34 +438,73 @@ export default function BulkUpload() {
             // Normalize Excel headers (similar to CSV normalization)
             const normalizeHeader = (header: string): string => {
               let normalized = String(header || '').trim();
+              const lowerHeader = normalized.toLowerCase().replace(/\s+/g, '');
+              
+              // Handle common header variations - prioritize exact matches
               const headerMap: Record<string, string> = {
+                // Google Map Link - exact matches first
+                'googlemaplink': 'googleMapLink',
                 'google map link': 'googleMapLink',
-                'Google Map Link': 'googleMapLink',
-                'googleMapLink': 'googleMapLink',
+                'googlemap': 'googleMapLink',
+                // Location Details - exact matches first
+                'locationdetails': 'locationDetails',
                 'location details': 'locationDetails',
-                'Location Details': 'locationDetails',
-                'locationDetails': 'locationDetails',
+                // Metro Station Distance - exact matches first
+                'metrostationdistance': 'metroStationDistance',
                 'metro station distance': 'metroStationDistance',
-                'Metro Station Distance': 'metroStationDistance',
-                'metroStationDistance': 'metroStationDistance',
+                // Metro Station Distance 2 - exact matches first
+                'metrostationdistance2': 'metroStationDistance2',
+                'metro station distance 2': 'metroStationDistance2',
+                'metrostationdistance 2': 'metroStationDistance2',
+                // Railway Station Distance - exact matches first
+                'railwaystationdistance': 'railwayStationDistance',
                 'railway station distance': 'railwayStationDistance',
-                'Railway Station Distance': 'railwayStationDistance',
-                'railwayStationDistance': 'railwayStationDistance',
+                // Railway Station Distance 2 - exact matches first
+                'railwaystationdistance2': 'railwayStationDistance2',
+                'railway station distance 2': 'railwayStationDistance2',
+                'railwaystationdistance 2': 'railwayStationDistance2',
+                // About Workspace - exact matches first
+                'aboutworkspace': 'aboutWorkspace',
+                'about workspace': 'aboutWorkspace',
                 'about space': 'aboutWorkspace',
-                'About Space': 'aboutWorkspace',
-                'aboutWorkspace': 'aboutWorkspace',
+                // Workspace Name
+                'workspacename': 'workspaceName',
                 'workspace name': 'workspaceName',
-                'Workspace Name': 'workspaceName',
-                'workspaceName': 'workspaceName',
+                // Property Tier
+                'propertytier': 'propertyTier',
                 'property tier': 'propertyTier',
-                'Property Tier': 'propertyTier',
-                'propertyTier': 'propertyTier',
               };
               
-              const lowerHeader = normalized.toLowerCase();
+              // Check exact match first (most important)
               if (headerMap[lowerHeader]) {
                 return headerMap[lowerHeader];
               }
+              
+              // Check if header already matches camelCase format exactly
+              if (normalized === 'locationDetails' || normalized === 'metroStationDistance' || 
+                  normalized === 'metroStationDistance2' || normalized === 'railwayStationDistance' ||
+                  normalized === 'railwayStationDistance2' || normalized === 'googleMapLink' ||
+                  normalized === 'aboutWorkspace') {
+                return normalized;
+              }
+              
+              // Check for partial matches only for known truncated patterns (be more strict)
+              const strictPartialMap: Record<string, string> = {
+                'locationdetail': 'locationDetails', // truncated "locationDetails"
+                'metrostation': 'metroStationDistance', // truncated "metroStationDistance"
+                'metrostation2': 'metroStationDistance2', // truncated "metroStationDistance2"
+                'railwaystation': 'railwayStationDistance', // truncated "railwayStationDistance"
+                'railwaystation2': 'railwayStationDistance2', // truncated "railwayStationDistance2"
+                'googlemap': 'googleMapLink',
+                'aboutwork': 'aboutWorkspace', // truncated "aboutWorkspace"
+              };
+              
+              for (const [key, value] of Object.entries(strictPartialMap)) {
+                if (lowerHeader.startsWith(key) && lowerHeader.length >= key.length) {
+                  return value;
+                }
+              }
+              
               return normalized;
             };
             

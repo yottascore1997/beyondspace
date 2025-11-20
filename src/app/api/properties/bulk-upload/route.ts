@@ -104,9 +104,19 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       const row = rows[i] as BulkUploadRow;
       const rowNumber = i + 2; // Excel row number (1 is header)
 
-      // Debug: Log raw row data
+      // Debug: Log raw row data with location fields
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Row ${rowNumber}] Raw CSV Data:`, JSON.stringify(row, null, 2));
+        console.log(`[Row ${rowNumber}] Location Fields Check:`, {
+          locationDetails: row.locationDetails,
+          metroStationDistance: row.metroStationDistance,
+          metroStationDistance2: row.metroStationDistance2,
+          railwayStationDistance: row.railwayStationDistance,
+          railwayStationDistance2: row.railwayStationDistance2,
+          googleMapLink: row.googleMapLink,
+          aboutWorkspace: row.aboutWorkspace,
+          allKeys: Object.keys(row)
+        });
       }
 
       try {
@@ -210,11 +220,47 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
           }
         }
 
+        // Helper function to check if a value looks like a URL
+        const looksLikeUrl = (val: string): boolean => {
+          if (!val) return false;
+          return /^https?:\/\//i.test(val) || val.includes('maps.google') || val.includes('goo.gl') || val.includes('http');
+        };
+        
         // Combine workspace timings - handle empty strings and null values
+        // First check if workspace timing fields contain URL data (should go to googleMapLink)
+        let monFri = String(row.monFriTime || '').trim();
+        let saturday = String(row.saturdayTime || '').trim();
+        let sunday = String(row.sundayTime || '').trim();
+        
+        // Check if any workspace timing field contains URL - move it to googleMapLink
+        if (looksLikeUrl(monFri)) {
+          if (!row.googleMapLink || !String(row.googleMapLink).trim()) {
+            // Move URL from monFriTime to googleMapLink
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[Row ${rowNumber}] Moving URL from monFriTime to googleMapLink: "${monFri}"`);
+            }
+            // We'll set this in googleMapLink later, clear monFri for now
+            monFri = '';
+          }
+        }
+        if (looksLikeUrl(saturday)) {
+          if (!row.googleMapLink || !String(row.googleMapLink).trim()) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[Row ${rowNumber}] Moving URL from saturdayTime to googleMapLink: "${saturday}"`);
+            }
+            saturday = '';
+          }
+        }
+        if (looksLikeUrl(sunday)) {
+          if (!row.googleMapLink || !String(row.googleMapLink).trim()) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[Row ${rowNumber}] Moving URL from sundayTime to googleMapLink: "${sunday}"`);
+            }
+            sunday = '';
+          }
+        }
+        
         let workspaceTimingsValue: string | null = null;
-        const monFri = String(row.monFriTime || '').trim();
-        const saturday = String(row.saturdayTime || '').trim();
-        const sunday = String(row.sundayTime || '').trim();
         
         // Debug log for workspace timings
         if (process.env.NODE_ENV === 'development') {
@@ -233,10 +279,120 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
           }
         }
 
+        // Validate and fix location fields - check if data is in wrong fields
+        // Helper function to check if a value looks like a distance
+        const looksLikeDistance = (val: string): boolean => {
+          if (!val) return false;
+          return /\d+\s*(km|m|meter|metre)/i.test(val) || /\d+\.\d+\s*(km|m)/i.test(val);
+        };
+        
+        // Helper function to check if a value looks like a location/address
+        const looksLikeLocation = (val: string): boolean => {
+          if (!val) return false;
+          // Location should be longer, contain address-like words, and not be a distance
+          return val.length > 10 && 
+                 !looksLikeDistance(val) && 
+                 (val.includes(',') || val.includes('Road') || val.includes('Street') || val.includes('Plaza') || val.includes('Building'));
+        };
+        
+        // Fix locationDetails - if empty but metroStationDistance has location-like data, swap them
+        let locationDetails = (row.locationDetails || '').trim();
+        let metroStationDistance = (row.metroStationDistance || '').trim();
+        let metroStationDistance2 = (row.metroStationDistance2 || '').trim();
+        let railwayStationDistance = (row.railwayStationDistance || '').trim();
+        let railwayStationDistance2 = (row.railwayStationDistance2 || '').trim();
+        let googleMapLink = (row.googleMapLink || '').trim();
+        
+        // Fix locationDetails
+        if (!locationDetails || locationDetails.length < 5) {
+          // Check if metroStationDistance has location data
+          if (looksLikeLocation(metroStationDistance)) {
+            locationDetails = metroStationDistance;
+            metroStationDistance = '';
+          }
+          // Check if railwayStationDistance has location data
+          else if (looksLikeLocation(railwayStationDistance)) {
+            locationDetails = railwayStationDistance;
+            railwayStationDistance = '';
+          }
+        }
+        
+        // Fix metroStationDistance - should have distance, not location or URL
+        if (metroStationDistance && !looksLikeDistance(metroStationDistance)) {
+          if (looksLikeLocation(metroStationDistance)) {
+            // This is location data, move it
+            if (!locationDetails) locationDetails = metroStationDistance;
+            metroStationDistance = '';
+          } else if (looksLikeUrl(metroStationDistance)) {
+            // This is URL data, move it
+            if (!googleMapLink) googleMapLink = metroStationDistance;
+            metroStationDistance = '';
+          }
+        }
+        
+        // Fix railwayStationDistance - should have distance, not location or URL
+        if (railwayStationDistance && !looksLikeDistance(railwayStationDistance)) {
+          if (looksLikeLocation(railwayStationDistance)) {
+            // This is location data, move it
+            if (!locationDetails) locationDetails = railwayStationDistance;
+            railwayStationDistance = '';
+          } else if (looksLikeUrl(railwayStationDistance)) {
+            // This is URL data, move it
+            if (!googleMapLink) googleMapLink = railwayStationDistance;
+            railwayStationDistance = '';
+          }
+        }
+        
+        // Fix googleMapLink - check workspace timing fields for URL data
+        // If googleMapLink is empty but workspace timing has URL, use that
+        if (!googleMapLink || !looksLikeUrl(googleMapLink)) {
+          // Check workspace timing fields for URL
+          const workspaceTimingUrl = looksLikeUrl(monFri) ? monFri : 
+                                     looksLikeUrl(saturday) ? saturday : 
+                                     looksLikeUrl(sunday) ? sunday : null;
+          
+          if (workspaceTimingUrl) {
+            googleMapLink = workspaceTimingUrl;
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[Row ${rowNumber}] Using URL from workspace timing for googleMapLink: "${googleMapLink}"`);
+            }
+          }
+        }
+        
+        // Fix googleMapLink - should be URL, not distance
+        if (googleMapLink && !looksLikeUrl(googleMapLink)) {
+          if (looksLikeDistance(googleMapLink)) {
+            // This is distance data, need to find where it should go
+            // Check if railwayStationDistance2 is empty
+            if (!railwayStationDistance2) {
+              railwayStationDistance2 = googleMapLink;
+            } else if (!railwayStationDistance) {
+              railwayStationDistance = googleMapLink;
+            } else if (!metroStationDistance2) {
+              metroStationDistance2 = googleMapLink;
+            } else if (!metroStationDistance) {
+              metroStationDistance = googleMapLink;
+            }
+            googleMapLink = '';
+          }
+        }
+        
+        // Debug log for location fields
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Row ${rowNumber}] Location Fields After Fix:`, {
+            locationDetails,
+            metroStationDistance,
+            metroStationDistance2,
+            railwayStationDistance,
+            railwayStationDistance2,
+            googleMapLink
+          });
+        }
+        
         // Combine metro distances
         const metroParts = [
-          (row.metroStationDistance || '').trim(),
-          (row.metroStationDistance2 || '').trim(),
+          metroStationDistance,
+          metroStationDistance2,
         ];
         const combinedMetro = metroParts
           .filter(Boolean)
@@ -244,8 +400,8 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
 
         // Combine railway distances
         const railParts = [
-          (row.railwayStationDistance || '').trim(),
-          (row.railwayStationDistance2 || '').trim(),
+          railwayStationDistance,
+          railwayStationDistance2,
         ];
         const combinedRail = railParts
           .filter(Boolean)
@@ -406,37 +562,14 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
           workspaceTimings: workspaceTimingsValue,
           workspaceClosedDays: row.workspaceClosedDays ? String(row.workspaceClosedDays).trim() : null,
           amenities: amenities,
-          locationDetails: row.locationDetails ? String(row.locationDetails).trim() : null,
+          locationDetails: locationDetails || null,
           metroStationDistance: combinedMetro,
           railwayStationDistance: combinedRail,
           googleMapLink: (() => {
-            // Try multiple possible key names for googleMapLink (case-insensitive, with/without spaces)
-            let mapLink = '';
-            
-            // Check direct key
-            if (row.googleMapLink) {
-              mapLink = String(row.googleMapLink).trim();
-            } else {
-              // Try case-insensitive lookup (handle spaces, different cases)
-              const possibleKeys = Object.keys(row).filter(key => {
-                const normalizedKey = key.toLowerCase().replace(/\s+/g, '');
-                return normalizedKey === 'googlemaplink' || normalizedKey === 'googlemap' || normalizedKey === 'maplink';
-              });
-              if (possibleKeys.length > 0) {
-                mapLink = String(row[possibleKeys[0]]).trim();
-              }
-            }
-            
-            // Debug log for google map link
-            if (process.env.NODE_ENV === 'development') {
-              console.log(`[Row ${rowNumber}] Google Map Link - Raw value:`, row.googleMapLink);
-              console.log(`[Row ${rowNumber}] Google Map Link - Processed:`, mapLink);
-              console.log(`[Row ${rowNumber}] All row keys:`, Object.keys(row));
-            }
-            
+            // Use the fixed googleMapLink from above
             // Truncate to 191 characters (database limit) but only if not empty
-            if (mapLink && mapLink.length > 0) {
-              return mapLink.length > 191 ? mapLink.slice(0, 191) : mapLink;
+            if (googleMapLink && googleMapLink.length > 0) {
+              return googleMapLink.length > 191 ? googleMapLink.slice(0, 191) : googleMapLink;
             }
             return null;
           })(),

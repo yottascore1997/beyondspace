@@ -191,8 +191,8 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       <div className={`relative z-10 text-left text-white w-full px-4 md:px-10 transition-all duration-1000 ${
         isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       } md:flex md:items-start md:justify-between md:gap-4`}>
-        <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px]">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-3 leading-tight font-[Poppins,sans-serif]">
+        <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px] mt-4 md:mt-6">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-2 md:mb-3 leading-tight font-[Poppins,sans-serif]">
             <span
               className="block text-white"
               style={headlineSpanStyle}
@@ -207,11 +207,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/95 font-semibold mb-4" style={{textShadow: '2px 2px 8px rgba(0,0,0,0.6)'}}>
+          <p className="text-xl md:text-2xl lg:text-3xl text-white/95 font-semibold mb-3 md:mb-4" style={{textShadow: '2px 2px 8px rgba(0,0,0,0.6)'}}>
             Premium Office Spaces, Coworking Hubs & Meeting Rooms
           </p>
           
-          <div className="flex flex-wrap justify-start gap-5 text-base md:text-lg text-white/90 mb-2">
+          <div className="flex flex-wrap justify-start gap-4 md:gap-5 text-base md:text-lg lg:text-xl text-white/90 mb-2">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>

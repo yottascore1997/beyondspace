@@ -129,18 +129,18 @@ export default function Benefits() {
         }
       `
     }} />
-      <section className="relative py-16 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
+      <section className="relative py-8 md:py-10 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-blue-900">
+          <div className="text-center mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 md:mb-3 text-blue-900">
               Why Choose Us?
             </h2>
-            <div className="w-16 h-1 bg-orange-500 mx-auto"></div>
+            <div className="w-12 md:w-16 h-0.5 md:h-1 bg-orange-500 mx-auto"></div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center">
             {/* Left Side - Benefit Cards */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-5">
               {items.map((it, itemIndex) => {
                 // Skip partner item; it will be rendered below the image
                 if (it.title === 'Partner with premium brand, largest network of offices') {
@@ -157,14 +157,16 @@ export default function Benefits() {
                   return (
                     <div
                       key={it.title}
-                      className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
+                      className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-5 hover:shadow-xl transition-all duration-300"
                     >
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className={`w-16 h-16 ${it.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
-                          {it.icon}
+                      <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
+                        <div className={`w-12 h-12 md:w-14 md:h-14 ${it.iconColor} rounded-lg md:rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                          <div className="w-6 h-6 md:w-7 md:h-7 [&>svg]:w-full [&>svg]:h-full">
+                            {it.icon}
+                          </div>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold mb-2">
+                          <h3 className="text-lg md:text-xl font-semibold mb-1.5 md:mb-2">
                             <span className="text-black">We&apos;ll Assist You </span>
                             <span className="bg-gradient-to-r from-orange-600 via-pink-600 to-red-500 bg-clip-text text-transparent">Find</span>
                             <span className="text-black"> and </span>
@@ -175,7 +177,7 @@ export default function Benefits() {
                       </div>
                       
                       {/* Steps with step-like styling */}
-                      <div className="space-y-4 relative pl-4">
+                      <div className="space-y-3 md:space-y-4 relative pl-3 md:pl-4">
                         {stepLines.map((stepLine, stepIndex) => {
                           const stepMatch = stepLine.match(/^([1-4])\)\s*(.+?):\s*([\s\S]+?)$/);
                           if (!stepMatch) return null;
@@ -185,26 +187,26 @@ export default function Benefits() {
                           return (
                             <div
                               key={stepIndex}
-                              className="relative flex gap-4"
+                              className="relative flex gap-3 md:gap-4"
                             >
                               {/* Connecting Line (except for last step) */}
                               {stepIndex < stepLines.length - 1 && (
-                                <div className="absolute left-[18px] top-[40px] w-0.5 h-[calc(100%+1rem)] bg-gradient-to-b from-purple-400 via-blue-400 to-cyan-400 z-0"></div>
+                                <div className="absolute left-[14px] md:left-[18px] top-[32px] md:top-[40px] w-0.5 h-[calc(100%+0.75rem)] md:h-[calc(100%+1rem)] bg-gradient-to-b from-purple-400 via-blue-400 to-cyan-400 z-0"></div>
                               )}
                               
                               {/* Step Number Badge */}
                               <div className="relative z-10 flex-shrink-0">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400 text-white font-extrabold text-sm shadow-lg shadow-purple-500/40 ring-2 ring-white">
+                                <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg md:rounded-xl bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400 text-white font-extrabold text-xs md:text-sm shadow-lg shadow-purple-500/40 ring-2 ring-white">
                                   {stepLetter}
                                 </div>
                               </div>
                               
                               {/* Step Content */}
                               <div className="flex-1 relative z-10">
-                                <h4 className="text-base font-bold text-gray-900 mb-1">
+                                <h4 className="text-sm md:text-base font-bold text-gray-900 mb-1">
                                   {stepTitle.trim()}:
                                 </h4>
-                                <p className="text-sm text-black leading-relaxed">
+                                <p className="text-xs md:text-sm text-black leading-relaxed">
                                   {stepDesc.trim()}
                                 </p>
                               </div>
@@ -220,15 +222,17 @@ export default function Benefits() {
                 return (
                   <div
                     key={it.title}
-                    className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
+                    className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-5 hover:shadow-xl transition-all duration-300"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className={`w-16 h-16 ${it.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
-                        {it.icon}
+                    <div className="flex items-start gap-3 md:gap-4">
+                      <div className={`w-12 h-12 md:w-14 md:h-14 ${it.iconColor} rounded-lg md:rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                        <div className="w-6 h-6 md:w-7 md:h-7 [&>svg]:w-full [&>svg]:h-full">
+                          {it.icon}
+                        </div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{it.title}</h3>
-                        <div className="text-black leading-relaxed whitespace-pre-line">{it.desc}</div>
+                        <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-1.5 md:mb-2">{it.title}</h3>
+                        <div className="text-sm md:text-base text-black leading-relaxed whitespace-pre-line">{it.desc}</div>
                       </div>
                     </div>
                   </div>
@@ -238,7 +242,7 @@ export default function Benefits() {
 
             {/* Right Side - Client Images Slider */}
             <div className="relative lg:-mt-2">
-              <div className="relative rounded-3xl overflow-hidden border-r-8 border-b-8 border-blue-400 shadow-2xl h-[600px]">
+              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border-r-4 md:border-r-6 lg:border-r-8 border-b-4 md:border-b-6 lg:border-b-8 border-blue-400 shadow-2xl h-[400px] md:h-[500px] lg:h-[550px]">
                 {clientImages.map((client, index) => (
                   <img
                     key={index}
@@ -271,14 +275,16 @@ export default function Benefits() {
                 if (!partnerItem) return null;
                 
                 return (
-                  <div className="mt-10 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-start gap-4">
-                      <div className={`w-16 h-16 ${partnerItem.iconColor} rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
-                        {partnerItem.icon}
+                  <div className="mt-6 md:mt-8 bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-5 hover:shadow-xl transition-all duration-300">
+                    <div className="flex items-start gap-3 md:gap-4">
+                      <div className={`w-12 h-12 md:w-14 md:h-14 ${partnerItem.iconColor} rounded-lg md:rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
+                        <div className="w-6 h-6 md:w-7 md:h-7 [&>svg]:w-full [&>svg]:h-full">
+                          {partnerItem.icon}
+                        </div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{partnerItem.title}</h3>
-                        <div className="text-black leading-relaxed whitespace-pre-line">{partnerItem.desc}</div>
+                        <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-1.5 md:mb-2">{partnerItem.title}</h3>
+                        <div className="text-sm md:text-base text-black leading-relaxed whitespace-pre-line">{partnerItem.desc}</div>
                       </div>
                     </div>
                   </div>
@@ -287,13 +293,13 @@ export default function Benefits() {
             </div>
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="mt-8 md:mt-10 text-center">
             <button
               onClick={() => setShareModalOpen(true)}
-              className="cta-gradient inline-flex items-center gap-2 px-12 py-4 rounded-full text-white text-xl font-semibold shadow-lg"
+              className="cta-gradient inline-flex items-center gap-2 px-8 md:px-10 lg:px-12 py-3 md:py-4 rounded-full text-white text-base md:text-lg lg:text-xl font-semibold shadow-lg"
             >
               Schedule Your Free Workspace Consultation
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>

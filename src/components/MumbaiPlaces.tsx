@@ -142,44 +142,44 @@ export default function MumbaiPlaces() {
   }));
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <section className="py-8 md:py-10 bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2 md:mb-3 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
             Explore{' '}
             <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
               Mumbai&apos;s
             </span>{' '}
             Prime Locations
           </h2>
-          <p className="text-lg text-black max-w-2xl mx-auto" style={{ textShadow: '0 0 10px rgba(255,255,255,0.35)' }}>
+          <p className="text-sm md:text-base text-black max-w-2xl mx-auto" style={{ textShadow: '0 0 10px rgba(255,255,255,0.35)' }}>
             Discover the most sought-after neighborhoods in the city of dreams
           </p>
         </div>
 
         {/* Horizontal Scrollable Container */}
-        <div className="relative">
+        <div className="relative overflow-hidden">
           {/* Navigation Buttons */}
-          <button onClick={() => smoothScrollBy(-344)} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110">
-            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onClick={() => smoothScrollBy(-260)} className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2.5 shadow-lg transition-all duration-300 hover:scale-110">
+            <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button onClick={() => smoothScrollBy(344)} className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110">
-            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onClick={() => smoothScrollBy(260)} className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2.5 shadow-lg transition-all duration-300 hover:scale-110">
+            <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
 
           {/* Scrollable Cards Container */}
-          <div ref={scrollRef} className="flex gap-6 overflow-x-auto scrollbar-hide px-4 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide px-2 md:px-4 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {orderedItems.map((item, index) => (
               <div
                 key={item.place.id}
                 onClick={() => handleAreaClick(item.place.name)}
                 onMouseEnter={() => setHoveredPlace(item.place.id)}
                 onMouseLeave={() => setHoveredPlace(null)}
-                className={`group relative flex-shrink-0 w-80 h-96 rounded-3xl overflow-hidden shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a08efe]/30 cursor-pointer ${
+                className={`group relative flex-shrink-0 w-60 md:w-64 h-72 md:h-80 rounded-2xl overflow-hidden shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a08efe]/30 cursor-pointer ${
                   hoveredPlace === item.place.id ? 'ring-2 ring-[#a08efe]/50' : ''
                 }`}
                 style={{
@@ -197,17 +197,17 @@ export default function MumbaiPlaces() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                 
                 {/* Content positioned at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                   {/* Area Tag */}
-                  <div className="mb-3">
-                    <span className="bg-orange-400 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium">
+                  <div className="mb-2">
+                    <span className="bg-orange-400 backdrop-blur-sm text-white px-2.5 md:px-3 py-1 rounded-full text-xs font-medium">
                       {item.place.area}
                     </span>
                   </div>
 
                   {/* Place Name */}
                   <h3 
-                    className="text-2xl md:text-3xl font-bold mb-2 transition-all duration-300"
+                    className="text-lg md:text-xl font-bold mb-1.5 transition-all duration-300"
                     style={{ 
                       color: '#ffffff',
                       textShadow: '0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.3)'
@@ -217,13 +217,13 @@ export default function MumbaiPlaces() {
                   </h3>
                   
                   {/* Description */}
-                  <p className="text-white/90 text-sm mb-3 leading-relaxed">
+                  <p className="text-white/90 text-xs mb-2 leading-relaxed">
                     {item.place.description}
                   </p>
 
                   {/* Properties Count and Get Offer Button */}
                   <div className="flex items-center justify-between">
-                    <span className="text-cyan-300 font-semibold text-sm">
+                    <span className="text-cyan-300 font-semibold text-xs">
                       {item.place.properties}
                     </span>
                     <button
@@ -231,7 +231,7 @@ export default function MumbaiPlaces() {
                         e.stopPropagation(); // Prevent card click from triggering
                         handleGetOffer(item.place.name);
                       }}
-                      className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300"
+                      className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300"
                     >
                       Get Offer
                     </button>

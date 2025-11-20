@@ -44,7 +44,7 @@ export default function Home() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Header />
       <Hero
         filters={filters}
