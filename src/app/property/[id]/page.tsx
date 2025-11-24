@@ -388,6 +388,27 @@ export default function PropertyDetails() {
         .animate-shake {
           animation: subtle-shake 0.6s ease-in-out;
         }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes fadeInScale {
+          from { 
+            opacity: 0; 
+            transform: scale(0.95);
+          }
+          to { 
+            opacity: 1; 
+            transform: scale(1);
+          }
+        }
+
+        @keyframes backdropFade {
+          from { background-color: rgba(0, 0, 0, 0); }
+          to { background-color: rgba(0, 0, 0, 0.95); }
+        }
       `}</style>
       <Header />
       
@@ -404,7 +425,7 @@ export default function PropertyDetails() {
         </nav>
 
         {/* Full Width Images Section */}
-        <div className="relative mb-8">
+        <div className="relative mb-6 lg:mb-8 z-0">
               {/* Get all available images */}
               {(() => {
                 const allImages = property.propertyImages && property.propertyImages.length > 0
@@ -468,7 +489,7 @@ export default function PropertyDetails() {
             </div>
 
         {/* Main Content Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Property Details - Left Side */}
           <div className="lg:col-span-8">
             {/* Property Header */}
@@ -804,7 +825,7 @@ export default function PropertyDetails() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Managed Office Space Card */}
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-40 md:h-48 overflow-hidden">
+                  <div className="w-full h-48 md:h-56 lg:h-60 overflow-hidden">
                     <img 
                       src="/images/1.jpeg" 
                       alt="Managed Office Space" 
@@ -828,7 +849,7 @@ export default function PropertyDetails() {
 
                 {/* Enterprise Solutions Card */}
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-40 md:h-48 overflow-hidden">
+                  <div className="w-full h-48 md:h-56 lg:h-60 overflow-hidden">
                     <img 
                       src="/images/2.jpeg" 
                       alt="Enterprise Solutions" 
@@ -1143,9 +1164,9 @@ export default function PropertyDetails() {
           </div>
 
           {/* Contact Form - Right Side */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
-            <div className="lg:sticky lg:top-24">
-            <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 relative overflow-hidden">
+          <div className="lg:col-span-4 lg:order-2">
+            <div className="lg:sticky lg:top-6 xl:top-8 lg:self-start">
+              <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 relative overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
@@ -1319,10 +1340,7 @@ export default function PropertyDetails() {
 
           </div>
         </div>
-
-          </div>
       </div>
-
       </div>
 
       <section className="py-12 md:py-16 bg-gradient-to-br from-white via-blue-50 to-white">
@@ -1384,11 +1402,22 @@ export default function PropertyDetails() {
         };
 
         return (
-          <div className={`${poppins.className} fixed inset-0 bg-black/95 z-50 flex items-center justify-center`}>
+          <div 
+            className={`${poppins.className} fixed inset-0 z-50 flex items-center justify-center`}
+            style={{ 
+              backgroundColor: 'rgba(0, 0, 0, 0)',
+              animation: 'backdropFade 0.3s ease-out forwards'
+            }}
+            onClick={() => setShowGallery(false)}
+          >
             {/* Close Button */}
             <button
               onClick={() => setShowGallery(false)}
               className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+              style={{ 
+                opacity: 0,
+                animation: 'fadeIn 0.3s ease-out 0.2s forwards'
+              }}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1396,15 +1425,28 @@ export default function PropertyDetails() {
             </button>
 
             {/* Image Counter */}
-            <div className="absolute top-4 left-4 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold z-10">
+            <div 
+              className="absolute top-4 left-4 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold z-10"
+              style={{ 
+                opacity: 0,
+                animation: 'fadeIn 0.3s ease-out 0.25s forwards'
+              }}
+            >
               {currentImageIndex + 1} / {allImages.length}
             </div>
 
             {/* Previous Button */}
             {allImages.length > 1 && (
               <button
-                onClick={handlePrevious}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevious();
+                }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+                style={{ 
+                  opacity: 0,
+                  animation: 'fadeIn 0.3s ease-out 0.3s forwards'
+                }}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1413,19 +1455,34 @@ export default function PropertyDetails() {
             )}
 
             {/* Main Image */}
-            <div className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4">
+            <div 
+              className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
               <img
                 src={allImages[currentImageIndex]}
                 alt={`${property.title} ${currentImageIndex + 1}`}
                 className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                style={{ 
+                  opacity: 0,
+                  transform: 'scale(0.95)',
+                  animation: 'fadeInScale 0.4s ease-out 0.1s forwards'
+                }}
               />
             </div>
 
             {/* Next Button */}
             {allImages.length > 1 && (
               <button
-                onClick={handleNext}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+                style={{ 
+                  opacity: 0,
+                  animation: 'fadeIn 0.3s ease-out 0.3s forwards'
+                }}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1632,6 +1689,7 @@ export default function PropertyDetails() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
