@@ -78,7 +78,7 @@ export default function MumbaiPlaces() {
       id: 'bkc',
       name: 'BKC',
       description: 'Mumbai\'s premier business district with world-class infrastructure',
-      image: '/images/mumbai3.jpeg',
+      image: '/images/mumbai3.png',
       properties: '0 Properties',
       area: 'Central Mumbai'
     },
@@ -86,7 +86,7 @@ export default function MumbaiPlaces() {
       id: 'lower-parel',
       name: 'Lower Parel',
       description: 'Historic mill district transformed into modern business hub',
-      image: '/images/mumbai5.jpeg',
+      image: '/images/mumbai5.jpg',
       properties: '0 Properties',
       area: 'South Mumbai'
     },
@@ -94,7 +94,7 @@ export default function MumbaiPlaces() {
       id: 'thane',
       name: 'Thane',
       description: 'Rapidly developing suburb with great connectivity and modern amenities',
-      image: '/images/mumbai7.jpeg',
+      image: '/images/mumbai7.jpg',
       properties: '0 Properties',
       area: 'Extended Mumbai'
     },
@@ -102,7 +102,7 @@ export default function MumbaiPlaces() {
       id: 'navi-mumbai',
       name: 'Navi Mumbai',
       description: 'Planned satellite city with world-class infrastructure and corporate parks',
-      image: '/images/mumbai8.jpeg',
+      image: '/images/mumbai8.PNG',
       properties: '0 Properties',
       area: 'Navi Mumbai'
     }
@@ -110,19 +110,19 @@ export default function MumbaiPlaces() {
 
   const localMumbaiImages = [
     '/images/mumbai4.jpeg',
-    '/images/mumbai3.jpeg',
-    '/images/mumbai5.jpeg',
-    '/images/mumbai7.jpeg',
-    '/images/mumbai8.jpeg',
+    '/images/mumbai3.png',
+    '/images/mumbai5.jpg',
+    '/images/mumbai7.jpg',
+    '/images/mumbai8.PNG',
   ];
 
   // Explicit unique image mapping per area (no repeats)
   const imageMap: Record<string, string> = {
     'andheri-east': '/images/mumbai4.jpeg',
-    bkc: '/images/mumbai3.jpeg',
-    'lower-parel': '/images/mumbai5.jpeg',
-    thane: '/images/mumbai7.jpeg',
-    'navi-mumbai': '/images/mumbai8.jpeg',
+    bkc: '/images/mumbai3.png',
+    'lower-parel': '/images/mumbai5.jpg',
+    thane: '/images/mumbai7.jpg',
+    'navi-mumbai': '/images/mumbai8.PNG',
   };
 
   const priorityOrder = ['andheri-east', 'bkc', 'lower-parel', 'thane', 'navi-mumbai'];
@@ -191,6 +191,11 @@ export default function MumbaiPlaces() {
                   src={item.image}
                   alt={item.place.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  onError={(e) => {
+                    console.error(`Failed to load image: ${item.image}`);
+                    // Fallback to a placeholder or default image
+                    (e.target as HTMLImageElement).src = '/images/mumbai4.jpeg';
+                  }}
                 />
                 
                 {/* Light Gradient Overlay for text readability */}

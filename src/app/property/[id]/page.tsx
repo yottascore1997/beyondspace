@@ -64,14 +64,14 @@ interface PrimeLocation {
 }
 
 const primeLocations: PrimeLocation[] = [
-  { name: 'Thane', slug: 'thane', image: '/images/mumbai7.jpeg' },
-  { name: 'Navi Mumbai', slug: 'navi mumbai', image: '/images/mumbai8.jpeg' },
+  { name: 'Thane', slug: 'thane', image: '/images/mumbai7.jpg' },
+  { name: 'Navi Mumbai', slug: 'navi mumbai', image: '/images/mumbai8.PNG' },
   { name: 'Andheri West', slug: 'andheri west', image: '/images/mumbai4.jpeg' },
   { name: 'Andheri East', slug: 'andheri east', image: '/images/mumbai4.jpeg' },
   { name: 'Andheri', slug: 'andheri', image: '/images/mumbai4.jpeg' },
-  { name: 'BKC', slug: 'bkc', image: '/images/mumbai3.jpeg' },
-  { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpeg' },
-  { name: 'Powai', slug: 'powai', image: '/images/mumbai8.jpeg' }
+  { name: 'BKC', slug: 'bkc', image: '/images/mumbai3.png' },
+  { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpg' },
+  { name: 'Powai', slug: 'powai', image: '/images/mumbai8.PNG' }
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -1349,7 +1349,7 @@ export default function PropertyDetails() {
             <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Coworking Locations in Mumbai</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-5">
             {primeLocations.map((location) => (
               <Link
                 key={location.slug}

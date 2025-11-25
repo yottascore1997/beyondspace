@@ -724,12 +724,12 @@ export default function CategoryPage() {
                           }
                         ].map((card) => (
                           <div key={card.title} className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                            <div className="relative h-40 sm:h-44 md:h-48 overflow-hidden">
+                            <div className="relative h-48 sm:h-52 md:h-56 lg:h-60 xl:h-64 overflow-hidden">
                               <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
                             </div>
-                            <div className="p-4 sm:p-5 md:p-6">
-                              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{card.title}</h3>
-                              <p className="text-sm sm:text-base text-black mb-3 sm:mb-4 leading-relaxed">{card.description}</p>
+                            <div className="p-3 sm:p-4 md:p-5">
+                              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">{card.title}</h3>
+                              <p className="text-sm sm:text-base text-black mb-2 sm:mb-3 leading-relaxed">{card.description}</p>
                               <button
                                 onClick={handleEnquireClick}
                                 className="w-full bg-blue-400 text-white py-2 sm:py-2.5 md:py-3 px-4 sm:px-5 md:px-6 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-500 transition-all duration-300"
