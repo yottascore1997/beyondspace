@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 const coworkingBrands = [
   { name: 'Connect', src: '/images/connect.png' },
   { name: 'Smartworks', src: '/images/smartworks.png' },
-  { name: 'SBM Bank', src: '/images/sbmbank.png' },
   { name: 'Work Avenue', src: '/images/workavenue.png' },
   { name: 'Corporate Edge', src: '/images/corporateedge.png' },
   { name: 'WeWork', src: '/images/wework.png' },

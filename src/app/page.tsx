@@ -46,23 +46,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Header />
-      <Hero
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={resetFilters}
-      />
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
+        <Hero
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onReset={resetFilters}
+        />
 
-      <MumbaiPlaces />
+        <MumbaiPlaces />
 
-      <TrustedCompanies />
+        <TrustedCompanies />
 
-      <WorkspaceCategories />
+        <WorkspaceCategories />
 
-      <QuickCategories />
+        <QuickCategories />
 
-      {/* YouTube Video Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
+        {/* YouTube Video Section */}
+        <section className="bg-white py-16">
+          <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Video - Left Side */}
             <div className="relative">
@@ -142,13 +143,14 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
 
-      <FeaturedCoworking />
+        <FeaturedCoworking />
 
-      <Benefits />
+        <Benefits />
 
-      <Testimonials />
+        <Testimonials />
+      </div>
 
       <Footer />
 

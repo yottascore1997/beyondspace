@@ -11,7 +11,6 @@ import ContactList from '@/components/admin/ContactList';
 import RequirementsList from '@/components/admin/RequirementsList';
 import CustomerSubmissions from '@/components/admin/CustomerSubmissions';
 import AreasList from '@/components/admin/AreasList';
-import BulkUpload from '@/components/admin/BulkUpload';
 
 interface User {
   id: string;
@@ -189,11 +188,6 @@ export default function AdminPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <AreasList />
                 </div>
-              </div>
-            )}
-            {activeTab === 'bulk-upload' && (
-              <div className="p-8">
-                <BulkUpload />
               </div>
             )}
           </div>

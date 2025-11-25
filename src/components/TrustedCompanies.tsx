@@ -16,7 +16,8 @@ export default function TrustedCompanies() {
     'c11.png',
     'c12.png',
     'c13.png',
-    'c14.png'
+    'c14.png',
+    'sbmbank.png'
   ];
 
   const companies = companyLogos.map((fileName, index) => ({
