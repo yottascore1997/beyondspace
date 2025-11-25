@@ -681,7 +681,7 @@ export default function CategoryPage() {
           <div className="flex-1">
             
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-white rounded-2xl shadow-lg animate-pulse">
                     <div className="h-96 bg-gray-300 rounded-t-2xl"></div>
@@ -794,7 +794,7 @@ export default function CategoryPage() {
                       
                       // Add properties batch
                       batches.push(
-                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
+                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
                           {batch.map((property) => (
                             <PropertyCard
                               key={property.id}
@@ -828,7 +828,7 @@ export default function CategoryPage() {
                     
                     // Add paginated properties
                     batches.push(
-                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
+                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
                         {currentPageProperties.map((property) => (
                           <PropertyCard
                             key={property.id}
