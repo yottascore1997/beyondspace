@@ -407,7 +407,7 @@ export default function PropertyDetails() {
 
         @keyframes backdropFade {
           from { background-color: rgba(0, 0, 0, 0); }
-          to { background-color: rgba(0, 0, 0, 0.95); }
+          to { background-color: rgba(0, 0, 0, 0.3); }
         }
       `}</style>
       <Header />
@@ -424,8 +424,27 @@ export default function PropertyDetails() {
           </ol>
         </nav>
 
-        {/* Full Width Images Section */}
-        <div className="relative mb-6 lg:mb-8 z-0">
+        {/* Full Width Images Section - Isolated Container */}
+        <div 
+          className="w-full mb-3 lg:mb-4" 
+          style={{ 
+            display: 'block', 
+            position: 'relative', 
+            zIndex: 0, 
+            clear: 'both',
+            overflow: 'hidden',
+            minHeight: '400px'
+          }}
+        >
+          <div 
+            className="relative w-full h-[400px] md:h-[450px] lg:h-[500px]" 
+            style={{ 
+              display: 'block',
+              position: 'relative',
+              overflow: 'hidden',
+              minHeight: '400px'
+            }}
+          >
               {/* Get all available images */}
               {(() => {
                 const allImages = property.propertyImages && property.propertyImages.length > 0
@@ -433,9 +452,20 @@ export default function PropertyDetails() {
                   : [property.image];
 
                 return (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[350px] md:h-[400px] lg:h-[450px]">
+              <div 
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full" 
+                style={{ 
+                  position: 'relative',
+                  height: '100%',
+                  overflow: 'visible'
+                }}
+              >
                 {/* Large Image (Left) */}
-                <div className="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group">
+                <div 
+                  className="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group"
+                  style={{ borderRadius: '1rem' }}
+                  onClick={() => setShowGallery(true)}
+                >
                     <img
                     src={allImages[0]}
                       alt={property.title}
@@ -443,8 +473,11 @@ export default function PropertyDetails() {
                     />
                   {/* View All Images Button */}
                         <button
-                    onClick={() => setShowGallery(true)}
-                    className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md hover:bg-white hover:scale-105 transition-all duration-300"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowGallery(true);
+                    }}
+                    className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md hover:bg-white hover:scale-105 transition-all duration-300 z-10"
                         >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -456,7 +489,15 @@ export default function PropertyDetails() {
                 {/* 2x2 Grid of Smaller Images (Right) */}
                 <div className="grid grid-cols-2 gap-1.5 h-full">
                   {allImages.slice(1, 5).map((image, index) => (
-                    <div key={index} className="relative rounded-xl overflow-hidden shadow-md">
+                    <div 
+                      key={index} 
+                      className="relative rounded-xl overflow-hidden shadow-md cursor-pointer"
+                      style={{ borderRadius: '0.75rem' }}
+                      onClick={() => {
+                        setCurrentImageIndex(index + 1);
+                        setShowGallery(true);
+                      }}
+                    >
                       <img
                         src={image}
                         alt={`${property.title} ${index + 2}`}
@@ -465,8 +506,12 @@ export default function PropertyDetails() {
                       {/* View All Photos Button on the last image */}
                       {index === 3 && allImages.length > 5 && (
                         <button
-                          onClick={() => setShowGallery(true)}
-                          className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white text-sm font-semibold rounded-xl group hover:bg-black/70 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentImageIndex(index + 1);
+                            setShowGallery(true);
+                          }}
+                          className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white text-sm font-semibold rounded-xl group hover:bg-black/70 transition-colors z-10"
                         >
                           <svg className="w-6 h-6 mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -487,11 +532,21 @@ export default function PropertyDetails() {
                 );
               })()}
             </div>
+        </div>
+        {/* End of Images Section - All content below this point */}
+        <div style={{ clear: 'both', height: '0', overflow: 'hidden', margin: '0', padding: '0' }}></div>
 
-        {/* Main Content Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        {/* Main Content Section - Starts after images section */}
+        <div 
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-3" 
+          style={{ 
+            position: 'relative', 
+            zIndex: 0,
+            clear: 'both'
+          }}
+        >
           {/* Property Details - Left Side */}
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8" style={{ position: 'relative', zIndex: 0 }}>
             {/* Property Header */}
             <div className="mb-5">
             {/* Property Title */}
@@ -1387,7 +1442,7 @@ export default function PropertyDetails() {
 
       <Footer />
 
-      {/* Simple Gallery Modal with Big Image and Next/Previous */}
+      {/* Gallery Modal Popup */}
       {showGallery && (() => {
         const allImages = property.propertyImages && property.propertyImages.length > 0
           ? [property.image, ...property.propertyImages.map(img => img.imageUrl).filter(img => img !== property.image)]
@@ -1403,92 +1458,72 @@ export default function PropertyDetails() {
 
         return (
           <div 
-            className={`${poppins.className} fixed inset-0 z-50 flex items-center justify-center`}
+            className={`${poppins.className} fixed inset-0 z-50 flex items-center justify-center p-4`}
             style={{ 
               backgroundColor: 'rgba(0, 0, 0, 0)',
               animation: 'backdropFade 0.3s ease-out forwards'
             }}
             onClick={() => setShowGallery(false)}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setShowGallery(false)}
-              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+            {/* Popup Container */}
+            <div 
+              className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] relative flex flex-col"
+              onClick={(e) => e.stopPropagation()}
               style={{ 
                 opacity: 0,
-                animation: 'fadeIn 0.3s ease-out 0.2s forwards'
+                transform: 'scale(0.95)',
+                animation: 'fadeInScale 0.4s ease-out 0.1s forwards'
               }}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Image Container - Full Width */}
+              <div className="flex-1 flex items-center justify-center p-8 bg-gray-50 relative overflow-hidden" style={{ minHeight: '500px', maxHeight: 'calc(95vh - 48px)' }}>
+                {/* Close Button */}
+                <button
+                  onClick={() => setShowGallery(false)}
+                  className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg z-20"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
             {/* Image Counter */}
-            <div 
-              className="absolute top-4 left-4 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold z-10"
-              style={{ 
-                opacity: 0,
-                animation: 'fadeIn 0.3s ease-out 0.25s forwards'
-              }}
-            >
+                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-semibold z-20">
               {currentImageIndex + 1} / {allImages.length}
             </div>
+
+                {/* Main Image */}
+                <img
+                  src={allImages[currentImageIndex]}
+                  alt={`${property.title} ${currentImageIndex + 1}`}
+                  className="max-w-[70%] max-h-[70%] object-contain rounded-lg shadow-lg"
+                />
 
             {/* Previous Button */}
             {allImages.length > 1 && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePrevious();
-                }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
-                style={{ 
-                  opacity: 0,
-                  animation: 'fadeIn 0.3s ease-out 0.3s forwards'
-                }}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    onClick={handlePrevious}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-500 text-gray-700 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg z-10"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
             )}
 
-            {/* Main Image */}
-            <div 
-              className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img
-                src={allImages[currentImageIndex]}
-                alt={`${property.title} ${currentImageIndex + 1}`}
-                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-                style={{ 
-                  opacity: 0,
-                  transform: 'scale(0.95)',
-                  animation: 'fadeInScale 0.4s ease-out 0.1s forwards'
-                }}
-              />
-            </div>
-
             {/* Next Button */}
             {allImages.length > 1 && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleNext();
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
-                style={{ 
-                  opacity: 0,
-                  animation: 'fadeIn 0.3s ease-out 0.3s forwards'
-                }}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    onClick={handleNext}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-500 text-gray-700 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg z-10"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             )}
+              </div>
+            </div>
           </div>
         );
       })()}
