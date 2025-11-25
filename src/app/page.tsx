@@ -46,12 +46,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Header />
+      <Hero
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onReset={resetFilters}
+      />
       <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
-        <Hero
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onReset={resetFilters}
-        />
 
         <MumbaiPlaces />
 

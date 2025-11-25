@@ -72,7 +72,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     }, 10000);
 
     // Typewriter effect for "Dream Office Space" with restart
-    const text = 'Discover Your Dream Office Space';
+    const text = 'Discover your Office space in mumbai';
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -140,15 +140,21 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     { key: 'coworking', label: 'Coworking' },
     { key: 'managed', label: 'Managed Office Space' },
     { key: 'dedicateddesk', label: 'Dedicated Desk' },
-    { key: 'flexidesk', label: 'Day Pass / Flexi Desk' },
+    { key: 'flexidesk', label: 'Day Pass' },
+    { key: 'privatecabin', label: 'Private Cabin' },
     { key: 'virtualoffice', label: 'Virtual Office' },
     { key: 'meetingroom', label: 'Meeting Room' },
     { key: 'enterpriseoffices', label: 'Enterprise Offices' },
   ];
 
   const headlineSpanStyle: CSSProperties = {
-    textShadow: '0 0 10px rgba(255,255,255,0.7), 0 0 18px rgba(150,220,255,0.4)',
-    WebkitTextStroke: '1.6px rgba(0, 0, 0, 0.7)'
+    color: '#ffffff',
+    textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.7), 0 0 30px rgba(255,255,255,0.5)',
+    filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(255,255,255,0.8))',
+    fontWeight: 900,
+    letterSpacing: '-0.02em',
+    WebkitTextStroke: '2.5px #000000',
+    paintOrder: 'stroke fill'
   };
 
   return (
@@ -188,59 +194,73 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       </div>
       
       {/* Two-column layout: left text (centered vertically), right search (centered) */}
-      <div className={`relative z-10 text-left text-white w-full px-4 md:px-10 transition-all duration-1000 ${
+      <div className={`relative z-10 text-left text-white w-full px-0 transition-all duration-1000 ${
         isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       } md:flex md:items-start md:justify-between md:gap-4`}>
-        <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px] mt-4 md:mt-6">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-2 md:mb-3 leading-tight font-[Poppins,sans-serif]">
+        <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px] mt-4 md:mt-6 relative">
+          {/* Premium background glow behind text */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-cyan-500/20 blur-3xl rounded-3xl opacity-60"></div>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl mb-5 md:mb-6 leading-tight font-[Poppins,sans-serif] relative z-10">
             <span
-              className="block text-white"
+              className="block"
               style={headlineSpanStyle}
             >
               {typedOffice}
               <span
                 className={`inline-block w-[1ch] transition-opacity duration-300 ${isTypingComplete ? 'opacity-0' : 'opacity-100'}`}
-                style={{ color: '#4f46e5' }}
+                style={{ 
+                  color: '#ffffff',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,1), 0 0 20px rgba(255,255,255,0.8)',
+                  filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(255,255,255,0.9))',
+                  WebkitTextStroke: '2.5px #000000',
+                  paintOrder: 'stroke fill'
+                }}
               >
                 |
               </span>
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl lg:text-3xl text-white/95 font-semibold mb-3 md:mb-4" style={{textShadow: '2px 2px 8px rgba(0,0,0,0.6)'}}>
+          <p className="text-lg md:text-xl lg:text-2xl font-semibold mb-5 md:mb-6 relative z-10" style={{
+            color: '#ffffff',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6), 0 0 10px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.7), 0 0 24px rgba(255,255,255,0.5)',
+            filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+            WebkitTextStroke: '2px #000000',
+            paintOrder: 'stroke fill'
+          }}>
             Premium Office Spaces, Coworking Hubs & Meeting Rooms
           </p>
           
-          <div className="flex flex-wrap justify-start gap-4 md:gap-5 text-base md:text-lg lg:text-xl text-white/90 mb-2">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <div className="flex flex-wrap justify-start gap-2 md:gap-3 mb-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-lg hover:bg-white/30 transition-all duration-300 hover:scale-105">
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-md">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
               </svg>
-              <span className="font-semibold">Instant Booking</span>
+              </div>
+              <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">Instant Booking</span>
             </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-lg hover:bg-white/30 transition-all duration-300 hover:scale-105">
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-md">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
               </svg>
-              <span className="font-semibold">Prime Locations</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-              </svg>
-              <span className="font-semibold">Best Prices</span>
+              </div>
+              <span className="text-sm md:text-base font-bold text-white drop-shadow-lg">Prime Locations</span>
             </div>
           </div>
         </div>
 
         {/* Lighter card so image is visible behind */}
-        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-4 md:self-start max-w-2xl md:max-w-lg w-full md:w-[52%] ${
+        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-4 md:mr-8 md:mt-6 md:self-start max-w-xl md:max-w-md w-full md:w-[45%] ${
           isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
 
-          <div className="grid grid-cols-1 gap-3 mb-3">
+          <div className="grid grid-cols-1 gap-2 mb-2">
             <div className="group">
-              <label className="block text-gray-800 text-xs font-semibold mb-1">City</label>
+              <label className="block text-gray-800 text-[10px] font-semibold mb-0.5">City</label>
               <select
                 value={selectedCityId || ''}
                 onChange={(e) => {
@@ -250,7 +270,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
                   onFilterChange('city', name);
                   onFilterChange('area', 'all');
                 }}
-                className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
+                className="w-full p-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-xs"
               >
                 <option value="">Select City</option>
                 {cityOptions.map((city) => (
@@ -260,11 +280,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </div>
 
             <div className="group">
-              <label className="block text-gray-800 text-xs font-semibold mb-1">Area</label>
+              <label className="block text-gray-800 text-[10px] font-semibold mb-0.5">Area</label>
               <select
                 value={filters.area}
                 onChange={(e) => onFilterChange('area', e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
+                className="w-full p-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-xs"
               >
                 <option value="all">Any Area</option>
                 {areaOptions.map((area) => (
@@ -274,11 +294,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </div>
 
             <div className="group">
-              <label className="block text-gray-800 text-xs font-semibold mb-1">Category</label>
+              <label className="block text-gray-800 text-[10px] font-semibold mb-0.5">Category</label>
               <select
                 value={filters.purpose}
                 onChange={(e) => onFilterChange('purpose', e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-sm"
+                className="w-full p-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-xs"
               >
                 <option value="">Select Category</option>
                 {quickFilters.map((category) => (
@@ -307,20 +327,20 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
                   router.push('/category/coworking');
                 }
               }}
-              className="w-full mt-2 py-2 rounded-lg bg-blue-400 text-white text-sm font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+              className="w-full mt-1 py-1.5 rounded-lg bg-blue-400 text-white text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
             >
               Search Spaces
             </button>
           </div>
 
-          <div className="border-t border-gray-200 pt-3">
-            <p className="text-sm md:text-base text-gray-700 font-semibold mb-3 text-center">Popular Categories</p>
+          <div className="border-t border-gray-200 pt-2">
+            <p className="text-xs md:text-sm text-gray-700 font-semibold mb-2 text-center">Popular Categories</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5">
               {quickFilters.map((filter) => (
               <button
                 key={filter.key}
                 onClick={() => router.push(`/category/${filter.key}`)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs md:text-sm font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
+                  className="w-full px-2 py-1 rounded-lg bg-gray-100 text-gray-700 text-[10px] md:text-xs font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
               >
                 {filter.label}
               </button>
