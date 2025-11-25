@@ -418,7 +418,14 @@ export default function PropertyDetails() {
           <ol className="flex items-center space-x-1.5 text-xs text-gray-500">
             <li><Link href="/" className="hover:text-gray-700">Home</Link></li>
             <li>/</li>
-            <li><Link href="/" className="hover:text-gray-700">Properties</Link></li>
+            <li>
+              <Link 
+                href={searchParams.get('category') ? `/category/${searchParams.get('category')}` : '/'} 
+                className="hover:text-gray-700"
+              >
+                Properties
+              </Link>
+            </li>
             <li>/</li>
             <li className="text-gray-900">{property.title}</li>
           </ol>
