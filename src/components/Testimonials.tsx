@@ -100,7 +100,7 @@ export default function Testimonials() {
 
   return (
     <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1600px] mx-auto px-4 xl:px-8 2xl:px-12">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
             Our Clients <span className="bg-gradient-to-r from-orange-400 via-pink-400 to-orange-500 bg-clip-text text-transparent">Speak</span> for Us

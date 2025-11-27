@@ -72,7 +72,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
     }, 10000);
 
     // Typewriter effect for "Dream Office Space" with restart
-    const text = 'Discover your Office space in mumbai';
+    const text = 'Discover your Dream Office space';
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -194,13 +194,13 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
       </div>
       
       {/* Two-column layout: left text (centered vertically), right search (centered) */}
-      <div className={`relative z-10 text-left text-white w-full px-0 transition-all duration-1000 ${
+      <div className={`relative z-10 text-left text-white w-full max-w-[1600px] mx-auto px-4 xl:px-8 2xl:px-12 transition-all duration-1000 ${
         isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-      } md:flex md:items-start md:justify-between md:gap-4`}>
-        <div className="max-w-3xl mb-4 md:mb-0 md:w-1/2 ml-[30px] mt-4 md:mt-6 relative">
+      } md:flex md:items-start md:justify-between md:gap-8 xl:gap-12`}>
+        <div className="max-w-4xl xl:max-w-5xl mb-4 md:mb-0 md:w-1/2 xl:w-[55%] ml-[30px] mt-4 md:mt-6 relative">
           {/* Premium background glow behind text */}
           <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-cyan-500/20 blur-3xl rounded-3xl opacity-60"></div>
-          <h1 className="text-3xl md:text-5xl lg:text-6xl mb-5 md:mb-6 leading-tight font-[Poppins,sans-serif] relative z-10">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl mb-5 md:mb-6 leading-tight font-[Poppins,sans-serif] relative z-10">
             <span
               className="block"
               style={headlineSpanStyle}
@@ -221,7 +221,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl lg:text-2xl font-semibold mb-5 md:mb-6 relative z-10" style={{
+          <p className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold mb-5 md:mb-6 relative z-10" style={{
             color: '#ffffff',
             textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6), 0 0 10px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.7), 0 0 24px rgba(255,255,255,0.5)',
             filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.8))',
@@ -254,7 +254,7 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
         </div>
 
         {/* Lighter card so image is visible behind */}
-        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-4 md:mr-8 md:mt-6 md:self-start max-w-xl md:max-w-md w-full md:w-[45%] ${
+        <div className={`bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 xl:p-6 shadow-xl transition-all duration-700 delay-500 mx-auto md:mx-0 md:-ml-4 md:mr-8 md:mt-6 md:self-start max-w-xl md:max-w-md xl:max-w-lg w-full md:w-[45%] xl:w-[40%] ${
           isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
 

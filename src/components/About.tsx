@@ -30,7 +30,7 @@ export default function About() {
         <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-10 animate-pulse"></div>
       </div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 xl:px-8 2xl:px-12 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>

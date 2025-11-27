@@ -143,16 +143,16 @@ export default function MumbaiPlaces() {
 
   return (
     <section className="py-8 md:py-10 bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1600px] mx-auto px-4 xl:px-8 2xl:px-12">
         <div className="text-center mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2 md:mb-3 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
+          <h2 className="text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-bold mb-2 md:mb-3 text-gray-900" style={{ textShadow: '0 0 14px rgba(255,255,255,0.4)' }}>
             Explore{' '}
             <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
               Mumbai&apos;s
             </span>{' '}
             Prime Locations
           </h2>
-          <p className="text-sm md:text-base text-black max-w-2xl mx-auto" style={{ textShadow: '0 0 10px rgba(255,255,255,0.35)' }}>
+          <p className="text-sm md:text-base xl:text-lg text-black max-w-2xl xl:max-w-4xl mx-auto" style={{ textShadow: '0 0 10px rgba(255,255,255,0.35)' }}>
             Discover the most sought-after neighborhoods in the city of dreams
           </p>
         </div>
@@ -172,14 +172,14 @@ export default function MumbaiPlaces() {
           </button>
 
           {/* Scrollable Cards Container */}
-          <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide px-2 md:px-4 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div ref={scrollRef} className="flex gap-4 xl:gap-6 overflow-x-auto scrollbar-hide px-2 md:px-4 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {orderedItems.map((item, index) => (
               <div
                 key={item.place.id}
                 onClick={() => handleAreaClick(item.place.name)}
                 onMouseEnter={() => setHoveredPlace(item.place.id)}
                 onMouseLeave={() => setHoveredPlace(null)}
-                className={`group relative flex-shrink-0 w-60 md:w-64 h-72 md:h-80 rounded-2xl overflow-hidden shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a08efe]/30 cursor-pointer ${
+                className={`group relative flex-shrink-0 w-60 md:w-64 xl:w-72 2xl:w-80 h-72 md:h-80 xl:h-96 2xl:h-[26rem] rounded-2xl overflow-hidden shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a08efe]/30 cursor-pointer ${
                   hoveredPlace === item.place.id ? 'ring-2 ring-[#a08efe]/50' : ''
                 }`}
                 style={{

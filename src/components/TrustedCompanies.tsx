@@ -30,7 +30,7 @@ export default function TrustedCompanies() {
 
   return (
     <section className="py-16 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1600px] mx-auto px-4 xl:px-8 2xl:px-12">
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

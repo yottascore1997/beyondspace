@@ -144,6 +144,8 @@ export default function PropertyDetails() {
   const [modalCountryCode, setModalCountryCode] = useState('+91');
   const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const modalCountryDropdownRef = useRef<HTMLDivElement | null>(null);
+  const [isFormSticky, setIsFormSticky] = useState(true);
+  const amenitiesRef = useRef<HTMLDivElement | null>(null);
 
   const workspaceTypes = [
     'Coworking Space',
@@ -205,13 +207,13 @@ export default function PropertyDetails() {
   ];
 
   const handleEnquireClick = () => {
-    const formSection = document.getElementById('contact-form-section');
-    if (formSection) {
-      // Only trigger shake animation, no scrolling to prevent sticky form from shifting
-      formSection.classList.add('animate-shake');
+    const formFields = document.getElementById('contact-form-fields');
+    if (formFields) {
+      // Only trigger shake animation on form fields, not the entire frame
+      formFields.classList.add('animate-shake');
       setTimeout(() => {
-        formSection.classList.remove('animate-shake');
-      }, 600);
+        formFields.classList.remove('animate-shake');
+      }, 400);
     }
   };
 
@@ -247,6 +249,30 @@ export default function PropertyDetails() {
       fetchProperty(params.id as string);
     }
   }, [params.id]);
+
+  // Scroll-based sticky control for Amenities section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (amenitiesRef.current) {
+        const amenitiesTop = amenitiesRef.current.offsetTop;
+        const scrollPosition = window.scrollY + window.innerHeight;
+        
+        // When user scrolls to amenities section, stop sticky
+        if (scrollPosition >= amenitiesTop + 100) {
+          setIsFormSticky(false);
+        } else {
+          setIsFormSticky(true);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial position
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [property]);
 
   const handleContactInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -377,16 +403,16 @@ export default function PropertyDetails() {
   return (
     <div className={`${poppins.className} min-h-screen bg-white`}>
       <style jsx global>{`
-        @keyframes subtle-shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-4px); }
-          40% { transform: translateX(4px); }
-          60% { transform: translateX(-3px); }
-          80% { transform: translateX(3px); }
+        @keyframes smooth-slide {
+          0% { transform: translateX(0); }
+          25% { transform: translateX(-15px); }
+          50% { transform: translateX(15px); }
+          75% { transform: translateX(-8px); }
+          100% { transform: translateX(0); }
         }
 
         .animate-shake {
-          animation: subtle-shake 0.6s ease-in-out;
+          animation: smooth-slide 0.4s ease-in-out;
         }
 
         @keyframes fadeIn {
@@ -407,7 +433,22 @@ export default function PropertyDetails() {
 
         @keyframes backdropFade {
           from { background-color: rgba(0, 0, 0, 0); }
-          to { background-color: rgba(0, 0, 0, 0.3); }
+          to { background-color: rgba(0, 0, 0, 0.85); }
+        }
+
+        @keyframes imageSlide {
+          from { 
+            opacity: 0; 
+            transform: translateX(20px);
+          }
+          to { 
+            opacity: 1; 
+            transform: translateX(0);
+          }
+        }
+
+        .gallery-image {
+          animation: imageSlide 0.3s ease-out;
         }
       `}</style>
       <Header />
@@ -444,7 +485,7 @@ export default function PropertyDetails() {
           }}
         >
           <div 
-            className="relative w-full h-[400px] md:h-[450px] lg:h-[500px]" 
+            className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] xl:h-[600px] 2xl:h-[700px]" 
             style={{ 
               display: 'block',
               position: 'relative',
@@ -460,7 +501,7 @@ export default function PropertyDetails() {
 
                 return (
               <div 
-                className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full" 
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:gap-6 w-full h-full" 
                 style={{ 
                   position: 'relative',
                   height: '100%',
@@ -476,7 +517,7 @@ export default function PropertyDetails() {
                     <img
                     src={allImages[0]}
                       alt={property.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                     />
                   {/* View All Images Button */}
                         <button
@@ -494,7 +535,7 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* 2x2 Grid of Smaller Images (Right) */}
-                <div className="grid grid-cols-2 gap-1.5 h-full">
+                <div className="grid grid-cols-2 gap-1.5 xl:gap-2 h-full">
                   {allImages.slice(1, 5).map((image, index) => (
                     <div 
                       key={index} 
@@ -508,7 +549,7 @@ export default function PropertyDetails() {
                       <img
                         src={image}
                         alt={`${property.title} ${index + 2}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center"
                       />
                       {/* View All Photos Button on the last image */}
                       {index === 3 && allImages.length > 5 && (
@@ -1096,7 +1137,7 @@ export default function PropertyDetails() {
             })()}
 
             {/* Amenities Section */}
-            <div className="mb-8">
+            <div ref={amenitiesRef} className="mb-8">
               <h3 className="text-xl font-semibold text-gray-900 mb-5">Amenities</h3>
               
               <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 rounded-2xl p-6">
@@ -1227,7 +1268,7 @@ export default function PropertyDetails() {
 
           {/* Contact Form - Right Side */}
           <div className="lg:col-span-4 lg:order-2">
-            <div className="lg:sticky lg:top-6 xl:top-8 lg:self-start">
+            <div className={`${isFormSticky ? 'lg:sticky lg:top-6 xl:top-8 lg:self-start' : 'lg:self-start'}`}>
               <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 relative overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
@@ -1240,7 +1281,7 @@ export default function PropertyDetails() {
                   <p className="text-xs text-gray-700">Share your requirements and we'll tailor a proposal for you.</p>
                 </div>
 
-                <form onSubmit={handleContactSubmit} className="space-y-3">
+                <form id="contact-form-fields" onSubmit={handleContactSubmit} className="space-y-3">
                   <div>
                     <input
                       type="text"
@@ -1472,64 +1513,83 @@ export default function PropertyDetails() {
             }}
             onClick={() => setShowGallery(false)}
           >
-            {/* Popup Container */}
+            {/* Popup Container - Fixed Aspect Ratio */}
             <div 
-              className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] relative flex flex-col"
+              className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl shadow-2xl relative overflow-hidden flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
               style={{ 
+                width: '70vw',
+                maxWidth: '900px',
+                height: '80vh',
+                maxHeight: '800px',
                 opacity: 0,
                 transform: 'scale(0.95)',
                 animation: 'fadeInScale 0.4s ease-out 0.1s forwards'
               }}
             >
-              {/* Image Container - Full Width */}
-              <div className="flex-1 flex items-center justify-center p-8 bg-gray-50 relative overflow-hidden" style={{ minHeight: '500px', maxHeight: 'calc(95vh - 48px)' }}>
-                {/* Close Button */}
-                <button
-                  onClick={() => setShowGallery(false)}
-                  className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg z-20"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {/* Image Counter */}
-                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-semibold z-20">
-              {currentImageIndex + 1} / {allImages.length}
-            </div>
-
-                {/* Main Image */}
-                <img
-                  src={allImages[currentImageIndex]}
-                  alt={`${property.title} ${currentImageIndex + 1}`}
-                  className="max-w-[70%] max-h-[70%] object-contain rounded-lg shadow-lg"
-                />
-
-            {/* Previous Button */}
-            {allImages.length > 1 && (
+              {/* Close Button - Top Right */}
               <button
-                    onClick={handlePrevious}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-500 text-gray-700 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg z-10"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                onClick={() => setShowGallery(false)}
+                className="absolute top-4 right-4 bg-black/70 hover:bg-black/90 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm z-20"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-            )}
 
-            {/* Next Button */}
-            {allImages.length > 1 && (
-              <button
-                    onClick={handleNext}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-500 text-gray-700 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg z-10"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            )}
-              </div>
+              {/* Main Image - Perfect Fit */}
+              <img
+                key={currentImageIndex}
+                src={allImages[currentImageIndex]}
+                alt={`${property.title} ${currentImageIndex + 1}`}
+                className="w-full h-full object-contain gallery-image p-4"
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+              />
+
+                {/* Navigation Buttons */}
+                {allImages.length > 1 && (
+                  <>
+                    {/* Previous Button */}
+                    <button
+                      onClick={handlePrevious}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm z-10"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={handleNext}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm z-10"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+
+                {/* Image Dots Indicator */}
+                {allImages.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                    {allImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          index === currentImageIndex 
+                            ? 'bg-white scale-125' 
+                            : 'bg-white/50 hover:bg-white/75'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
             </div>
           </div>
         );

@@ -122,10 +122,10 @@ export default function WorkspaceCategories() {
 
   return (
     <section className="py-8 md:py-10 bg-white">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1600px] mx-auto px-4 xl:px-8 2xl:px-12">
         {/* Section Heading */}
         <div className="text-center mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-gray-900 mb-2">
             Quick Search by{' '}
             <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
               Popular Categories
@@ -134,15 +134,15 @@ export default function WorkspaceCategories() {
         </div>
 
         {/* Categories Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 md:gap-6 xl:gap-8">
           {categories.map((category, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 md:p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 md:p-5 xl:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
               onClick={() => handleCategoryClick(category.name)}
             >
               {/* Category Image */}
-              <div className="w-full h-56 md:h-64 rounded-lg overflow-hidden mb-3">
+              <div className="w-full h-56 md:h-64 xl:h-72 rounded-lg overflow-hidden mb-3">
                 <img
                   src={categoryImages[index]}
                   alt={`${category.name} workspace`}

@@ -34,7 +34,7 @@ export default function FeaturedCoworking() {
 
   return (
     <section className="py-8 md:py-10 bg-white overflow-hidden">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <div className="relative text-center mb-6 md:mb-8">
           <h2 className="relative inline-block text-2xl md:text-3xl font-bold text-slate-900">
             <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
