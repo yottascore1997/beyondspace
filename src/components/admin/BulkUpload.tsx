@@ -20,13 +20,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
   const [message, setMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Excel template headers (must match API expectations)
+  // Excel template headers in desired order
+  // Order: Basic fields → Seating Plans → Remaining fields
   const templateHeaders = [
-    'title',
+    // Basic fields (first)
+    'coworkingname',
+    'buildingname',
     'city', 
     'area',
     'sublocation',
     'propertyTier',
+    // Seating Plans (middle)
+    'dedicated-desk',
+    'flexi-desk',
+    'private-cabin',
+    'virtual-office',
+    'meeting-room',
+    'managed-office-space',
+    'day-pass',
+    // Remaining fields (last)
     'categories',
     'image',
     'locationDetails',
@@ -39,8 +51,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
     'monFriTime',
     'saturdayTime',
     'sundayTime',
-    'amenities',
-    'seatingPlans'
+    'amenities'
   ];
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,13 +65,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
 
   const downloadTemplate = () => {
     // Create comprehensive sample data with 4 realistic records
+    // Note: Object keys order doesn't matter for XLSX, but we'll maintain logical order
     const sampleData = [
       {
-        title: '91Springboard - Lotus Corporate Park',
+        // Basic fields (first)
+        coworkingname: '91Springboard',
+        buildingname: 'Lotus Corporate Park',
         city: 'Mumbai',
         area: 'Andheri East',
         sublocation: 'MIDC',
         propertyTier: 'Premium',
+        // Seating Plans (middle)
+        'dedicated-desk': '11999',
+        'flexi-desk': '8999',
+        'private-cabin': '',
+        'virtual-office': '',
+        'meeting-room': '',
+        'managed-office-space': '',
+        'day-pass': '',
+        // Remaining fields (last)
         categories: 'coworking,managed,dedicateddesk',
         image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
         locationDetails: 'Plot No. D, 5th Road, MIDC, Andheri East, Mumbai, Maharashtra 400093',
@@ -73,15 +96,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         monFriTime: '9:00 AM - 8:00 PM',
         saturdayTime: '9:00 AM - 6:00 PM',
         sundayTime: '10:00 AM - 4:00 PM',
-        amenities: '', // Leave empty to auto-select all amenities
-        seatingPlans: '[{"id":"dedicated-desk","title":"Dedicated Desk","description":"Get your dedicated desk with storage and 24/7 access","price":"11999","seating":"1-50","isSelected":true},{"id":"flexi-desk","title":"Flexi Desk","description":"Hot desk with flexible timing","price":"8999","seating":"1-20","isSelected":true}]'
+        amenities: '' // Leave empty to auto-select all amenities
       },
       {
-        title: 'WeWork BKC - Tower 1',
+        // Basic fields (first)
+        coworkingname: 'WeWork BKC',
+        buildingname: 'Tower 1',
         city: 'Mumbai',
         area: 'BKC',
         sublocation: '',
         propertyTier: 'Luxury',
+        // Seating Plans (middle)
+        'dedicated-desk': '30000',
+        'flexi-desk': '',
+        'private-cabin': '',
+        'virtual-office': '',
+        'meeting-room': '',
+        'managed-office-space': '45000',
+        'day-pass': '',
+        // Remaining fields (last)
         categories: 'managed,enterpriseoffices,coworking',
         image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800',
         locationDetails: 'Tower 1, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051',
@@ -94,15 +127,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         monFriTime: '8:00 AM - 10:00 PM',
         saturdayTime: '9:00 AM - 7:00 PM',
         sundayTime: '10:00 AM - 6:00 PM',
-        amenities: '',
-        seatingPlans: '[{"id":"managed-office","title":"Managed Office","description":"Fully managed private office with dedicated team space","price":"45000","seating":"10-100","isSelected":true},{"id":"enterprise-office","title":"Enterprise Office","description":"Large scale office solution for big teams","price":"75000","seating":"100+","isSelected":true}]'
+        amenities: ''
       },
       {
-        title: 'Awfis Space Solutions - Lower Parel',
+        // Basic fields (first)
+        coworkingname: 'Awfis Space Solutions',
+        buildingname: 'Lower Parel',
         city: 'Mumbai',
         area: 'Lower Parel',
         sublocation: 'Kamala Mills',
         propertyTier: 'Premium',
+        // Seating Plans (middle)
+        'dedicated-desk': '12500',
+        'flexi-desk': '9500',
+        'private-cabin': '',
+        'virtual-office': '',
+        'meeting-room': '',
+        'managed-office-space': '',
+        'day-pass': '',
+        // Remaining fields (last)
         categories: 'coworking,dedicateddesk,flexidesk',
         image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800',
         locationDetails: 'Kamala Mills Compound, Senapati Bapat Marg, Lower Parel, Mumbai, Maharashtra 400013',
@@ -115,15 +158,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         monFriTime: '9:00 AM - 9:00 PM',
         saturdayTime: '10:00 AM - 6:00 PM',
         sundayTime: 'Closed',
-        amenities: '',
-        seatingPlans: '[{"id":"dedicated-desk","title":"Dedicated Desk","description":"Fixed desk with personal storage","price":"12500","seating":"1-30","isSelected":true},{"id":"flexi-desk","title":"Flexi Desk","description":"Flexible hot desking option","price":"9500","seating":"1-15","isSelected":true}]'
+        amenities: ''
       },
       {
-        title: 'Innov8 Coworking - Powai',
+        // Basic fields (first)
+        coworkingname: 'Innov8 Coworking',
+        buildingname: 'Powai',
         city: 'Mumbai',
         area: 'Powai',
         sublocation: 'Hiranandani',
         propertyTier: 'Popular',
+        // Seating Plans (middle)
+        'dedicated-desk': '',
+        'flexi-desk': '7500',
+        'private-cabin': '',
+        'virtual-office': '3500',
+        'meeting-room': '500',
+        'managed-office-space': '',
+        'day-pass': '',
+        // Remaining fields (last)
         categories: 'coworking,meetingroom,virtualoffice',
         image: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800',
         locationDetails: 'Hiranandani Gardens, Powai, Mumbai, Maharashtra 400076',
@@ -136,17 +189,32 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         monFriTime: '8:30 AM - 8:30 PM',
         saturdayTime: '9:30 AM - 5:30 PM',
         sundayTime: '10:00 AM - 3:00 PM',
-        amenities: '',
-        seatingPlans: '[{"id":"hot-desk","title":"Hot Desk","description":"Flexible seating in open area","price":"7500","seating":"1-10","isSelected":true},{"id":"meeting-room","title":"Meeting Room","description":"Hourly meeting room bookings","price":"500","seating":"4-12","isSelected":true},{"id":"virtual-office","title":"Virtual Office","description":"Business address and mail handling","price":"3500","seating":"Virtual","isSelected":true}]'
+        amenities: ''
       }
     ];
 
     // Create workbook
     const wb = XLSX.utils.book_new();
+    
+    // Create worksheet with ordered columns
+    // First, create sheet with data
     const ws = XLSX.utils.json_to_sheet(sampleData);
     
+    // Reorder columns according to templateHeaders order
+    // XLSX maintains column order based on first object's keys, so we need to ensure order
+    const orderedData = sampleData.map(row => {
+      const orderedRow: any = {};
+      templateHeaders.forEach(header => {
+        orderedRow[header] = (row as any)[header] || '';
+      });
+      return orderedRow;
+    });
+    
+    // Create new worksheet with ordered columns
+    const orderedWs = XLSX.utils.json_to_sheet(orderedData);
+    
     // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Properties');
+    XLSX.utils.book_append_sheet(wb, orderedWs, 'Properties');
     
     // Download file
     XLSX.writeFile(wb, 'property-upload-template.xlsx');
@@ -397,11 +465,13 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
       <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
         <h3 className="font-medium text-yellow-900 mb-2">📋 Important Notes:</h3>
         <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• <strong>Required fields:</strong> title, city, area, categories, image, locationDetails</li>
+          <li>• <strong>Required fields:</strong> coworkingname, buildingname, city, area, categories, image, locationDetails</li>
           <li>• <strong>Categories format:</strong> Comma-separated (e.g., "coworking,managed,dedicateddesk")</li>
           <li>• <strong>City & Area:</strong> Must exist in the database</li>
           <li>• <strong>Images:</strong> Provide valid image URLs</li>
           <li>• <strong>Amenities:</strong> Leave empty to auto-select all amenities, or provide JSON array</li>
+          <li>• <strong>Seating Plans:</strong> Each plan has its own column. Enter price in the respective column (e.g., "dedicated-desk" column = "11999"). Leave empty if not applicable.</li>
+          <li>• <strong>Available Columns:</strong> dedicated-desk, flexi-desk, private-cabin, virtual-office, meeting-room, managed-office-space, day-pass</li>
           <li>• <strong>Timing format:</strong> Use readable format (e.g., "9:00 AM - 6:00 PM")</li>
         </ul>
       </div>

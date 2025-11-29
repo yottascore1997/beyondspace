@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth';
 
 interface ExcelRow {
-  title: string;
+  coworkingname: string;
+  buildingname: string;
   city: string;
   area: string;
   sublocation?: string;
@@ -21,6 +22,15 @@ interface ExcelRow {
   saturdayTime?: string;
   sundayTime?: string;
   amenities?: string;
+  // Individual seating plan price columns
+  'dedicated-desk'?: string;
+  'flexi-desk'?: string;
+  'private-cabin'?: string;
+  'virtual-office'?: string;
+  'meeting-room'?: string;
+  'managed-office-space'?: string;
+  'day-pass'?: string;
+  // Backward compatibility - old format
   seatingPlans?: string;
 }
 
@@ -131,16 +141,128 @@ function parseAmenities(amenitiesStr?: string): any[] {
   }
 }
 
+// Predefined seating plans with fixed descriptions and seating values
+const SEATING_PLANS_MAP: Record<string, { title: string; description: string; seating: string }> = {
+  'dedicated-desk': {
+    title: 'Dedicated Desk',
+    description: 'Get your dedicated desk with storage and 24/7 access. Perfect for professionals who need a fixed workspace.',
+    seating: '1-50'
+  },
+  'flexi-desk': {
+    title: 'Flexi Desk',
+    description: 'Hot desk with flexible timing. Work from anywhere in the coworking space with flexible access.',
+    seating: '1-20'
+  },
+  'private-cabin': {
+    title: 'Private Cabin',
+    description: 'Private cabin for focused work with complete privacy and dedicated space.',
+    seating: '1-10'
+  },
+  'virtual-office': {
+    title: 'Virtual Office',
+    description: 'Business address and mail handling service. Perfect for remote businesses needing a professional address.',
+    seating: 'Virtual'
+  },
+  'meeting-room': {
+    title: 'Meeting Room',
+    description: 'Perfect for Meetings, Team huddles, and Presentations – Pick Your Room, Book it, & Impress! Meeting Rooms Come Equip With Monitor/TV, Whiteboard, WIFI, and Unlimited Tea and Coffee.',
+    seating: '04 Seater'
+  },
+  'managed-office-space': {
+    title: 'Managed Office Space',
+    description: 'A) Provider offer customized office setups according to company\'s specific needs and brand ethos. \nB) The provider manages day-to-day operations, including maintenance, IT support, and cleaning.\nC) Businesses of all sizes: From startups and SMEs to large enterprises and MNCs, companies use managed spaces for their flexibility and convenience. \nTo know more about managed office space, reach out to us, and let\'s discuss how our managed office solutions can cater to your specific business needs.',
+    seating: '10-100'
+  },
+  'day-pass': {
+    title: 'Day Pass',
+    description: 'Single day access to coworking space with all amenities included.',
+    seating: '1'
+  }
+};
+
+// Helper function to parse seating plans from individual columns or old format
+function parseSeatingPlansFromColumns(row: ExcelRow): any[] {
+  const plans: any[] = [];
+  const seatingPlanIds = ['dedicated-desk', 'flexi-desk', 'private-cabin', 'virtual-office', 'meeting-room', 'managed-office-space', 'day-pass'];
+  
+  // Check each seating plan column
+  for (const planId of seatingPlanIds) {
+    const price = (row as any)[planId];
+    if (price && price.toString().trim()) {
+      const planInfo = SEATING_PLANS_MAP[planId];
+      if (planInfo) {
+        plans.push({
+          id: planId,
+          title: planInfo.title,
+          description: planInfo.description,
+          price: price.toString().trim(),
+          seating: planInfo.seating,
+          isSelected: true
+        });
+      }
+    }
+  }
+  
+  return plans;
+}
+
 // Helper function to parse seating plans
-function parseSeatingPlans(seatingPlansStr?: string): any[] {
+// Priority: 1. Individual columns, 2. Simplified format "id1:price1,id2:price2", 3. JSON format (backward compatible)
+function parseSeatingPlans(row: ExcelRow, seatingPlansStr?: string): any[] {
+  // First, try individual columns (new format)
+  const columnPlans = parseSeatingPlansFromColumns(row);
+  if (columnPlans.length > 0) {
+    return columnPlans;
+  }
+  
+  // If no individual columns, try old string format
   if (!seatingPlansStr) return [];
   
+  // Try new simplified format: "dedicated-desk:11999,flexi-desk:8999"
+  if (seatingPlansStr.includes(':') && !seatingPlansStr.trim().startsWith('[')) {
+    const plans: any[] = [];
+    const pairs = seatingPlansStr.split(',').map(s => s.trim()).filter(Boolean);
+    
+    for (const pair of pairs) {
+      const [id, price] = pair.split(':').map(s => s.trim());
+      if (id && price && SEATING_PLANS_MAP[id]) {
+        const planInfo = SEATING_PLANS_MAP[id];
+        plans.push({
+          id: id,
+          title: planInfo.title,
+          description: planInfo.description,
+          price: price,
+          seating: planInfo.seating,
+          isSelected: true
+        });
+      }
+    }
+    
+    if (plans.length > 0) return plans;
+  }
+  
+  // Fallback to JSON format (backward compatible)
   try {
-    // Try to parse as JSON first
     const parsed = JSON.parse(seatingPlansStr);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) {
+      // If JSON format, ensure all plans have required fields from mapping
+      return parsed.map((plan: any) => {
+        if (plan.id && SEATING_PLANS_MAP[plan.id]) {
+          const planInfo = SEATING_PLANS_MAP[plan.id];
+          return {
+            id: plan.id,
+            title: planInfo.title,
+            description: plan.description || planInfo.description,
+            price: plan.price || '',
+            seating: plan.seating || planInfo.seating,
+            isSelected: plan.isSelected !== undefined ? plan.isSelected : true
+          };
+        }
+        return plan;
+      });
+    }
+    return [];
   } catch {
-    // If not JSON, return empty array
     return [];
   }
 }
@@ -149,8 +271,12 @@ function parseSeatingPlans(seatingPlansStr?: string): any[] {
 function validateProperty(row: ExcelRow, rowIndex: number): string[] {
   const errors: string[] = [];
   
-  if (!row.title?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Title is required`);
+  if (!row.coworkingname?.trim()) {
+    errors.push(`Row ${rowIndex + 2}: Coworking Name is required`);
+  }
+  
+  if (!row.buildingname?.trim()) {
+    errors.push(`Row ${rowIndex + 2}: Building Name is required`);
   }
   
   if (!row.city?.trim()) {
@@ -228,10 +354,13 @@ function processRow(row: ExcelRow, userId: string): ProcessedProperty {
   
   // Parse complex fields
   const amenities = parseAmenities(row.amenities);
-  const seatingPlans = parseSeatingPlans(row.seatingPlans);
+  const seatingPlans = parseSeatingPlans(row, row.seatingPlans);
+  
+  // Combine coworkingname and buildingname to create title
+  const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
   
   return {
-    title: row.title.trim(),
+    title: title,
     city: row.city.trim(),
     area: row.area.trim(),
     sublocation: row.sublocation?.trim() || null,
