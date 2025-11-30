@@ -21,14 +21,13 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Excel template headers in desired order
-  // Order: Basic fields → Seating Plans → Remaining fields
   const templateHeaders = [
     // Basic fields (first)
     'coworkingname',
     'buildingname',
-    'city', 
-    'area',
     'sublocation',
+    'area',
+    'city',
     'propertyTier',
     // Seating Plans (middle)
     'dedicated-desk',
@@ -40,18 +39,16 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
     'day-pass',
     // Remaining fields (last)
     'categories',
-    'image',
-    'locationDetails',
     'metroStationDistance',
     'metroStationDistance2',
     'railwayStationDistance',
     'railwayStationDistance2',
-    'googleMapLink',
-    'aboutWorkspace',
     'monFriTime',
     'saturdayTime',
     'sundayTime',
-    'amenities'
+    'locationDetails',
+    'googleMapLink',
+    'aboutWorkspace'
   ];
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,9 +68,9 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         // Basic fields (first)
         coworkingname: '91Springboard',
         buildingname: 'Lotus Corporate Park',
-        city: 'Mumbai',
-        area: 'Andheri East',
         sublocation: 'MIDC',
+        area: 'Andheri East',
+        city: 'Mumbai',
         propertyTier: 'Premium',
         // Seating Plans (middle)
         'dedicated-desk': '11999',
@@ -85,26 +82,24 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'day-pass': '',
         // Remaining fields (last)
         categories: 'coworking,managed,dedicateddesk',
-        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
-        locationDetails: 'Plot No. D, 5th Road, MIDC, Andheri East, Mumbai, Maharashtra 400093',
         metroStationDistance: '0.4 Km Walking Distance From MIDC Metro Station',
         metroStationDistance2: '1.1 Km Walking Distance From Airport Road Metro Station',
         railwayStationDistance: '3.3 Km Drive From Andheri Railway Station',
         railwayStationDistance2: '9.2 Km Drive From Ghatkopar Railway Station',
-        googleMapLink: 'https://maps.google.com/?q=19.1136,72.8697',
-        aboutWorkspace: 'Premium coworking space in the heart of MIDC with state-of-the-art facilities, high-speed internet, modern meeting rooms, and a vibrant community of entrepreneurs and professionals.',
         monFriTime: '9:00 AM - 8:00 PM',
         saturdayTime: '9:00 AM - 6:00 PM',
         sundayTime: '10:00 AM - 4:00 PM',
-        amenities: '' // Leave empty to auto-select all amenities
+        locationDetails: 'Plot No. D, 5th Road, MIDC, Andheri East, Mumbai, Maharashtra 400093',
+        googleMapLink: 'https://maps.google.com/?q=19.1136,72.8697',
+        aboutWorkspace: 'Premium coworking space in the heart of MIDC with state-of-the-art facilities, high-speed internet, modern meeting rooms, and a vibrant community of entrepreneurs and professionals.'
       },
       {
         // Basic fields (first)
         coworkingname: 'WeWork BKC',
         buildingname: 'Tower 1',
-        city: 'Mumbai',
-        area: 'BKC',
         sublocation: '',
+        area: 'BKC',
+        city: 'Mumbai',
         propertyTier: 'Luxury',
         // Seating Plans (middle)
         'dedicated-desk': '30000',
@@ -116,26 +111,24 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'day-pass': '',
         // Remaining fields (last)
         categories: 'managed,enterpriseoffices,coworking',
-        image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800',
-        locationDetails: 'Tower 1, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051',
         metroStationDistance: '0.2 Km Walking Distance From BKC Metro Station',
         metroStationDistance2: '',
         railwayStationDistance: '1.5 Km Drive From Kurla Railway Station',
         railwayStationDistance2: '2.8 Km Drive From Bandra Railway Station',
-        googleMapLink: 'https://maps.google.com/?q=19.0596,72.8656',
-        aboutWorkspace: 'Luxury managed office space in Mumbai\'s premier business district with world-class amenities, premium interiors, and stunning city views. Perfect for enterprises and growing teams.',
         monFriTime: '8:00 AM - 10:00 PM',
         saturdayTime: '9:00 AM - 7:00 PM',
         sundayTime: '10:00 AM - 6:00 PM',
-        amenities: ''
+        locationDetails: 'Tower 1, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051',
+        googleMapLink: 'https://maps.google.com/?q=19.0596,72.8656',
+        aboutWorkspace: 'Luxury managed office space in Mumbai\'s premier business district with world-class amenities, premium interiors, and stunning city views. Perfect for enterprises and growing teams.'
       },
       {
         // Basic fields (first)
         coworkingname: 'Awfis Space Solutions',
         buildingname: 'Lower Parel',
-        city: 'Mumbai',
-        area: 'Lower Parel',
         sublocation: 'Kamala Mills',
+        area: 'Lower Parel',
+        city: 'Mumbai',
         propertyTier: 'Premium',
         // Seating Plans (middle)
         'dedicated-desk': '12500',
@@ -147,26 +140,24 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'day-pass': '',
         // Remaining fields (last)
         categories: 'coworking,dedicateddesk,flexidesk',
-        image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800',
-        locationDetails: 'Kamala Mills Compound, Senapati Bapat Marg, Lower Parel, Mumbai, Maharashtra 400013',
         metroStationDistance: '0.8 Km Walking Distance From Lower Parel Metro Station',
         metroStationDistance2: '',
         railwayStationDistance: '0.5 Km Walking Distance From Lower Parel Railway Station',
         railwayStationDistance2: '',
-        googleMapLink: 'https://maps.google.com/?q=19.0144,72.8312',
-        aboutWorkspace: 'Modern coworking space in the trendy Kamala Mills area with flexible seating options, creative interiors, networking events, and easy access to cafes and restaurants.',
         monFriTime: '9:00 AM - 9:00 PM',
         saturdayTime: '10:00 AM - 6:00 PM',
         sundayTime: 'Closed',
-        amenities: ''
+        locationDetails: 'Kamala Mills Compound, Senapati Bapat Marg, Lower Parel, Mumbai, Maharashtra 400013',
+        googleMapLink: 'https://maps.google.com/?q=19.0144,72.8312',
+        aboutWorkspace: 'Modern coworking space in the trendy Kamala Mills area with flexible seating options, creative interiors, networking events, and easy access to cafes and restaurants.'
       },
       {
         // Basic fields (first)
         coworkingname: 'Innov8 Coworking',
         buildingname: 'Powai',
-        city: 'Mumbai',
-        area: 'Powai',
         sublocation: 'Hiranandani',
+        area: 'Powai',
+        city: 'Mumbai',
         propertyTier: 'Popular',
         // Seating Plans (middle)
         'dedicated-desk': '',
@@ -178,18 +169,16 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'day-pass': '',
         // Remaining fields (last)
         categories: 'coworking,meetingroom,virtualoffice',
-        image: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800',
-        locationDetails: 'Hiranandani Gardens, Powai, Mumbai, Maharashtra 400076',
         metroStationDistance: '2.5 Km Drive From Ghatkopar Metro Station',
         metroStationDistance2: '',
         railwayStationDistance: '4.2 Km Drive From Kanjurmarg Railway Station',
         railwayStationDistance2: '5.8 Km Drive From Vikhroli Railway Station',
-        googleMapLink: 'https://maps.google.com/?q=19.1197,72.9089',
-        aboutWorkspace: 'Vibrant coworking space in the tech hub of Powai with a young, energetic community. Offers flexible workspace solutions, meeting rooms, and virtual office services for startups and freelancers.',
         monFriTime: '8:30 AM - 8:30 PM',
         saturdayTime: '9:30 AM - 5:30 PM',
         sundayTime: '10:00 AM - 3:00 PM',
-        amenities: ''
+        locationDetails: 'Hiranandani Gardens, Powai, Mumbai, Maharashtra 400076',
+        googleMapLink: 'https://maps.google.com/?q=19.1197,72.9089',
+        aboutWorkspace: 'Vibrant coworking space in the tech hub of Powai with a young, energetic community. Offers flexible workspace solutions, meeting rooms, and virtual office services for startups and freelancers.'
       }
     ];
 
@@ -465,7 +454,8 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
       <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
         <h3 className="font-medium text-yellow-900 mb-2">📋 Important Notes:</h3>
         <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• <strong>Required fields:</strong> coworkingname, buildingname, city, area, categories, image, locationDetails</li>
+          <li>• <strong>Required fields:</strong> coworkingname, buildingname, city, area, categories, locationDetails</li>
+          <li>• <strong>Images:</strong> Will be added separately after bulk upload</li>
           <li>• <strong>Categories format:</strong> Comma-separated (e.g., "coworking,managed,dedicateddesk")</li>
           <li>• <strong>City & Area:</strong> Must exist in the database</li>
           <li>• <strong>Images:</strong> Provide valid image URLs</li>

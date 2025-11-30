@@ -10,7 +10,7 @@ interface ExcelRow {
   sublocation?: string;
   propertyTier?: string;
   categories: string;
-  image: string;
+  image?: string; // Optional - user will add images separately
   locationDetails: string;
   metroStationDistance?: string;
   metroStationDistance2?: string;
@@ -291,10 +291,6 @@ function validateProperty(row: ExcelRow, rowIndex: number): string[] {
     errors.push(`Row ${rowIndex + 2}: Categories is required`);
   }
   
-  if (!row.image?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Image URL is required`);
-  }
-  
   if (!row.locationDetails?.trim()) {
     errors.push(`Row ${rowIndex + 2}: Address Details is required`);
   }
@@ -373,7 +369,7 @@ function processRow(row: ExcelRow, userId: string): ProcessedProperty {
     size: 0, // Default 0
     beds: '', // Default empty
     rating: 0, // Default 0
-    image: row.image.trim(),
+    image: row.image?.trim() || '', // Optional - user will add images separately
     tag: '', // Default empty
     description: '', // Default empty
     workspaceName: null, // Not in form
