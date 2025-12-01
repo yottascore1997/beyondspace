@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Toast from './Toast';
 
 interface City {
   id: string;
@@ -188,9 +189,15 @@ export default function PropertyForm({
   const [formData, setFormData] = useState<PropertyFormData>(() => createInitialFormData());
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
+    message: '',
+    type: 'success',
+    isVisible: false
+  });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
+  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('file');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
@@ -227,7 +234,7 @@ export default function PropertyForm({
     { key: 'virtualoffice', label: 'Virtual Office', type: 'COWORKING', purpose: 'commercial' },
     { key: 'meetingroom', label: 'Meeting Room', type: 'COMMERCIAL', purpose: 'commercial' },
     { key: 'daypass', label: 'Day Pass', type: 'COWORKING', purpose: 'commercial' },
-    { key: 'popular', label: 'Popular', type: 'COWORKING', purpose: 'commercial' },
+    { key: 'privatecabin', label: 'Private Cabin', type: 'COWORKING', purpose: 'commercial' },
   ];
 
   const getCategoryLabels = (keys: string[]) => {
@@ -261,7 +268,7 @@ const resetFormState = (options: { keepMessage?: boolean } = {}) => {
   setSelectedCategoryNames([]);
   setUploadedImages([]);
   setImagePreview('');
-  setUploadMethod('url');
+  setUploadMethod('file');
   setDraggedImageIndex(null);
   setIsFetchingProperty(false);
   setCurrentEditingId(null);
@@ -502,7 +509,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
     setUploadedImages(combinedImages);
     setImagePreview(combinedImages[0] || '');
     setSelectedCategoryNames(getCategoryLabels(updatedFormData.categories));
-    setUploadMethod('url');
+    setUploadMethod('file');
     setMessage('Editing property details. Make your changes and click Update Property.');
     setCurrentEditingId(propertyId);
   } catch (error) {
@@ -628,13 +635,39 @@ const loadPropertyForEdit = async (propertyId: string) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    const errors: Record<string, string> = {};
+    
+    if (!formData.title.trim()) errors.title = 'Property title is required';
+    if (!formData.city) errors.city = 'City is required';
+    if (!formData.area) errors.area = 'Area is required';
     if (formData.categories.length === 0) {
+      errors.categories = 'Please select at least one category';
       setMessage('Please select at least one category');
+    } else {
+      // Only validate purpose and type if categories are selected (they should be auto-set)
+      if (!formData.purpose) errors.purpose = 'Purpose is required';
+      if (!formData.type) errors.type = 'Property type is required';
+    }
+    // Note: priceDisplay, price, size, beds, rating might be auto-populated or in a different section
+    // Only validate if they seem to be required but empty
+    if (!formData.image.trim() && uploadedImages.length === 0) errors.image = 'Property image is required';
+    
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      setToast({
+        message: 'Please fill all required fields',
+        type: 'error',
+        isVisible: true
+      });
       return;
     }
 
     setLoading(true);
     setMessage('');
+    setValidationErrors({});
 
     try {
       const token = localStorage.getItem('token');
@@ -749,18 +782,45 @@ const loadPropertyForEdit = async (propertyId: string) => {
         if (isEditMode) {
           resetFormState({ keepMessage: true });
           setMessage('Property updated successfully!');
+          setToast({
+            message: 'Property updated successfully!',
+            type: 'success',
+            isVisible: true
+          });
           onFinish?.('updated');
         } else {
           resetFormState({ keepMessage: true });
           setMessage('Property added successfully!');
+          setToast({
+            message: 'Property added successfully!',
+            type: 'success',
+            isVisible: true
+          });
           onFinish?.('created');
         }
       } else {
         const error = await response.json();
-        setMessage(`Error: ${error.error ?? 'Something went wrong.'}`);
+        const errorMessage = `Error: ${error.error ?? 'Something went wrong.'}`;
+        setMessage(errorMessage);
+        setToast({
+          message: errorMessage,
+          type: 'error',
+          isVisible: true
+        });
+        setToast({
+          message: errorMessage,
+          type: 'error',
+          isVisible: true
+        });
       }
     } catch (error) {
-      setMessage('Network error. Please try again.');
+      const errorMessage = 'Network error. Please try again.';
+      setMessage(errorMessage);
+      setToast({
+        message: errorMessage,
+        type: 'error',
+        isVisible: true
+      });
     } finally {
       setLoading(false);
     }
@@ -790,20 +850,35 @@ const loadPropertyForEdit = async (propertyId: string) => {
       }));
     }
     
-    // Update preview when image URL changes
-    if (name === 'image' && uploadMethod === 'url') {
-      setImagePreview(value);
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
+    
+    // Also clear categories error when category is selected
+    if (name === 'categories' && validationErrors.categories) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.categories;
+        return newErrors;
+      });
+    }
+    
+    // Image preview is handled by uploaded images now
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // Validate file count (max 10 images in total)
+    // Validate file count (max 20 images in total)
     const totalImagesCount = uploadedImages.length + files.length;
-    if (totalImagesCount > 10) {
-      setMessage('Maximum 10 images allowed');
+    if (totalImagesCount > 20) {
+      setMessage('Maximum 20 images allowed');
       return;
     }
 
@@ -814,8 +889,8 @@ const loadPropertyForEdit = async (propertyId: string) => {
         setMessage(`File ${i + 1} is not an image`);
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        setMessage(`File ${i + 1} size must be less than 5MB`);
+      if (file.size > 10 * 1024 * 1024) {
+        setMessage(`File ${i + 1} size must be less than 10MB`);
         return;
       }
     }
@@ -931,6 +1006,12 @@ const loadPropertyForEdit = async (propertyId: string) => {
  
   return (
     <div>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+      />
       {message && (
         <div className={`mb-6 p-4 rounded-lg ${
           message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
@@ -957,9 +1038,16 @@ const loadPropertyForEdit = async (propertyId: string) => {
               value={formData.title}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none ${
+                validationErrors.title 
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                  : 'border-gray-300 focus:ring-2 focus:ring-[#a08efe] focus:border-transparent'
+              }`}
               placeholder=""
             />
+            {validationErrors.title && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.title}</p>
+            )}
           </div>
 
           <div>
@@ -971,7 +1059,11 @@ const loadPropertyForEdit = async (propertyId: string) => {
               value={formData.city}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none ${
+                validationErrors.city 
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                  : 'border-gray-300 focus:ring-2 focus:ring-[#a08efe] focus:border-transparent'
+              }`}
             >
               <option value="">Select City</option>
               {cities.map((city) => (
@@ -980,6 +1072,9 @@ const loadPropertyForEdit = async (propertyId: string) => {
                 </option>
               ))}
             </select>
+            {validationErrors.city && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.city}</p>
+            )}
           </div>
 
           <div>
@@ -992,7 +1087,11 @@ const loadPropertyForEdit = async (propertyId: string) => {
               onChange={handleChange}
               required
               disabled={!formData.city || loadingAreas}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                validationErrors.area 
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-200' 
+                  : 'border-gray-300 focus:ring-2 focus:ring-[#a08efe] focus:border-transparent'
+              }`}
             >
               <option value="">
                 {loadingAreas ? 'Loading areas...' : formData.city ? 'Select Area' : 'Select City first'}
@@ -1003,6 +1102,9 @@ const loadPropertyForEdit = async (propertyId: string) => {
                 </option>
               ))}
             </select>
+            {validationErrors.area && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.area}</p>
+            )}
           </div>
 
           <div>
@@ -1030,7 +1132,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
             >
               <option value="">Select Type</option>
-              <option value="Popular">Popular</option>
+              <option value="Private Cabin">Private Cabin</option>
               <option value="Premium">Premium</option>
               <option value="Luxury">Luxury</option>
               <option value="Ultra Luxury">Ultra Luxury</option>
@@ -1052,6 +1154,8 @@ const loadPropertyForEdit = async (propertyId: string) => {
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${
                       isSelected
                         ? 'bg-[#a08efe] text-white border-[#a08efe] shadow-lg shadow-[#a08efe]/30'
+                        : validationErrors.categories
+                        ? 'bg-white text-gray-700 border-red-500 hover:border-red-600'
                         : 'bg-white text-gray-700 border-gray-300 hover:border-[#a08efe] hover:text-[#a08efe]'
                     }`}
                   >
@@ -1063,6 +1167,9 @@ const loadPropertyForEdit = async (propertyId: string) => {
             <p className="mt-2 text-xs text-gray-600">
               Select one or more categories. The first selected category is treated as the primary workspace type.
             </p>
+            {validationErrors.categories && (
+              <p className="mt-2 text-sm text-red-600">{validationErrors.categories}</p>
+            )}
             {selectedCategoryNames.length > 0 && (
               <p className="mt-2 text-sm font-medium text-gray-700">
                 Selected:&nbsp;
@@ -1076,65 +1183,8 @@ const loadPropertyForEdit = async (propertyId: string) => {
               Property Image {!isEditMode && '*'}
             </label>
             
-            {/* Upload Method Selection */}
-            <div className="flex gap-4 mb-3">
-              <button
-                type="button"
-                onClick={() => handleUploadMethodChange('url')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  uploadMethod === 'url'
-                    ? 'bg-[#a08efe] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Use URL
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUploadMethodChange('file')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  uploadMethod === 'file'
-                    ? 'bg-[#a08efe] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Upload File
-              </button>
-            </div>
-
-            {/* URL Input */}
-            {uploadMethod === 'url' && (
-              <div>
-                <input
-                  type={isEditMode ? "text" : "url"}
-                  name="image"
-                  value={formData.image}
-                  onChange={handleChange}
-                  required={!isEditMode}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-                  placeholder=""
-                />
-                {/* Show preview immediately when URL is entered */}
-                {formData.image && (
-                  <div className="mt-3">
-                    <p className="text-sm text-gray-600 mb-2">Selected Image Preview:</p>
-                    <img
-                      src={formData.image}
-                      alt="Selected property preview"
-                      className="w-full h-48 object-cover rounded-lg border-2 border-[#a08efe]"
-                      onError={(e) => {
-                        e.currentTarget.src = '/images/placeholder.jpg';
-                        e.currentTarget.alt = 'Invalid image URL';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* File Upload */}
-            {uploadMethod === 'file' && (
-              <div>
+            <div>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -1147,18 +1197,24 @@ const loadPropertyForEdit = async (propertyId: string) => {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-full px-3 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#a08efe] hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full px-3 py-2 border-2 border-dashed rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    validationErrors.image 
+                      ? 'border-red-500 hover:border-red-600' 
+                      : 'border-gray-300 hover:border-[#a08efe]'
+                  }`}
                 >
-                  {uploading ? 'Uploading...' : 'Click to select images (max 10)'}
+                  {uploading ? 'Uploading...' : 'Click to select images (max 20)'}
                 </button>
+                {validationErrors.image && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.image}</p>
+                )}
               </div>
-            )}
 
             {/* Uploaded Images Gallery */}
             {uploadedImages.length > 0 && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Selected Images ({uploadedImages.length}/10)
+                  Selected Images ({uploadedImages.length}/20)
                 </label>
                 
                 {/* Main Image Preview - Large */}

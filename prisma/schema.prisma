@@ -140,6 +140,20 @@ model Requirement {
   updatedAt DateTime @updatedAt
 }
 
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  company   String
+  text      String   @db.Text
+  rating    Int      @default(5)
+  avatar    String
+  displayOrder Int   @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model City {
   id        String   @id @default(cuid())
   name      String   @unique

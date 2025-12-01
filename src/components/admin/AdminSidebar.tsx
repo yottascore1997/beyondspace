@@ -93,11 +93,29 @@ export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout }
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       )
+    },
+    {
+      id: 'testimonials',
+      label: 'Testimonials',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      )
+    },
+    {
+      id: 'add-testimonial',
+      label: 'Add Testimonial',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      )
     }
   ];
 
   return (
-    <div className={`bg-white shadow-xl transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'} min-h-screen flex flex-col`}>
+    <div className={`bg-white shadow-xl transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'} fixed left-0 top-0 h-screen flex flex-col z-40`}>
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -142,8 +160,8 @@ export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout }
         </div>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 p-4">
+      {/* Navigation Menu - Scrollable */}
+      <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.id}>

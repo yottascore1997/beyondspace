@@ -97,11 +97,23 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     : [property.image];
   
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+    setCurrentImageIndex((prev) => {
+      // Stop at last image, don't loop back
+      if (prev >= allImages.length - 1) {
+        return prev;
+      }
+      return prev + 1;
+    });
   };
   
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+    setCurrentImageIndex((prev) => {
+      // Stop at first image, don't loop back
+      if (prev <= 0) {
+        return prev;
+      }
+      return prev - 1;
+    });
   };
 
   // Build property URL with category query param if provided
@@ -117,7 +129,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       className="block"
     >
       <article className={`${poppins.className} bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200`}>
-        <div className="relative h-56 sm:h-64 md:h-72 overflow-hidden rounded-t-xl group">
+        <div className="relative h-56 sm:h-64 md:h-72 2xl:h-80 overflow-hidden rounded-t-xl group">
         {property.propertyTier && (
           <span className="absolute top-2 left-2 z-20 inline-flex items-center rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-white shadow-md capitalize">
             {property.propertyTier}
@@ -147,30 +159,36 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
         {/* Image Navigation Arrows - Only show if multiple images */}
         {allImages.length > 1 && (
           <>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                prevImage();
-              }}
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                nextImage();
-              }}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            {/* Previous Button - Hide when at first image */}
+            {currentImageIndex > 0 && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  prevImage();
+                }}
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            {/* Next Button - Hide when at last image */}
+            {currentImageIndex < allImages.length - 1 && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  nextImage();
+                }}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
           </>
         )}
         

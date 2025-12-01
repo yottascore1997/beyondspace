@@ -8,6 +8,7 @@ interface Property {
   title: string;
   city: string;
   area: string;
+  sublocation?: string | null;
   purpose: string;
   type: string;
   categories?: string[];
@@ -39,6 +40,9 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
   const [dragOverPropertyId, setDragOverPropertyId] = useState<string | null>(null);
   const [orderDirty, setOrderDirty] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   const categoryLabelMap: Record<string, string> = {
     coworking: 'Coworking',
@@ -141,10 +145,35 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
     return Array.from(new Set(properties.map((p) => p.area).filter(Boolean)));
   }, [areas, properties]);
 
-  const filteredProperties =
-    selectedArea === 'All'
-      ? properties
-      : properties.filter((property) => property.area === selectedArea);
+  // Filter properties by area and search query
+  const filteredProperties = useMemo(() => {
+    let filtered = properties;
+    
+    // Filter by area
+    if (selectedArea !== 'All') {
+      filtered = filtered.filter((property) => property.area === selectedArea);
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((property) =>
+        property.title.toLowerCase().includes(query) ||
+        property.city.toLowerCase().includes(query) ||
+        property.area.toLowerCase().includes(query) ||
+        property.type.toLowerCase().includes(query) ||
+        (property.sublocation && property.sublocation.toLowerCase().includes(query)) ||
+        (property.categories && property.categories.some(cat => cat.toLowerCase().includes(query)))
+      );
+    }
+    
+    return filtered;
+  }, [properties, selectedArea, searchQuery]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
 
   const sortedFilteredProperties = useMemo(() => {
     if (selectedArea === 'All') {
@@ -180,6 +209,14 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
   }, [filteredProperties, selectedArea, areaOrderMap]);
+
+  // Get paginated properties
+  const paginatedProperties = sortedFilteredProperties.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedArea, searchQuery]);
 
   const reorderWithinArea = (draggedId: string, targetId: string) => {
     if (selectedArea === 'All' || draggedId === targetId) return;
@@ -291,6 +328,37 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
 
   return (
     <div>
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search properties by title, city, area, type..."
+            className="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
+          />
+          <svg
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-sm font-semibold text-gray-700">Filter by Area:</label>
@@ -363,16 +431,25 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
         </div>
       )}
 
+      {/* Results Count */}
+      <div className="mb-4 text-sm text-gray-600">
+        Showing {startIndex + 1}-{Math.min(endIndex, filteredProperties.length)} of {filteredProperties.length} properties
+        {searchQuery && ` matching "${searchQuery}"`}
+      </div>
+
       {sortedFilteredProperties.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No properties found for the selected area</p>
+          <p className="text-gray-500 text-lg">No properties found</p>
           <p className="text-gray-400 mt-2">
-            Try choosing another area or add new properties to this location.
+            {searchQuery 
+              ? 'Try adjusting your search query or filters.'
+              : 'Try choosing another area or add new properties to this location.'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {sortedFilteredProperties.map((property) => (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {paginatedProperties.map((property) => (
             <div
               key={property.id}
               className={`bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all relative ${
@@ -487,7 +564,64 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
               </div>
             </div>
           ))}
-        </div>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              >
+                Previous
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 2 && page <= currentPage + 2)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === page
+                            ? 'bg-[#a08efe] text-white'
+                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  } else if (
+                    page === currentPage - 3 ||
+                    page === currentPage + 3
+                  ) {
+                    return (
+                      <span key={page} className="px-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

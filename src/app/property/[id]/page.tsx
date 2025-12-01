@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import PropertyCard from '@/components/PropertyCard';
 
 interface PropertyImage {
   id: string;
@@ -54,25 +55,9 @@ interface Property {
   aboutWorkspace?: string;
   workspaceTimings?: string | null;
   propertyOptions?: SeatingPlan[] | null;
+  isActive?: boolean;
   createdAt: string;
 }
-
-interface PrimeLocation {
-  name: string;
-  slug: string;
-  image: string;
-}
-
-const primeLocations: PrimeLocation[] = [
-  { name: 'Thane', slug: 'thane', image: '/images/mumbai7.jpg' },
-  { name: 'Navi Mumbai', slug: 'navi mumbai', image: '/images/mumbai8.PNG' },
-  { name: 'Andheri West', slug: 'andheri west', image: '/images/mumbai4.jpeg' },
-  { name: 'Andheri East', slug: 'andheri east', image: '/images/mumbai4.jpeg' },
-  { name: 'Andheri', slug: 'andheri', image: '/images/mumbai4.jpeg' },
-  { name: 'BKC', slug: 'bkc', image: '/images/mumbai3.png' },
-  { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpg' },
-  { name: 'Powai', slug: 'powai', image: '/images/mumbai8.PNG' }
-];
 
 const CATEGORY_LABELS: Record<string, string> = {
   coworking: 'Coworking',
@@ -125,6 +110,8 @@ export default function PropertyDetails() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -345,6 +332,11 @@ export default function PropertyDetails() {
           console.log('[Property Fetch] Property Options:', data.propertyOptions?.length, 'plans');
         }
         setProperty(data);
+        
+        // Fetch similar properties from the same area
+        if (data.area) {
+          fetchSimilarProperties(data.area, data.id);
+        }
       } else {
         setError('Property not found');
       }
@@ -353,6 +345,31 @@ export default function PropertyDetails() {
       setError('Failed to load property details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSimilarProperties = async (area: string, currentPropertyId: string) => {
+    try {
+      setLoadingSimilar(true);
+      const response = await fetch(`/api/properties?city=Mumbai`);
+      
+      if (response.ok) {
+        const allProperties = await response.json();
+        // Filter properties from the same area, excluding current property
+        const similar = allProperties
+          .filter((p: Property) => 
+            p.area.toLowerCase() === area.toLowerCase() && 
+            p.id !== currentPropertyId &&
+            p.isActive !== false
+          )
+          .slice(0, 8); // Show max 8 similar properties
+        
+        setSimilarProperties(similar);
+      }
+    } catch (error) {
+      console.error('Error fetching similar properties:', error);
+    } finally {
+      setLoadingSimilar(false);
     }
   };
 
@@ -415,6 +432,14 @@ export default function PropertyDetails() {
           animation: smooth-slide 0.4s ease-in-out;
         }
 
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -449,6 +474,16 @@ export default function PropertyDetails() {
 
         .gallery-image {
           animation: imageSlide 0.3s ease-out;
+        }
+
+        .gallery-modal-container {
+          max-width: 900px !important;
+        }
+
+        @media (min-width: 1536px) {
+          .gallery-modal-container {
+            max-width: 1200px !important;
+          }
         }
       `}</style>
       <Header />
@@ -615,22 +650,6 @@ export default function PropertyDetails() {
                   <span className="text-gray-400">•</span>
               <span>{property.city}</span>
                 </div>
-                {property.googleMapLink && (
-                  <a
-                    href={property.googleMapLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-all duration-300 text-xs font-semibold shadow-md flex-shrink-0"
-                  >
-                    <div className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors">
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <span>View on Google Maps</span>
-                  </a>
-                )}
             </div>
 
             {/* Metro Station and Railway Station */}
@@ -1446,47 +1465,47 @@ export default function PropertyDetails() {
       </div>
       </div>
 
-      <section className="py-12 md:py-16 bg-gradient-to-br from-white via-blue-50 to-white">
-        <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
-          <div className="text-center mb-10">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Coworking Locations in Mumbai</h3>
-          </div>
+      {/* Similar Properties Section */}
+      {similarProperties.length > 0 && (
+        <section className="pt-6 pb-12 md:pt-8 md:pb-16 bg-gradient-to-br from-gray-50 to-white">
+          <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
+            <div className="mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
+                Similar Properties in {property?.area}
+              </h2>
+              <p className="text-gray-600 text-xs md:text-sm">
+                Explore more properties in the same area
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-5">
-            {primeLocations.map((location) => (
-              <Link
-                key={location.slug}
-                href={`/category/coworking-space`}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 overflow-hidden transition-transform duration-300 hover:-translate-y-1 flex flex-col h-full"
-              >
-                <div className="h-40 md:h-44 w-full overflow-hidden">
-                  <img
-                    src={location.image}
-                    alt={`Coworking Space in ${location.name}`}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  />
-                </div>
-                <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                  <h4 className="text-lg font-semibold text-gray-900">
-                    Coworking Space in {location.name}
-                  </h4>
-                  <div className="flex items-center justify-between text-xs font-semibold text-blue-500">
-                    <span>Explore Spaces</span>
-                    <svg
-                      className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+            {loadingSimilar ? (
+              <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl shadow-md animate-pulse">
+                    <div className="h-64 bg-gray-300 rounded-t-xl"></div>
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                ))}
+              </div>
+            ) : (
+              <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                {similarProperties.map((similarProperty) => (
+                  <div key={similarProperty.id} className="flex-shrink-0 w-80">
+                    <PropertyCard
+                      property={similarProperty}
+                      hideCategory={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <Footer />
 
@@ -1515,11 +1534,10 @@ export default function PropertyDetails() {
           >
             {/* Popup Container - Fixed Aspect Ratio */}
             <div 
-              className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl shadow-2xl relative overflow-hidden flex items-center justify-center"
+              className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl shadow-2xl relative overflow-hidden flex items-center justify-center gallery-modal-container"
               onClick={(e) => e.stopPropagation()}
               style={{ 
                 width: '70vw',
-                maxWidth: '900px',
                 height: '80vh',
                 maxHeight: '800px',
                 opacity: 0,

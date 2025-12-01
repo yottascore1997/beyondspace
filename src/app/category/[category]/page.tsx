@@ -56,6 +56,23 @@ interface Filters {
   price: string;
 }
 
+interface PrimeLocation {
+  name: string;
+  slug: string;
+  image: string;
+}
+
+const primeLocations: PrimeLocation[] = [
+  { name: 'Thane', slug: 'thane', image: '/images/mumbai7.jpg' },
+  { name: 'Navi Mumbai', slug: 'navi mumbai', image: '/images/mumbai8.PNG' },
+  { name: 'Andheri West', slug: 'andheri west', image: '/images/mumbai4.jpeg' },
+  { name: 'Andheri East', slug: 'andheri east', image: '/images/mumbai4.jpeg' },
+  { name: 'Andheri', slug: 'andheri', image: '/images/mumbai4.jpeg' },
+  { name: 'BKC', slug: 'bkc', image: '/images/mumbai3.png' },
+  { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpg' },
+  { name: 'Powai', slug: 'powai', image: '/images/mumbai8.PNG' }
+];
+
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -953,6 +970,51 @@ export default function CategoryPage() {
 
         </div>
       </div>
+
+      {/* Explore Top Coworking Locations Section - Only for coworking-space category */}
+      {(categoryName === 'coworking-space' || categoryName === 'coworking') && (
+        <section className="py-12 md:py-16 bg-gradient-to-br from-white via-blue-50 to-white">
+          <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
+            <div className="text-center mb-10">
+              <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Coworking Locations in Mumbai</h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-5">
+              {primeLocations.map((location) => (
+                <Link
+                  key={location.slug}
+                  href={`/category/coworking-space`}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 overflow-hidden transition-transform duration-300 hover:-translate-y-1 flex flex-col h-full"
+                >
+                  <div className="h-40 md:h-44 w-full overflow-hidden">
+                    <img
+                      src={location.image}
+                      alt={`Coworking Space in ${location.name}`}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      Coworking Space in {location.name}
+                    </h4>
+                    <div className="flex items-center justify-between text-xs font-semibold text-blue-500">
+                      <span>Explore Spaces</span>
+                      <svg
+                        className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
       <ShareRequirementsModal isOpen={isModalOpen} onClose={closeModal} />

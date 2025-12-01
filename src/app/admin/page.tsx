@@ -12,6 +12,8 @@ import RequirementsList from '@/components/admin/RequirementsList';
 import CustomerSubmissions from '@/components/admin/CustomerSubmissions';
 import AreasList from '@/components/admin/AreasList';
 import BulkUpload from '@/components/admin/BulkUpload';
+import TestimonialsList from '@/components/admin/TestimonialsList';
+import TestimonialForm from '@/components/admin/TestimonialForm';
 
 interface User {
   id: string;
@@ -26,6 +28,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null);
   const [propertyListRefreshKey, setPropertyListRefreshKey] = useState(0);
+  const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
+  const [testimonialListRefreshKey, setTestimonialListRefreshKey] = useState(0);
   const router = useRouter();
   const isClient = useIsClient();
 
@@ -107,6 +111,29 @@ export default function AdminPage() {
     if (tab !== 'add-property') {
       setEditingPropertyId(null);
     }
+    if (tab !== 'add-testimonial') {
+      setEditingTestimonialId(null);
+    }
+  };
+
+  const handleEditTestimonial = (testimonialId: string) => {
+    setEditingTestimonialId(testimonialId);
+    setActiveTab('add-testimonial');
+  };
+
+  const handleTestimonialFormFinish = (action: 'created' | 'updated') => {
+    if (action === 'updated') {
+      setTestimonialListRefreshKey(prev => prev + 1);
+      setEditingTestimonialId(null);
+      setActiveTab('testimonials');
+    } else if (action === 'created') {
+      setTestimonialListRefreshKey(prev => prev + 1);
+    }
+  };
+
+  const handleCancelTestimonialEdit = () => {
+    setEditingTestimonialId(null);
+    setActiveTab('testimonials');
   };
 
   if (loading || !isClient) {
@@ -126,7 +153,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+      {/* Sidebar - Fixed */}
       {user && (
         <AdminSidebar 
           user={user} 
@@ -136,10 +163,10 @@ export default function AdminPage() {
         />
       )}
       
-      {/* Main Content */}
+      {/* Main Content - Scrollable */}
       {user && (
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full bg-gray-50">
+        <div className="flex-1 overflow-y-auto" style={{ marginLeft: '288px' }}>
+          <div className="bg-gray-50 min-h-screen">
             {activeTab === 'dashboard' && <Dashboard />}
             {activeTab === 'properties' && (
               <div className="p-8">
@@ -197,6 +224,45 @@ export default function AdminPage() {
               <div className="p-8">
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <AreasList />
+                </div>
+              </div>
+            )}
+            {activeTab === 'testimonials' && (
+              <div className="p-8">
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900">Testimonials Management</h1>
+                    <button
+                      onClick={() => {
+                        setEditingTestimonialId(null);
+                        setActiveTab('add-testimonial');
+                      }}
+                      className="px-4 py-2 bg-[#a08efe] text-white rounded-lg hover:bg-[#7a66ff] transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Add Testimonial
+                    </button>
+                  </div>
+                  <TestimonialsList
+                    onEditTestimonial={handleEditTestimonial}
+                    refreshKey={testimonialListRefreshKey}
+                  />
+                </div>
+              </div>
+            )}
+            {activeTab === 'add-testimonial' && (
+              <div className="p-8">
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-6">
+                    {editingTestimonialId ? 'Edit Testimonial' : 'Add New Testimonial'}
+                  </h1>
+                  <TestimonialForm
+                    editingTestimonialId={editingTestimonialId}
+                    onFinish={handleTestimonialFormFinish}
+                    onCancelEdit={handleCancelTestimonialEdit}
+                  />
                 </div>
               </div>
             )}
