@@ -33,9 +33,8 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
     'dedicated-desk',
     'flexi-desk',
     'private-cabin',
-    'virtual-office',
-    'meeting-room',
     'managed-office-space',
+    'virtual-office',
     'day-pass',
     // Remaining fields (last)
     'categories',
@@ -76,9 +75,8 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'dedicated-desk': '11999',
         'flexi-desk': '8999',
         'private-cabin': '',
-        'virtual-office': '',
-        'meeting-room': '',
         'managed-office-space': '',
+        'virtual-office': '',
         'day-pass': '',
         // Remaining fields (last)
         categories: 'coworking,managed,dedicateddesk',
@@ -105,9 +103,8 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'dedicated-desk': '30000',
         'flexi-desk': '',
         'private-cabin': '',
-        'virtual-office': '',
-        'meeting-room': '',
         'managed-office-space': '45000',
+        'virtual-office': '',
         'day-pass': '',
         // Remaining fields (last)
         categories: 'managed,enterpriseoffices,coworking',
@@ -134,9 +131,8 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'dedicated-desk': '12500',
         'flexi-desk': '9500',
         'private-cabin': '',
-        'virtual-office': '',
-        'meeting-room': '',
         'managed-office-space': '',
+        'virtual-office': '',
         'day-pass': '',
         // Remaining fields (last)
         categories: 'coworking,dedicateddesk,flexidesk',
@@ -163,12 +159,11 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         'dedicated-desk': '',
         'flexi-desk': '7500',
         'private-cabin': '',
-        'virtual-office': '3500',
-        'meeting-room': '500',
         'managed-office-space': '',
+        'virtual-office': '3500',
         'day-pass': '',
         // Remaining fields (last)
-        categories: 'coworking,meetingroom,virtualoffice',
+        categories: 'coworking,virtualoffice',
         metroStationDistance: '2.5 Km Drive From Ghatkopar Metro Station',
         metroStationDistance2: '',
         railwayStationDistance: '4.2 Km Drive From Kanjurmarg Railway Station',
@@ -461,7 +456,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
           <li>• <strong>Images:</strong> Provide valid image URLs</li>
           <li>• <strong>Amenities:</strong> Leave empty to auto-select all amenities, or provide JSON array</li>
           <li>• <strong>Seating Plans:</strong> Each plan has its own column. Enter price in the respective column (e.g., "dedicated-desk" column = "11999"). Leave empty if not applicable.</li>
-          <li>• <strong>Available Columns:</strong> dedicated-desk, flexi-desk, private-cabin, virtual-office, meeting-room, managed-office-space, day-pass</li>
+          <li>• <strong>Available Columns:</strong> dedicated-desk, flexi-desk, private-cabin, managed-office-space, virtual-office, day-pass</li>
           <li>• <strong>Timing format:</strong> Use readable format (e.g., "9:00 AM - 6:00 PM")</li>
         </ul>
       </div>

@@ -171,3 +171,5 @@ Add `?sslmode=require` to your DATABASE_URL:
 mysql://root:password@host:3306/db?sslmode=require
 ```
 
+
+

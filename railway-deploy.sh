@@ -34,3 +34,4 @@ echo "1. Set DATABASE_URL in Railway dashboard (Variables tab)"
 echo "2. Set other environment variables (NEXTAUTH_SECRET, NEXTAUTH_URL, etc.)"
 echo "3. Deploy your Next.js application"
 
+

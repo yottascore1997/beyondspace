@@ -1051,6 +1051,62 @@ export default function PropertyDetails() {
               </p>
             </div>
 
+            {/* Google Maps Section - Below Location Details */}
+            {property && (() => {
+              // Helper function to get Google Maps embed URL
+              const getMapEmbedUrl = () => {
+                // If googleMapLink is provided and is already an embed URL, use it directly
+                if (property.googleMapLink && property.googleMapLink.includes('/embed')) {
+                  return property.googleMapLink;
+                }
+                
+                // If googleMapLink is a regular Google Maps URL, try to extract location
+                if (property.googleMapLink) {
+                  // Try to extract coordinates from URL
+                  const coordMatch = property.googleMapLink.match(/@([-\d.]+),([-\d.]+)/);
+                  if (coordMatch) {
+                    return `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&output=embed`;
+                  }
+                  
+                  // Try to extract place ID
+                  const placeMatch = property.googleMapLink.match(/place\/([^\/\?]+)/);
+                  if (placeMatch) {
+                    return `https://www.google.com/maps?q=place_id:${encodeURIComponent(placeMatch[1])}&output=embed`;
+                  }
+                }
+                
+                // Fallback: Create embed URL from location details (no API key needed)
+                const locationQuery = property.locationDetails || `${property.sublocation ? property.sublocation + ', ' : ''}${property.area}, ${property.city}`;
+                return `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&output=embed`;
+              };
+
+              const locationText = property.locationDetails || `${property.sublocation ? property.sublocation + ', ' : ''}${property.area}, ${property.city}`;
+
+              return (
+                <div className="mb-5 bg-white rounded-xl shadow-2xl border-2 border-gray-200 overflow-hidden">
+                  <div className="p-4 border-b border-gray-200">
+                    <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-1">Location on Map</h4>
+                    <p className="text-xs text-gray-600">
+                      {locationText}
+                    </p>
+                  </div>
+                  <div className="w-full h-[200px] md:h-[250px] lg:h-[300px]">
+                    <iframe
+                      src={getMapEmbedUrl()}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="w-full h-full"
+                      title={`Map showing location of ${property.title}`}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Benefits Section */}
             <div className="mb-5">
               <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-pink-200 rounded-lg shadow-lg p-4 md:p-5">

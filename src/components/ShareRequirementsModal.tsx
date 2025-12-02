@@ -216,7 +216,8 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                     onChange={handleInputChange}
                     placeholder="Enter your name"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    style={{ color: '#111827' }}
                   />
                 </div>
                 <div>
@@ -228,7 +229,8 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                     onChange={handleInputChange}
                     placeholder="Enter your email"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    style={{ color: '#111827' }}
                   />
                 </div>
               </div>
@@ -236,7 +238,7 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone*</label>
                 <div className="flex gap-2">
-                  <select className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                  <select className="px-3 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" style={{ color: '#111827' }}>
                     <option>+91</option>
                   </select>
                   <input
@@ -246,7 +248,8 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                     onChange={handleInputChange}
                     placeholder="Enter your phone number"
                     required
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    style={{ color: '#111827' }}
                   />
                 </div>
               </div>
@@ -258,7 +261,8 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                     name="type"
                     value={formData.type}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    style={{ color: '#111827' }}
                   >
                     <option value="">Select Type</option>
                     {workspaceTypes.map((type) => (
@@ -272,7 +276,8 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                     name="seats"
                     value={formData.seats}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300"
+                    style={{ color: '#111827' }}
                   >
                     <option value="">Select Seats</option>
                     <option>1-5</option>

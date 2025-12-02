@@ -26,9 +26,8 @@ interface ExcelRow {
   'dedicated-desk'?: string;
   'flexi-desk'?: string;
   'private-cabin'?: string;
-  'virtual-office'?: string;
-  'meeting-room'?: string;
   'managed-office-space'?: string;
+  'virtual-office'?: string;
   'day-pass'?: string;
   // Backward compatibility - old format
   seatingPlans?: string;
@@ -183,7 +182,7 @@ const SEATING_PLANS_MAP: Record<string, { title: string; description: string; se
 // Helper function to parse seating plans from individual columns or old format
 function parseSeatingPlansFromColumns(row: ExcelRow): any[] {
   const plans: any[] = [];
-  const seatingPlanIds = ['dedicated-desk', 'flexi-desk', 'private-cabin', 'virtual-office', 'meeting-room', 'managed-office-space', 'day-pass'];
+  const seatingPlanIds = ['dedicated-desk', 'flexi-desk', 'private-cabin', 'managed-office-space', 'virtual-office', 'day-pass'];
   
   // Check each seating plan column
   for (const planId of seatingPlanIds) {

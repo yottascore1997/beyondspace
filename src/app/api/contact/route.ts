@@ -24,8 +24,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate mobile format (Indian mobile numbers)
+    // Extract only digits from mobile number
+    const mobileDigits = mobile.replace(/\D/g, '');
+    
+    // Extract last 10 digits (in case country code is included)
+    const phoneNumber = mobileDigits.length >= 10 
+      ? mobileDigits.slice(-10) 
+      : mobileDigits;
+    
     const mobileRegex = /^[6-9]\d{9}$/;
-    if (!mobileRegex.test(mobile.replace(/\D/g, ''))) {
+    if (!mobileRegex.test(phoneNumber)) {
       return NextResponse.json(
         { error: 'Please enter a valid 10-digit mobile number' },
         { status: 400 }
@@ -36,7 +44,7 @@ export async function POST(request: NextRequest) {
     const contactForm = await prisma.contactForm.create({
       data: {
         name: name.trim(),
-        mobile: mobile.replace(/\D/g, ''),
+        mobile: phoneNumber,
         email: email.toLowerCase().trim(),
         solution,
         message: message?.trim() || null,
