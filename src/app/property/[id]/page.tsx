@@ -1351,7 +1351,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/meetingroom.png" 
+                      src="/images/amenity/meetingroom.PNG" 
                       alt="Meeting Rooms" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1371,7 +1371,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/workstation.png" 
+                      src="/images/amenity/workstation.PNG" 
                       alt="Ergo Workstations" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1411,7 +1411,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/carparking.png" 
+                      src="/images/amenity/carparking.PNG" 
                       alt="Car / Bike Parking" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1431,7 +1431,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/pantry.png" 
+                      src="/images/amenity/pantry.PNG" 
                       alt="Pantry" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1471,7 +1471,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-red-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/reception.png" 
+                      src="/images/amenity/reception.PNG" 
                       alt="Reception" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1551,7 +1551,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/loungue.png" 
+                      src="/images/amenity/loungue.PNG" 
                       alt="Lounge" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
