@@ -1132,7 +1132,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
             >
               <option value="">Select Type</option>
-              <option value="Private Cabin">Private Cabin</option>
+              <option value="Popular">Popular</option>
               <option value="Premium">Premium</option>
               <option value="Luxury">Luxury</option>
               <option value="Ultra Luxury">Ultra Luxury</option>

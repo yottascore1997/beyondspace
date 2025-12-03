@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Poppins } from 'next/font/google';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import PropertyCard from '@/components/PropertyCard';
 import Footer from '@/components/Footer';
@@ -82,6 +82,7 @@ const poppins = Poppins({
 export default function CategoryPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const category = params.category as string;
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
@@ -103,13 +104,16 @@ export default function CategoryPage() {
   const [isGetOfferModalOpen, setIsGetOfferModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Initialize currentPage from URL query param
+  const initialPage = searchParams.get('page') ? parseInt(searchParams.get('page')!, 10) : 1;
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [pendingAreas, setPendingAreas] = useState<string[]>([]);
   const locationMenuRef = useRef<HTMLDivElement | null>(null);
   const priceSelectRef = useRef<HTMLSelectElement | null>(null);
   const propertiesPerPage = 8;
-  const initialPropertiesCount = 30; // Show first 30 without pagination
+  const initialPropertiesCount = 32; // Show first 32 without pagination
   const [cityOptions, setCityOptions] = useState<{ id: string; name: string }[]>([]);
   const [areaOptions, setAreaOptions] = useState<{ id: string; name: string; cityId: string }[]>([]);
   const [mumbaiCityId, setMumbaiCityId] = useState<string>('');
@@ -120,6 +124,15 @@ export default function CategoryPage() {
   useEffect(() => {
     fetchCategoryProperties();
   }, [category, searchQuery]);
+
+  // Auto-search: Update searchQuery when searchInput changes (with debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   useEffect(() => {
     const loadCitiesAreas = async () => {
@@ -165,9 +178,28 @@ export default function CategoryPage() {
     }
   }, [searchParams]);
 
+  // Function to update URL with page number
+  const updatePageInURL = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page === 1) {
+      params.delete('page');
+    } else {
+      params.set('page', page.toString());
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Sync currentPage with URL when URL changes (only when URL changes, not when currentPage changes)
+  useEffect(() => {
+    const urlPage = searchParams.get('page') ? parseInt(searchParams.get('page')!, 10) : 1;
+    setCurrentPage(urlPage);
+  }, [searchParams]);
+
   useEffect(() => {
     filterAndSortProperties();
-    setCurrentPage(1); // Reset to page 1 when filters change
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
+    updatePageInURL(1);
   }, [properties, filters, searchQuery]);
 
   useEffect(() => {
@@ -348,6 +380,7 @@ export default function CategoryPage() {
       filtered.sort((a, b) => b.rating - a.rating);
     }
 
+    // Show all filtered properties (first 32 without pagination, rest with pagination)
     setFilteredProperties(filtered);
   };
 
@@ -480,7 +513,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className={`${poppins.className} min-h-screen bg-gray-50`} style={{ fontFamily: 'Poppins, sans-serif' }}>
+    <div className={`${poppins.className} min-h-screen bg-gray-50`} style={{ fontFamily: 'Poppins, sans-serif', overflow: 'visible' }}>
       <style jsx global>{`
         * {
           font-family: Poppins, sans-serif !important;
@@ -507,6 +540,7 @@ export default function CategoryPage() {
         }
       `}</style>
       <Header />
+      <div className="h-16 sm:h-20 md:h-24"></div>
       
 
       {/* Main Header */}
@@ -617,7 +651,7 @@ export default function CategoryPage() {
                   className={`${poppins.className} flex items-center justify-between w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
                 >
                   <span className="truncate">
-                    Popular Locations
+                    Prime Locations
                     {pendingAreas.length > 0 && (
                       <span className="ml-1 sm:ml-2 text-blue-500 font-semibold">
                         ({pendingAreas.length})
@@ -799,15 +833,15 @@ export default function CategoryPage() {
                     </div>
                   );
 
-                  // Show first 30 properties without pagination
-                  const first30Properties = filteredProperties.slice(0, initialPropertiesCount);
+                  // Show first 32 properties without pagination (only on page 1)
+                  const first32Properties = filteredProperties.slice(0, initialPropertiesCount);
                   const remainingProperties = filteredProperties.slice(initialPropertiesCount);
                   
-                  // Display first 30 properties with sections after every 8
-                  if (first30Properties.length > 0) {
+                  // Display first 32 properties with sections after every 8 (only on page 1)
+                  if (currentPage === 1 && first32Properties.length > 0) {
                     const itemsPerBatch = 8;
-                    for (let i = 0; i < first30Properties.length; i += itemsPerBatch) {
-                      const batch = first30Properties.slice(i, i + itemsPerBatch);
+                    for (let i = 0; i < first32Properties.length; i += itemsPerBatch) {
+                      const batch = first32Properties.slice(i, i + itemsPerBatch);
                       const batchNumber = Math.floor(i / itemsPerBatch);
                       
                       // Add properties batch
@@ -825,8 +859,8 @@ export default function CategoryPage() {
                         </div>
                       );
                       
-                      // Add section after each batch (except if it's the last batch of first 30)
-                      if (i + itemsPerBatch < first30Properties.length || first30Properties.length < itemsPerBatch) {
+                      // Add section after each batch (except if it's the last batch of first 32)
+                      if (i + itemsPerBatch < first32Properties.length || first32Properties.length < itemsPerBatch) {
                         const isPromo = Math.floor(i / itemsPerBatch) % 2 === 0;
                         batches.push(
                           <div key={`section-${batchNumber}`}>
@@ -837,28 +871,35 @@ export default function CategoryPage() {
                     }
                   }
                   
-                  // Show remaining properties with pagination (after 30)
+                  // Show remaining properties with pagination (after 32)
+                  // Page 1 shows only first 32, pagination starts from page 2
                   if (remainingProperties.length > 0) {
-                    const totalPages = Math.ceil(remainingProperties.length / propertiesPerPage);
-                    const startIndex = (currentPage - 1) * propertiesPerPage;
-                    const endIndex = startIndex + propertiesPerPage;
-                    const currentPageProperties = remainingProperties.slice(startIndex, endIndex);
+                    const totalPages = Math.ceil(remainingProperties.length / propertiesPerPage) + 1; // +1 for the first 32 properties page
                     
-                    // Add paginated properties
-                    batches.push(
-                      <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
-                        {currentPageProperties.map((property) => (
-                          <PropertyCard
-                            key={property.id}
-                            property={property}
-                            onEnquireClick={handleEnquireClick}
-                            hideCategory={true}
-                          />
-                        ))}
-                      </div>
-                    );
+                    // Show remaining properties if currentPage > 1
+                    if (currentPage > 1) {
+                      // For page 2+, show properties from remainingProperties
+                      // Page 2 = index 0-7, Page 3 = index 8-15, etc.
+                      const startIndex = (currentPage - 2) * propertiesPerPage;
+                      const endIndex = startIndex + propertiesPerPage;
+                      const currentPageProperties = remainingProperties.slice(startIndex, endIndex);
+                      
+                      // Add paginated properties
+                      batches.push(
+                        <div key={`paginated-${currentPage}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
+                          {currentPageProperties.map((property) => (
+                            <PropertyCard
+                              key={property.id}
+                              property={property}
+                              onEnquireClick={handleEnquireClick}
+                              hideCategory={true}
+                            />
+                          ))}
+                        </div>
+                      );
+                    }
                     
-                    // Add pagination component
+                    // Add pagination component (always show if there are remaining properties)
                     batches.push(
                       <div key="pagination" className="mt-8 sm:mt-10 md:mt-12 flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
                         {(() => {
@@ -896,29 +937,59 @@ export default function CategoryPage() {
                             return pages;
                           };
                           
+                          const handlePageChange = (page: number, e?: React.MouseEvent) => {
+                            // If Ctrl/Cmd or middle mouse button, let browser handle it (open in new tab)
+                            if (e && (e.ctrlKey || e.metaKey || e.button === 1)) {
+                              return; // Let the link handle it
+                            }
+                            e?.preventDefault();
+                            setCurrentPage(page);
+                            updatePageInURL(page);
+                            // Scroll to top when page changes
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          };
+                          
+                          // Helper function to generate URL for a page
+                          const getPageUrl = (page: number) => {
+                            const params = new URLSearchParams(searchParams.toString());
+                            if (page === 1) {
+                              params.delete('page');
+                            } else {
+                              params.set('page', page.toString());
+                            }
+                            const queryString = params.toString();
+                            return `?${queryString}`;
+                          };
+                          
+                          const prevPage = Math.max(1, currentPage - 1);
+                          const nextPage = Math.min(totalPages, currentPage + 1);
+                          
                           return (
                             <>
                               {/* Previous Button */}
-                              <button
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
-                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
-                                  currentPage === 1
-                                    ? 'bg-gray-200 text-black cursor-not-allowed'
-                                    : 'bg-blue-400 text-white hover:bg-blue-500'
-                                }`}
-                              >
-                                Previous
-                              </button>
+                              {currentPage === 1 ? (
+                                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold bg-gray-200 text-black cursor-not-allowed`}>
+                                  Previous
+                                </span>
+                              ) : (
+                                <Link
+                                  href={getPageUrl(prevPage)}
+                                  onClick={(e) => handlePageChange(prevPage, e)}
+                                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all bg-blue-400 text-white hover:bg-blue-500`}
+                                >
+                                  Previous
+                                </Link>
+                              )}
                               
                               {/* Page Numbers */}
                               {getPageNumbers().map((page, index) => (
                                 page === '...' ? (
                                   <span key={`ellipsis-${index}`} className="px-2 text-black">...</span>
                                 ) : (
-                                  <button
+                                  <Link
                                     key={page}
-                                    onClick={() => setCurrentPage(page as number)}
+                                    href={getPageUrl(page as number)}
+                                    onClick={(e) => handlePageChange(page as number, e)}
                                     className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
                                       currentPage === page
                                         ? 'bg-blue-400 text-white'
@@ -926,22 +997,24 @@ export default function CategoryPage() {
                                     }`}
                                   >
                                     {page}
-                                  </button>
+                                  </Link>
                                 )
                               ))}
                               
                               {/* Next Button */}
-                              <button
-                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                disabled={currentPage === totalPages}
-                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
-                                  currentPage === totalPages
-                                    ? 'bg-gray-200 text-black cursor-not-allowed'
-                                    : 'bg-blue-400 text-white hover:bg-blue-500'
-                                }`}
-                              >
-                                Next
-                              </button>
+                              {currentPage === totalPages ? (
+                                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold bg-gray-200 text-black cursor-not-allowed`}>
+                                  Next
+                                </span>
+                              ) : (
+                                <Link
+                                  href={getPageUrl(nextPage)}
+                                  onClick={(e) => handlePageChange(nextPage, e)}
+                                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all bg-blue-400 text-white hover:bg-blue-500`}
+                                >
+                                  Next
+                                </Link>
+                              )}
                             </>
                           );
                         })()}
@@ -977,7 +1050,7 @@ export default function CategoryPage() {
         <section className="py-12 md:py-16 bg-gradient-to-br from-white via-blue-50 to-white">
           <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
             <div className="text-center mb-10">
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Coworking Locations in Mumbai</h3>
+              <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Explore Top Office Locations in Mumbai</h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-5">

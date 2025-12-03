@@ -552,6 +552,7 @@ export default function AreaPage() {
         }
       `}</style>
       <Header />
+      <div className="h-16 sm:h-20 md:h-24"></div>
       
       {/* Breadcrumb Navigation */}
       <div className="bg-white border-b">

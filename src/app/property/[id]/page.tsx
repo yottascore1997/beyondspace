@@ -131,8 +131,146 @@ export default function PropertyDetails() {
   const [modalCountryCode, setModalCountryCode] = useState('+91');
   const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const modalCountryDropdownRef = useRef<HTMLDivElement | null>(null);
-  const [isFormSticky, setIsFormSticky] = useState(true);
   const amenitiesRef = useRef<HTMLDivElement | null>(null);
+  const similarPropertiesRef = useRef<HTMLDivElement | null>(null);
+  const contactFormRef = useRef<HTMLDivElement | null>(null);
+
+  // Fixed positioning - make form container stick when it reaches top
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const formContainer = contactFormRef.current;
+    if (!formContainer) {
+      console.log('Form container not found');
+      return;
+    }
+    
+    const parentColumn = formContainer.parentElement;
+    if (!parentColumn) {
+      console.log('Parent column not found');
+      return;
+    }
+    
+    let initialTop = 0;
+    let initialLeft = 0;
+    let initialWidth = 0;
+    let isFixed = false;
+    let hasInitialized = false;
+    
+    const updatePosition = () => {
+      if (window.innerWidth < 1024) {
+        formContainer.style.position = '';
+        formContainer.style.top = '';
+        formContainer.style.left = '';
+        formContainer.style.width = '';
+        formContainer.style.zIndex = '';
+        isFixed = false;
+        hasInitialized = false;
+        return;
+      }
+      
+      const formRect = formContainer.getBoundingClientRect();
+      const columnRect = parentColumn.getBoundingClientRect();
+      const gridContainer = parentColumn.parentElement;
+      const scrollY = window.scrollY;
+      const viewportTop = 24; // 1.5rem
+      
+      // Initialize position on first load - store the natural position
+      if (!hasInitialized) {
+        initialTop = formRect.top + scrollY; // Natural scroll position where form starts
+        initialLeft = columnRect.left;
+        initialWidth = columnRect.width;
+        hasInitialized = true;
+      }
+      
+      // Always update left and width from current column position
+      initialLeft = columnRect.left;
+      initialWidth = columnRect.width;
+      
+      // Check if similar properties section is visible - form should stick until similar properties appears
+      const similarPropsSection = similarPropertiesRef.current;
+      let shouldStopSticky = false;
+      if (similarPropsSection) {
+        const similarPropsRect = similarPropsSection.getBoundingClientRect();
+        // If similar properties section top is in viewport or approaching, stop sticky
+        // Form should unfix when similar properties section comes into view
+        if (similarPropsRect.top < window.innerHeight) {
+          shouldStopSticky = true;
+        }
+      }
+      
+      // Check if we've scrolled past the form's natural starting position
+      // Form should only become fixed when its natural position reaches viewport top
+      const naturalFormTop = initialTop - scrollY; // Where form would be in normal flow
+      const shouldBeFixed = naturalFormTop <= viewportTop && scrollY >= initialTop - viewportTop && !shouldStopSticky;
+      
+      if (shouldBeFixed) {
+        // Use fixed positioning - but only if we've scrolled past the natural position
+        if (!isFixed) {
+          isFixed = true;
+          console.log('Form is now fixed at natural position');
+        }
+        // Force fixed positioning with !important via setProperty
+        formContainer.style.setProperty('position', 'fixed', 'important');
+        formContainer.style.setProperty('top', `${viewportTop}px`, 'important');
+        formContainer.style.setProperty('left', `${initialLeft}px`, 'important');
+        formContainer.style.setProperty('width', `${initialWidth}px`, 'important');
+        formContainer.style.setProperty('z-index', '10', 'important');
+        formContainer.style.setProperty('margin', '0', 'important');
+      } else {
+        // Form shouldn't be fixed - use normal flow
+        if (isFixed) {
+          isFixed = false;
+          if (shouldStopSticky) {
+            console.log('Form unfixed - amenities/similar properties section');
+          } else {
+            console.log('Form is back to normal flow');
+          }
+        }
+        formContainer.style.removeProperty('position');
+        formContainer.style.removeProperty('top');
+        formContainer.style.removeProperty('left');
+        formContainer.style.removeProperty('width');
+        formContainer.style.removeProperty('z-index');
+        formContainer.style.removeProperty('margin');
+      }
+    };
+    
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        // Recalculate on resize
+        const columnRect = parentColumn.getBoundingClientRect();
+        initialLeft = columnRect.left;
+        initialWidth = columnRect.width;
+        hasInitialized = false; // Reset to recalculate initialTop
+        updatePosition();
+      } else {
+        formContainer.style.cssText = '';
+        isFixed = false;
+        hasInitialized = false;
+      }
+    };
+    
+    // Initial setup
+    updatePosition();
+    
+    // Add event listeners
+    window.addEventListener('scroll', updatePosition, { passive: true });
+    window.addEventListener('resize', handleResize);
+    
+    // Update after delays
+    const timeout1 = setTimeout(updatePosition, 100);
+    const timeout2 = setTimeout(updatePosition, 500);
+    const timeout3 = setTimeout(updatePosition, 1000);
+    
+    return () => {
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      clearTimeout(timeout3);
+      window.removeEventListener('scroll', updatePosition);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [property]);
 
   const workspaceTypes = [
     'Coworking Space',
@@ -145,52 +283,16 @@ export default function PropertyDetails() {
   ];
 
   const seatOptions = ['1-5', '6-10', '11-20', '21-50', '50-70', '120+'];
-  const countryCodes: Array<{ code: string; name: string; flag: string }> = [
-    { code: '+1', name: 'United States', flag: '🇺🇸' },
-    { code: '+44', name: 'United Kingdom', flag: '🇬🇧' },
-    { code: '+61', name: 'Australia', flag: '🇦🇺' },
-    { code: '+81', name: 'Japan', flag: '🇯🇵' },
-    { code: '+82', name: 'South Korea', flag: '🇰🇷' },
-    { code: '+86', name: 'China', flag: '🇨🇳' },
-    { code: '+91', name: 'India', flag: '🇮🇳' },
-    { code: '+92', name: 'Pakistan', flag: '🇵🇰' },
-    { code: '+93', name: 'Afghanistan', flag: '🇦🇫' },
-    { code: '+94', name: 'Sri Lanka', flag: '🇱🇰' },
-    { code: '+95', name: 'Myanmar', flag: '🇲🇲' },
-    { code: '+971', name: 'United Arab Emirates', flag: '🇦🇪' },
-    { code: '+972', name: 'Israel', flag: '🇮🇱' },
-    { code: '+973', name: 'Bahrain', flag: '🇧🇭' },
-    { code: '+974', name: 'Qatar', flag: '🇶🇦' },
-    { code: '+975', name: 'Bhutan', flag: '🇧🇹' },
-    { code: '+977', name: 'Nepal', flag: '🇳🇵' },
-    { code: '+60', name: 'Malaysia', flag: '🇲🇾' },
-    { code: '+62', name: 'Indonesia', flag: '🇮🇩' },
-    { code: '+63', name: 'Philippines', flag: '🇵🇭' },
-    { code: '+64', name: 'New Zealand', flag: '🇳🇿' },
-    { code: '+65', name: 'Singapore', flag: '🇸🇬' },
-    { code: '+66', name: 'Thailand', flag: '🇹🇭' },
-    { code: '+234', name: 'Nigeria', flag: '🇳🇬' },
-    { code: '+254', name: 'Kenya', flag: '🇰🇪' },
-    { code: '+27', name: 'South Africa', flag: '🇿🇦' },
-    { code: '+351', name: 'Portugal', flag: '🇵🇹' },
-    { code: '+352', name: 'Luxembourg', flag: '🇱🇺' },
-    { code: '+353', name: 'Ireland', flag: '🇮🇪' },
-    { code: '+354', name: 'Iceland', flag: '🇮🇸' },
-    { code: '+355', name: 'Albania', flag: '🇦🇱' },
-    { code: '+356', name: 'Malta', flag: '🇲🇹' },
-    { code: '+357', name: 'Cyprus', flag: '🇨🇾' },
-    { code: '+358', name: 'Finland', flag: '🇫🇮' },
-    { code: '+359', name: 'Bulgaria', flag: '🇧🇬' },
-    { code: '+380', name: 'Ukraine', flag: '🇺🇦' },
-    { code: '+381', name: 'Serbia', flag: '🇷🇸' },
-    { code: '+386', name: 'Slovenia', flag: '🇸🇮' },
-    { code: '+852', name: 'Hong Kong', flag: '🇭🇰' },
-    { code: '+853', name: 'Macau', flag: '🇲🇴' },
-    { code: '+855', name: 'Cambodia', flag: '🇰🇭' },
-    { code: '+856', name: 'Laos', flag: '🇱🇦' },
-    { code: '+880', name: 'Bangladesh', flag: '🇧🇩' },
-    { code: '+886', name: 'Taiwan', flag: '🇹🇼' },
-    { code: '+960', name: 'Maldives', flag: '🇲🇻' }
+  const countryCodes: Array<{ code: string; name: string; flag: string; isoCode: string }> = [
+    { code: '+91', name: 'India', flag: 'https://flagcdn.com/w80/in.png', isoCode: 'IN' },
+    { code: '+65', name: 'Singapore', flag: 'https://flagcdn.com/w80/sg.png', isoCode: 'SG' },
+    { code: '+44', name: 'United Kingdom', flag: 'https://flagcdn.com/w80/gb.png', isoCode: 'GB' },
+    { code: '+61', name: 'Australia', flag: 'https://flagcdn.com/w80/au.png', isoCode: 'AU' },
+    { code: '+1', name: 'Canada', flag: 'https://flagcdn.com/w80/ca.png', isoCode: 'CA' },
+    { code: '+49', name: 'Germany', flag: 'https://flagcdn.com/w80/de.png', isoCode: 'DE' },
+    { code: '+31', name: 'Netherlands', flag: 'https://flagcdn.com/w80/nl.png', isoCode: 'NL' },
+    { code: '+971', name: 'United Arab Emirates', flag: 'https://flagcdn.com/w80/ae.png', isoCode: 'AE' },
+    { code: '+1', name: 'United States', flag: 'https://flagcdn.com/w80/us.png', isoCode: 'US' }
   ];
 
   const handleEnquireClick = () => {
@@ -237,29 +339,6 @@ export default function PropertyDetails() {
     }
   }, [params.id]);
 
-  // Scroll-based sticky control for Amenities section
-  useEffect(() => {
-    const handleScroll = () => {
-      if (amenitiesRef.current) {
-        const amenitiesTop = amenitiesRef.current.offsetTop;
-        const scrollPosition = window.scrollY + window.innerHeight;
-        
-        // When user scrolls to amenities section, stop sticky
-        if (scrollPosition >= amenitiesTop + 100) {
-          setIsFormSticky(false);
-        } else {
-          setIsFormSticky(true);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check initial position
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [property]);
 
   const handleContactInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -380,6 +459,7 @@ export default function PropertyDetails() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
+        <div className="h-16 sm:h-20 md:h-24"></div>
         <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-8" style={{ maxWidth: '1920px', width: '100%' }}>
           <div className="animate-pulse">
             <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
@@ -400,6 +480,7 @@ export default function PropertyDetails() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
+        <div className="h-16 sm:h-20 md:h-24"></div>
         <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-8" style={{ maxWidth: '1920px', width: '100%' }}>
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
@@ -485,25 +566,47 @@ export default function PropertyDetails() {
             max-width: 1200px !important;
           }
         }
+
+        /* Force sticky positioning for contact form */
+        @media (min-width: 1024px) {
+          .contact-form-sticky-wrapper {
+            /* Don't force sticky here - let JavaScript handle it */
+            height: fit-content !important;
+          }
+          
+          /* Ensure parent grid allows sticky */
+          .main-content-grid {
+            align-items: start !important;
+            display: grid !important;
+            overflow: visible !important;
+          }
+          
+          /* Ensure grid column allows sticky */
+          div[class*="lg:col-span-4"] {
+            position: relative !important;
+            height: fit-content !important;
+            overflow: visible !important;
+          }
+        }
       `}</style>
       <Header />
       
-      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-5" style={{ maxWidth: '1920px', width: '100%' }}>
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-5" style={{ maxWidth: '1920px', width: '100%', overflow: 'visible' }}>
         {/* Breadcrumb */}
         <nav className="mb-3">
-          <ol className="flex items-center space-x-1.5 text-xs text-gray-500">
-            <li><Link href="/" className="hover:text-gray-700">Home</Link></li>
-            <li>/</li>
+          <ol className="flex items-center space-x-1.5 text-sm md:text-base text-gray-900 font-bold">
+            <li><Link href="/" className="hover:text-gray-800 text-gray-900 font-bold">Home</Link></li>
+            <li className="text-gray-700">/</li>
             <li>
               <Link 
                 href={searchParams.get('category') ? `/category/${searchParams.get('category')}` : '/'} 
-                className="hover:text-gray-700"
+                className="hover:text-gray-800 text-gray-900 font-bold"
               >
                 Properties
               </Link>
             </li>
-            <li>/</li>
-            <li className="text-gray-900">{property.title}</li>
+            <li className="text-gray-700">/</li>
+            <li className="text-gray-900 font-bold">{property.title}</li>
           </ol>
         </nav>
 
@@ -520,7 +623,7 @@ export default function PropertyDetails() {
           }}
         >
           <div 
-            className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] xl:h-[600px] 2xl:h-[700px]" 
+            className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] xl:h-[600px] 2xl:h-[850px]" 
             style={{ 
               display: 'block',
               position: 'relative',
@@ -621,55 +724,67 @@ export default function PropertyDetails() {
 
         {/* Main Content Section - Starts after images section */}
         <div 
-          className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-3" 
+          className="main-content-grid grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-3" 
           style={{ 
-            position: 'relative', 
-            zIndex: 0,
-            clear: 'both'
+            clear: 'both',
+            alignItems: 'start',
+            position: 'relative',
+            overflow: 'visible'
           }}
         >
           {/* Property Details - Left Side */}
-          <div className="lg:col-span-8" style={{ position: 'relative', zIndex: 0 }}>
+          <div className="lg:col-span-8">
             {/* Property Header */}
             <div className="mb-5">
             {/* Property Title */}
-              <h1 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 mb-3 leading-tight">
+              <h1 className="text-base md:text-lg lg:text-xl 2xl:text-xl font-bold text-gray-900 mb-0.5 2xl:mb-0.5 leading-tight">
               {property.title}
             </h1>
             
               {/* Sub Location, Area, City with Google Maps Button */}
-              <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-                <div className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-600 flex-wrap">
+              <div className="flex items-center justify-between gap-3 2xl:gap-3 mb-4 2xl:mb-4 flex-wrap">
+                <div className="flex items-center gap-1 2xl:gap-1 text-sm md:text-base 2xl:text-base font-medium text-gray-600 flex-wrap">
               {property.sublocation && (
                 <>
                   <span>{property.sublocation}</span>
-                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-500">,</span>
                 </>
               )}
               <span>{property.area}</span>
-                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-500">,</span>
               <span>{property.city}</span>
                 </div>
             </div>
 
             {/* Metro Station and Railway Station */}
               {(property.metroStationDistance || property.railwayStationDistance) && (
-                <div className="mb-4 flex flex-col sm:flex-row gap-3">
+                <div className="mb-4 flex flex-col sm:flex-row gap-4 2xl:gap-6">
                   {property.metroStationDistance && (
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <span className="text-xl">🚇</span>
+                    <div className="flex items-start gap-4 2xl:gap-5 flex-1 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 2xl:p-5 border border-orange-200 shadow-sm">
+                      <div className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                        <img 
+                          src="/images/mumbai-metro.jpg" 
+                          alt="Mumbai Metro" 
+                          className="w-full h-full object-cover rounded-xl"
+                          onError={(e) => {
+                            // Fallback to a metro train image if file doesn't exist
+                            e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mumbai_Metro_Logo.svg/200px-Mumbai_Metro_Logo.svg.png';
+                          }}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        <p className="text-sm 2xl:text-base font-bold text-gray-800 uppercase tracking-wide mb-2.5 2xl:mb-3">
                           Metro Station
                         </p>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2 2xl:space-y-2.5">
                           {property.metroStationDistance.split('/').map((seg, i) => {
                             const text = seg.trim();
                             if (!text) return null;
                             return (
-                              <div key={i} className="text-sm text-gray-700 font-medium leading-relaxed">{text}</div>
+                              <div key={i} className="text-sm 2xl:text-base text-gray-700 font-semibold leading-relaxed flex items-start gap-2 2xl:gap-2.5">
+                                <span className="text-orange-500 mt-1 2xl:mt-1.5">•</span>
+                                <span>{text}</span>
+                              </div>
                             );
                           })}
                         </div>
@@ -677,20 +792,31 @@ export default function PropertyDetails() {
                     </div>
                   )}
                   {property.railwayStationDistance && (
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <span className="text-xl">🚆</span>
+                    <div className="flex items-start gap-4 2xl:gap-5 flex-1 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 2xl:p-5 border border-blue-200 shadow-sm ml-auto">
+                      <div className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                        <img 
+                          src="/images/mumbai-railway.jpg" 
+                          alt="Mumbai Railway" 
+                          className="w-full h-full object-cover rounded-xl"
+                          onError={(e) => {
+                            // Fallback to Indian Railways logo if file doesn't exist
+                            e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/Indian_Railways_logo.svg/200px-Indian_Railways_logo.svg.png';
+                          }}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        <p className="text-sm 2xl:text-base font-bold text-gray-800 uppercase tracking-wide mb-2.5 2xl:mb-3">
                           Railway Station
                         </p>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2 2xl:space-y-2.5">
                           {property.railwayStationDistance.split('/').map((seg, i) => {
                             const text = seg.trim();
                             if (!text) return null;
                             return (
-                              <div key={i} className="text-sm text-gray-700 font-medium leading-relaxed">{text}</div>
+                              <div key={i} className="text-sm 2xl:text-base text-gray-700 font-semibold leading-relaxed flex items-start gap-2 2xl:gap-2.5">
+                                <span className="text-blue-500 mt-1 2xl:mt-1.5">•</span>
+                                <span>{text}</span>
+                              </div>
                             );
                           })}
                       </div>
@@ -841,7 +967,7 @@ export default function PropertyDetails() {
 
               return (
             <div className="mb-5">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 mt-4">Seating Plans</h3>
+              <h3 className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold text-gray-900 mb-3 2xl:mb-3 mt-4 2xl:mt-4">Seating Plans</h3>
               
                     {finalPlans.map((plan, index) => {
                   // Map seating plan titles to default images
@@ -856,13 +982,13 @@ export default function PropertyDetails() {
                   return (
                     <div
                       key={index}
-                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg py-2 px-2 ${
-                        index < finalPlans.length - 1 ? 'mb-3' : ''
+                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg py-2 2xl:py-2 px-2 2xl:px-2 ${
+                        index < finalPlans.length - 1 ? 'mb-3 2xl:mb-3' : ''
                       }`}
                     >
-                      <div className="flex flex-col md:flex-row gap-2">
+                      <div className="flex flex-col md:flex-row 2xl:flex-row gap-2 2xl:gap-2">
                         {/* Image on Left - Square */}
-                        <div className="md:w-1/6 flex-shrink-0">
+                        <div className="md:w-1/6 2xl:w-1/6 flex-shrink-0">
                           <img 
                             src={getImageForPlan(plan.title)} 
                             alt={plan.title} 
@@ -871,17 +997,17 @@ export default function PropertyDetails() {
               </div>
 
                         {/* Content on Right */}
-                        <div className="md:w-5/6 flex flex-col relative min-h-0">
+                        <div className="md:w-5/6 2xl:w-5/6 flex flex-col relative min-h-0">
                           {/* Left Side - Title and Content */}
-                          <div className="flex-1 pr-2 pt-2 pb-2">
-                            <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2">{plan.title}</h4>
+                          <div className="flex-1 pr-2 2xl:pr-2 pt-2 2xl:pt-2 pb-2 2xl:pb-2">
+                            <h4 className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold text-gray-900 mb-2 2xl:mb-2">{plan.title}</h4>
                             
                             {plan.description && (
-                              <p className="text-gray-700 mb-2 text-sm font-normal leading-snug line-clamp-2">{plan.description}</p>
+                              <p className="text-gray-700 mb-2 2xl:mb-2 text-sm 2xl:text-sm font-normal leading-snug line-clamp-2">{plan.description}</p>
                             )}
                             
                             {plan.seating && (
-                              <div className="text-sm font-medium mt-1.5">
+                              <div className="text-sm 2xl:text-sm font-medium mt-1.5 2xl:mt-1.5">
                                 <span className="mr-2 inline-block align-middle">👤 Seating:</span>
                                 {plan.title.toLowerCase().includes('meeting room') ? (
                                   <span className="inline-flex flex-wrap gap-2 align-middle">
@@ -914,16 +1040,16 @@ export default function PropertyDetails() {
                           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end">
                             {/* Don't show general price for Meeting Room as we show individual seating prices */}
                             {plan.price && !plan.title.toLowerCase().includes('meeting room') && (
-                              <div className="text-right mb-1.5">
-                                <span className="text-base md:text-lg font-bold text-gray-900">{plan.price}</span>
-                                <span className="text-sm md:text-base font-normal text-gray-600 ml-0.5">/month</span>
+                              <div className="text-right mb-1.5 2xl:mb-1.5">
+                                <span className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900">{plan.price}</span>
+                                <span className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/month</span>
                   </div>
                             )}
                             
                             <button
                         type="button"
                               onClick={handleEnquireClick}
-                              className="bg-blue-400 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                              className="bg-blue-400 text-white px-3 2xl:px-3 py-1 2xl:py-1 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                             >
                         Enquire Now
                       </button>
@@ -939,30 +1065,30 @@ export default function PropertyDetails() {
 
             {/* Price Disclaimer */}
             <div className="mb-4">
-              <p className={`${poppins.className} text-sm text-gray-600 italic`}>*Prices mentioned above are starting prices & as per availability</p>
+              <p className={`${poppins.className} text-sm 2xl:text-sm text-gray-600 italic`}>*Prices mentioned above are starting prices & as per availability</p>
             </div>
 
             {/* Managed Office Space and Enterprise Solutions Section */}
-            <div className="mb-5 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="mb-5 2xl:mb-5 mt-6 2xl:mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-2 gap-3 2xl:gap-3">
                 {/* Managed Office Space Card */}
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-48 md:h-56 lg:h-60 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg 2xl:max-w-lg">
+                  <div className="w-full h-48 md:h-56 lg:h-60 2xl:h-56 2xl:md:h-56 2xl:lg:h-60 overflow-hidden">
                     <img 
-                      src="/images/1.jpeg" 
+                      src="/images/amenity/image0.jpeg" 
                       alt="Managed Office Space" 
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="p-3 space-y-2">
-                    <h4 className="text-base font-semibold text-gray-900">Managed Office Space</h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">
+                  <div className="p-3 2xl:p-3 space-y-2 2xl:space-y-2">
+                    <h4 className="text-base 2xl:text-base font-semibold text-gray-900">Managed Office Space</h4>
+                    <p className="text-gray-600 text-sm 2xl:text-sm leading-relaxed">
                       An end-to-end office space solution customized to your needs including sourcing, design, building and operations
                     </p>
                     <button 
                       type="button"
                       onClick={handleEnquireClick}
-                      className="w-full bg-blue-400 text-white py-2 px-4 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                      className="w-full bg-blue-400 text-white py-2 2xl:py-2 px-4 2xl:px-4 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -970,23 +1096,23 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* Enterprise Solutions Card */}
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg">
-                  <div className="w-full h-48 md:h-56 lg:h-60 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 mx-auto w-full max-w-lg 2xl:max-w-lg">
+                  <div className="w-full h-48 md:h-56 lg:h-60 2xl:h-56 2xl:md:h-56 2xl:lg:h-60 overflow-hidden">
                     <img 
-                      src="/images/2.jpeg" 
+                      src="/images/amenity/image1.jpeg" 
                       alt="Enterprise Solutions" 
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="p-3 space-y-2">
-                    <h4 className="text-base font-semibold text-gray-900">Enterprise Solutions</h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">
+                  <div className="p-3 2xl:p-3 space-y-2 2xl:space-y-2">
+                    <h4 className="text-base 2xl:text-base font-semibold text-gray-900">Enterprise Solutions</h4>
+                    <p className="text-gray-600 text-sm 2xl:text-sm leading-relaxed">
                       Fully equipped offices for larger teams with flexibility to scale and customize your office in prime locations & LEED certified buildings
                     </p>
                     <button 
                       type="button"
                       onClick={handleEnquireClick}
-                      className="w-full bg-blue-400 text-white py-2 px-4 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                      className="w-full bg-blue-400 text-white py-2 2xl:py-2 px-4 2xl:px-4 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -996,35 +1122,35 @@ export default function PropertyDetails() {
             </div>
 
             {/* Why book coworking space with Beyond Space Section */}
-            <div className="mb-5 mt-5">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3">Why book coworking space with Beyond Space?</h3>
-              <div className="bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg p-4 md:p-5">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="mb-5 2xl:mb-5 mt-5 2xl:mt-5">
+              <h3 className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold text-gray-900 mb-3 2xl:mb-3">Why book coworking space with Beyond Space?</h3>
+              <div className="bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg p-4 md:p-5 2xl:p-4 2xl:md:p-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 2xl:grid-cols-3 gap-3 2xl:gap-3">
                   {/* Left Side - Points in 2x2 grid */}
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 text-base font-bold">✓</span>
-                      <p className="text-gray-800 text-xs font-medium">Exclusive Pricing & Zero Booking fee</p>
+                  <div className="md:col-span-2 2xl:col-span-2 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-2 gap-2 2xl:gap-2">
+                    <div className="flex items-start gap-2 2xl:gap-2">
+                      <span className="text-green-600 text-base 2xl:text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs 2xl:text-xs font-medium">Exclusive Pricing & Zero Booking fee</p>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 text-base font-bold">✓</span>
-                      <p className="text-gray-800 text-xs font-medium">Guided Office Space Tours</p>
+                    <div className="flex items-start gap-2 2xl:gap-2">
+                      <span className="text-green-600 text-base 2xl:text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs 2xl:text-xs font-medium">Guided Office Space Tours</p>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 text-base font-bold">✓</span>
-                      <p className="text-gray-800 text-xs font-medium">Verified Spaces and Trusted Operators</p>
+                    <div className="flex items-start gap-2 2xl:gap-2">
+                      <span className="text-green-600 text-base 2xl:text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs 2xl:text-xs font-medium">Verified Spaces and Trusted Operators</p>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-green-600 text-base font-bold">✓</span>
-                      <p className="text-gray-800 text-xs font-medium">Dedicated Relationship Manager</p>
+                    <div className="flex items-start gap-2 2xl:gap-2">
+                      <span className="text-green-600 text-base 2xl:text-base font-bold">✓</span>
+                      <p className="text-gray-800 text-xs 2xl:text-xs font-medium">Dedicated Relationship Manager</p>
                     </div>
                   </div>
                   {/* Right Side - Button */}
-                  <div className="flex items-center justify-center md:justify-end">
+                  <div className="flex items-center justify-center md:justify-end 2xl:justify-end">
                     <button
                       type="button"
                       onClick={handleEnquireClick}
-                      className="bg-blue-400 text-white py-2 px-5 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
+                      className="bg-blue-400 text-white py-2 2xl:py-2 px-5 2xl:px-5 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
                     >
                       Enquire Now
                     </button>
@@ -1035,18 +1161,18 @@ export default function PropertyDetails() {
 
             {/* Description */}
             {(property.aboutWorkspace || property.description) && (
-              <div className="mb-5">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">About</h3>
-                <p className="text-gray-700 text-base font-normal leading-relaxed">
+              <div className="mb-5 2xl:mb-5">
+                <h3 className="text-lg md:text-xl 2xl:text-lg 2xl:md:text-xl font-semibold text-gray-900 mb-2 2xl:mb-2">About Space</h3>
+                <p className="text-gray-700 text-base 2xl:text-base font-normal leading-relaxed">
                   {property.aboutWorkspace || property.description}
                 </p>
               </div>
             )}
 
             {/* Location Details */}
-            <div className="mb-5">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Location Details</h3>
-              <p className="text-gray-700 text-base font-normal">
+            <div className="mb-5 2xl:mb-5">
+              <h3 className="text-lg md:text-xl 2xl:text-lg 2xl:md:text-xl font-semibold text-gray-900 mb-2 2xl:mb-2">Location Details</h3>
+              <p className="text-gray-700 text-base 2xl:text-base font-normal">
                 {property.locationDetails || property.area}
               </p>
             </div>
@@ -1084,12 +1210,6 @@ export default function PropertyDetails() {
 
               return (
                 <div className="mb-5 bg-white rounded-xl shadow-2xl border-2 border-gray-200 overflow-hidden">
-                  <div className="p-4 border-b border-gray-200">
-                    <h4 className="text-sm md:text-base font-semibold text-gray-900 mb-1">Location on Map</h4>
-                    <p className="text-xs text-gray-600">
-                      {locationText}
-                    </p>
-                  </div>
                   <div className="w-full h-[200px] md:h-[250px] lg:h-[300px]">
                     <iframe
                       src={getMapEmbedUrl()}
@@ -1108,17 +1228,17 @@ export default function PropertyDetails() {
             })()}
 
             {/* Benefits Section */}
-            <div className="mb-5">
-              <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-pink-200 rounded-lg shadow-lg p-4 md:p-5">
-                <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
+            <div className="mb-5 2xl:mb-5">
+              <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-pink-200 rounded-lg shadow-lg p-4 md:p-5 2xl:p-4 2xl:md:p-5">
+                <div className="flex flex-col md:flex-row 2xl:flex-row gap-3 2xl:gap-3 items-start md:items-center 2xl:items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-gray-800 text-sm font-medium mb-1.5">Explore flexible workspace solutions just for you in Mumbai</p>
-                    <p className="text-gray-800 text-sm font-medium">Zero pressure advice, recommendations and negotiations at no extra cost</p>
+                    <p className="text-gray-800 text-sm 2xl:text-sm font-medium mb-1.5 2xl:mb-1.5">Explore flexible workspace solutions just for you in Mumbai</p>
+                    <p className="text-gray-800 text-sm 2xl:text-sm font-medium">Zero pressure advice, recommendations and negotiations at no extra cost</p>
                   </div>
                   <button
                     type="button"
                     onClick={handleEnquireClick}
-                    className="bg-blue-400 text-white py-2 px-5 rounded-lg text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300 whitespace-nowrap"
+                    className="bg-blue-400 text-white py-2 2xl:py-2 px-5 2xl:px-5 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300 whitespace-nowrap"
                   >
                     Enquire Now
                   </button>
@@ -1130,59 +1250,58 @@ export default function PropertyDetails() {
             {property.workspaceTimings && (() => {
               const { monFri, saturday, sunday } = parseWorkspaceTimings(property.workspaceTimings);
               return (
-            <div className="mb-5">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3">Office Timing</h3>
+            <div className="mb-5 2xl:mb-5">
+              <h3 className="text-lg md:text-xl 2xl:text-lg 2xl:mb-3 font-semibold text-gray-900 mb-3">Office Timing</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 2xl:grid-cols-3 gap-2 2xl:gap-2">
                 {/* Monday to Friday */}
-                <div className="p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-1.5">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-3 2xl:p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-2 2xl:gap-2 mb-1.5 2xl:mb-1.5">
+                    <div className="w-8 h-8 2xl:w-8 2xl:h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500">
+                      <svg className="w-4 h-4 2xl:w-4 2xl:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900 text-sm">Mon - Fri</p>
-                      <p className="text-xs text-gray-600">Weekdays</p>
+                      <p className="font-bold text-gray-900 text-sm 2xl:text-sm">Mon - Fri</p>
+                      <p className="text-xs 2xl:text-xs text-gray-600">Weekdays</p>
                     </div>
                   </div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="font-semibold text-gray-900 text-sm 2xl:text-sm">
                         {monFri || 'Not specified'}
                       </p>
                 </div>
 
                 {/* Saturday */}
-                <div className="p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-1.5">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-3 2xl:p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-2 2xl:gap-2 mb-1.5 2xl:mb-1.5">
+                    <div className="w-8 h-8 2xl:w-8 2xl:h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
+                      <svg className="w-4 h-4 2xl:w-4 2xl:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900 text-sm">Sat</p>
-                      <p className="text-xs text-gray-600">Saturday</p>
+                      <p className="font-bold text-gray-900 text-sm 2xl:text-sm">Saturday</p>
                     </div>
                   </div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="font-semibold text-gray-900 text-sm 2xl:text-sm">
                         {saturday || 'Not specified'}
                       </p>
                 </div>
 
                 {/* Sunday */}
-                <div className="p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-1.5">
+                <div className="p-3 2xl:p-3 bg-white rounded-lg shadow-lg border border-gray-100 text-center">
+                  <div className="flex items-center justify-center gap-2 2xl:gap-2 mb-1.5 2xl:mb-1.5">
                         {(() => {
                           const isClosed = sunday ? sunday.toLowerCase().includes('closed') : false;
                           return (
                             <>
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              <div className={`w-8 h-8 2xl:w-8 2xl:h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                                 isClosed
                                   ? 'bg-red-500' 
                                   : 'bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600'
                               }`}>
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 2xl:w-4 2xl:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   {isClosed ? (
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                   ) : (
@@ -1191,14 +1310,13 @@ export default function PropertyDetails() {
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900 text-sm">Sun</p>
-                      <p className="text-xs text-gray-600">Sunday</p>
+                      <p className="font-bold text-gray-900 text-sm 2xl:text-sm">Sunday</p>
                     </div>
                             </>
                           );
                         })()}
                   </div>
-                      <p className={`font-semibold text-sm ${
+                      <p className={`font-semibold text-sm 2xl:text-sm ${
                         sunday && sunday.toLowerCase().includes('closed')
                           ? 'text-red-600'
                           : 'text-gray-900'
@@ -1212,129 +1330,241 @@ export default function PropertyDetails() {
             })()}
 
             {/* Amenities Section */}
-            <div ref={amenitiesRef} className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-5">Amenities</h3>
+            <div ref={amenitiesRef} className="mb-8 2xl:mb-8">
+              <h3 className="text-xl 2xl:text-xl font-semibold text-gray-900 mb-5 2xl:mb-5">Amenities</h3>
               
-              <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 rounded-2xl p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 rounded-2xl p-6 2xl:p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 gap-4 2xl:gap-4">
                 {/* High Speed WiFi */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/wify.jpeg" 
+                      alt="WiFi" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">High Speed WiFi</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">High Speed WiFi</span>
                 </div>
 
                 {/* Meeting Rooms */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/meetingroom.png" 
+                      alt="Meeting Rooms" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Meeting Rooms</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Meeting Rooms</span>
                 </div>
 
                 {/* Ergo Workstations */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/workstation.png" 
+                      alt="Ergo Workstations" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Ergo Workstations</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Ergo Workstations</span>
                 </div>
 
                 {/* Printer */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/printer.jpg" 
+                      alt="Printer" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Printer</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Printer</span>
                 </div>
 
                 {/* Car / Bike Parking */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/carparking.png" 
+                      alt="Car / Bike Parking" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Car / Bike Parking</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Car / Bike Parking</span>
                 </div>
 
                 {/* Pantry */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/pantry.png" 
+                      alt="Pantry" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Pantry</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Pantry</span>
                 </div>
 
                 {/* Housekeeping */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/housekeeping.jpg" 
+                      alt="Housekeeping" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Housekeeping</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Housekeeping</span>
                 </div>
 
                 {/* Reception */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-red-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/reception.png" 
+                      alt="Reception" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Reception</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Reception</span>
                 </div>
 
                 {/* Air Conditioning */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/aircooler.jpg" 
+                      alt="Air Conditioning" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Air Conditioning</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Air Conditioning</span>
                 </div>
 
                 {/* Tea/Coffee */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/cofee.jpg" 
+                      alt="Tea/Coffee" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Tea/Coffee</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Tea/Coffee</span>
                 </div>
 
                 {/* Phone Booth */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/phonebooth.jpg" 
+                      alt="Phone Booth" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Phone Booth</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Phone Booth</span>
                 </div>
 
                 {/* Lounge */}
-                <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/amenity/loungue.png" 
+                      alt="Lounge" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+                        }
+                      }}
+                    />
                   </div>
-                  <span className="font-medium text-gray-900">Lounge</span>
+                  <span className="font-medium 2xl:font-medium text-gray-900 2xl:text-sm">Lounge</span>
                 </div>
                 </div>
               </div>
@@ -1342,21 +1572,29 @@ export default function PropertyDetails() {
           </div>
 
           {/* Contact Form - Right Side */}
-          <div className="lg:col-span-4 lg:order-2">
-            <div className={`${isFormSticky ? 'lg:sticky lg:top-6 xl:top-8 lg:self-start' : 'lg:self-start'}`}>
-              <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 relative overflow-hidden">
-              {/* Background Pattern */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
-              <div className="absolute top-1/2 left-1/2 w-20 h-20 bg-gradient-to-r from-blue-100/30 to-cyan-100/30 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
+          <div 
+            className="lg:col-span-4 lg:order-2" 
+            style={{ alignSelf: 'start', position: 'relative', height: 'fit-content' }}
+          >
+            <div 
+              ref={contactFormRef}
+              className="contact-form-sticky-wrapper"
+            >
+              <div id="contact-form-section" className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-xl shadow-2xl border-2 border-blue-200/50 p-5 2xl:p-5 relative overflow-visible">
+                {/* Background Pattern Container - with overflow-hidden for decorative elements only */}
+                <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-sky-200/20 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+                  <div className="absolute top-1/2 left-1/2 w-20 h-20 bg-gradient-to-r from-blue-100/30 to-cyan-100/30 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
+                </div>
               
               <div className="relative z-10">
-                <div className="mb-4">
-                  <h4 className="text-sm md:text-base font-semibold text-black mb-1.5">Tell Us About Your Workspace Needs</h4>
-                  <p className="text-xs text-gray-700">Share your requirements and we'll tailor a proposal for you.</p>
+                <div className="mb-4 2xl:mb-4">
+                  <h4 className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-semibold text-black mb-1.5 2xl:mb-1.5">Tell Us About Your Workspace Needs</h4>
+                  <p className="text-xs 2xl:text-xs text-gray-700">Share your requirements and we'll tailor a proposal for you.</p>
                 </div>
 
-                <form id="contact-form-fields" onSubmit={handleContactSubmit} className="space-y-3">
+                <form id="contact-form-fields" onSubmit={handleContactSubmit} className="space-y-3 2xl:space-y-3">
                   <div>
                     <input
                       type="text"
@@ -1365,7 +1603,7 @@ export default function PropertyDetails() {
                       onChange={handleContactInputChange}
                       placeholder="Enter your name"
                       required
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      className="w-full px-3 2xl:px-3 py-2 2xl:py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm 2xl:text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                   </div>
                   
@@ -1377,7 +1615,7 @@ export default function PropertyDetails() {
                       onChange={handleContactInputChange}
                       placeholder="Enter your email"
                       required
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
+                      className="w-full px-3 2xl:px-3 py-2 2xl:py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm 2xl:text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 placeholder-gray-500 shadow-sm"
                     />
                   </div>
                   
@@ -1387,9 +1625,9 @@ export default function PropertyDetails() {
                         <button
                           type="button"
                           onClick={() => setCountryDropdownOpen(prev => !prev)}
-                          className="flex w-28 items-center gap-1.5 rounded-lg border-2 border-gray-300 bg-white px-2.5 py-2 text-xs font-semibold text-black shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                          className="flex w-20 2xl:w-20 items-center gap-1 2xl:gap-1 rounded-lg border-2 border-gray-300 bg-white px-2 2xl:px-2 py-2 2xl:py-2 text-xs 2xl:text-xs font-semibold text-black shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                         >
-                          <span className="text-base leading-none">{selectedCountry.flag}</span>
+                          <img src={selectedCountry.flag} alt={selectedCountry.name} className="w-7 h-5 object-contain rounded border border-gray-200" style={{ imageRendering: 'crisp-edges' }} />
                           <span>{selectedCountry.code}</span>
                           <svg
                             className={`ml-auto h-2.5 w-2.5 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
@@ -1401,7 +1639,7 @@ export default function PropertyDetails() {
                           </svg>
                         </button>
                         {isCountryDropdownOpen && (
-                          <div className="absolute left-0 bottom-full z-30 mb-2 w-56 max-h-56 overflow-y-auto rounded-lg border border-blue-100 bg-white shadow-xl">
+                          <div className="absolute left-0 bottom-full z-50 mb-2 w-56 max-h-56 overflow-y-auto rounded-lg border border-blue-100 bg-white shadow-xl">
                             {countryCodes.map(country => (
                               <button
                                 type="button"
@@ -1412,7 +1650,7 @@ export default function PropertyDetails() {
                                 }}
                                 className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left transition hover:bg-blue-50"
                               >
-                                <span className="text-base leading-none">{country.flag}</span>
+                                <img src={country.flag} alt={country.name} className="w-8 h-6 object-contain rounded border border-gray-200 flex-shrink-0" style={{ imageRendering: 'crisp-edges' }} />
                                 <div className="flex flex-col">
                                   <span className="text-xs font-semibold text-gray-900">{country.name}</span>
                                   <span className="text-[10px] text-gray-500">{country.code}</span>
@@ -1440,7 +1678,7 @@ export default function PropertyDetails() {
                         name="type"
                         value={contactFormData.type}
                         onChange={handleContactInputChange}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
+                        className="w-full px-3 2xl:px-3 py-2 2xl:py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm 2xl:text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
                       >
                         <option value="">Select Type</option>
                         {workspaceTypes.map((type) => (
@@ -1453,7 +1691,7 @@ export default function PropertyDetails() {
                         name="seats"
                         value={contactFormData.seats}
                         onChange={handleContactInputChange}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
+                        className="w-full px-3 2xl:px-3 py-2 2xl:py-2 border-2 border-gray-300 rounded-lg bg-white text-black text-sm 2xl:text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all duration-300 appearance-none shadow-sm"
                       >
                         <option value="">Select Seats</option>
                         {seatOptions.map(option => (
@@ -1478,7 +1716,7 @@ export default function PropertyDetails() {
                   <button
                     type="submit"
                     disabled={contactIsSubmitting}
-                    className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
+                    className={`w-full py-2.5 2xl:py-2.5 px-4 2xl:px-4 rounded-lg font-semibold text-sm 2xl:text-sm transition-all duration-300 shadow-md hover:shadow-lg ${
                       contactIsSubmitting ? 'bg-blue-300 cursor-not-allowed text-white' : 'bg-blue-400 text-white hover:bg-blue-500'
                     }`}
                   >
@@ -1523,7 +1761,7 @@ export default function PropertyDetails() {
 
       {/* Similar Properties Section */}
       {similarProperties.length > 0 && (
-        <section className="pt-6 pb-12 md:pt-8 md:pb-16 bg-gradient-to-br from-gray-50 to-white">
+        <section ref={similarPropertiesRef} className="pt-6 pb-12 md:pt-8 md:pb-16 bg-gradient-to-br from-gray-50 to-white">
           <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
             <div className="mb-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
@@ -1770,7 +2008,7 @@ export default function PropertyDetails() {
                         onClick={() => setModalCountryDropdownOpen(prev => !prev)}
                         className="flex w-32 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm font-semibold text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <span className="text-lg leading-none">{selectedModalCountry.flag}</span>
+                        <img src={selectedModalCountry.flag} alt={selectedModalCountry.name} className="w-8 h-6 object-contain rounded border border-gray-200" style={{ imageRendering: 'crisp-edges' }} />
                         <span>{selectedModalCountry.code}</span>
                         <svg
                           className={`ml-auto h-3 w-3 transition-transform ${isModalCountryDropdownOpen ? 'rotate-180' : ''}`}
@@ -1793,7 +2031,7 @@ export default function PropertyDetails() {
                               }}
                               className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-blue-50"
                             >
-                              <span className="text-lg leading-none">{country.flag}</span>
+                              <img src={country.flag} alt={country.name} className="w-8 h-6 object-contain rounded border border-gray-200 flex-shrink-0" style={{ imageRendering: 'crisp-edges' }} />
                               <div className="flex flex-col">
                                 <span className="text-sm font-semibold text-gray-900">{country.name}</span>
                                 <span className="text-xs text-gray-500">{country.code}</span>

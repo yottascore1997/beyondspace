@@ -35,10 +35,24 @@ export default function Header() {
             transform: translateY(0) scale(1);
           }
         }
+        header {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 50 !important;
+          width: 100% !important;
+        }
+        body {
+          padding-top: 0 !important;
+        }
+        /* Add spacing after fixed header */
+        header + * {
+          margin-top: 0;
+        }
       `
     }} />
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-200 shadow-lg">
-      
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-200 shadow-lg" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, width: '100%' }}>
       <div className="w-full px-0 relative">
         <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
           <div className="flex items-center justify-between py-1.5 sm:py-2">

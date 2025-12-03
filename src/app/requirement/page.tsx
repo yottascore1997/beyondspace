@@ -63,6 +63,7 @@ export default function RequirementPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
+        <div className="h-16 sm:h-20 md:h-24"></div>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-white rounded-2xl shadow-lg p-12">
@@ -92,6 +93,7 @@ export default function RequirementPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <div className="h-16 sm:h-20 md:h-24"></div>
       
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">

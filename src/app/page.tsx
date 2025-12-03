@@ -46,6 +46,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Header />
+      <div className="h-16 sm:h-20 md:h-24"></div>
       <Hero
         filters={filters}
         onFilterChange={handleFilterChange}
