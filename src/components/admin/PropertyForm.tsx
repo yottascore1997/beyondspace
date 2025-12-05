@@ -85,7 +85,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'dedicated-desk',
     title: 'Dedicated Desk',
-    description: '',
+    description: 'Get your dedicated desk with storage and 24/7 access.',
     price: '',
     seating: '',
     isSelected: false,
@@ -93,7 +93,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'flexi-desk',
     title: 'Flexi Desk',
-    description: '',
+    description: 'Hot desk with flexible timing and access.',
     price: '',
     seating: '',
     isSelected: false,
@@ -101,7 +101,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'private-cabin',
     title: 'Private Cabin',
-    description: '',
+    description: 'Private cabin for focused work with complete privacy.',
     price: '',
     seating: '',
     isSelected: false,
@@ -109,7 +109,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'virtual-office',
     title: 'Virtual Office',
-    description: '',
+    description: 'Business address and mail handling service for remote businesses.',
     price: '',
     seating: '',
     isSelected: false,
@@ -134,7 +134,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'day-pass',
     title: 'Day Pass',
-    description: '',
+    description: 'Single day access to coworking space with all amenities included.',
     price: '',
     seating: '',
     isSelected: false,

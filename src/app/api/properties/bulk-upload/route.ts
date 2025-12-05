@@ -330,6 +330,84 @@ async function validateCityArea(city: string, area: string, rowIndex: number): P
   return errors;
 }
 
+// Helper function to check for duplicate titles within batch
+function checkDuplicateTitlesInBatch(data: ExcelRow[]): string[] {
+  const errors: string[] = [];
+  const titleMap = new Map<string, number[]>();
+  
+  // Generate titles and track their row indices
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    if (row.coworkingname?.trim() && row.buildingname?.trim()) {
+      const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+      
+      if (!titleMap.has(title)) {
+        titleMap.set(title, []);
+      }
+      titleMap.get(title)!.push(i + 2); // +2 because Excel rows are 1-indexed and we have header
+    }
+  }
+  
+  // Check for duplicates
+  titleMap.forEach((rowIndices, title) => {
+    if (rowIndices.length > 1) {
+      errors.push(`Duplicate property title "${title}" found in rows: ${rowIndices.join(', ')}. Each property must have a unique title.`);
+    }
+  });
+  
+  return errors;
+}
+
+// Helper function to check for existing properties with same title in database
+async function checkExistingProperties(data: ExcelRow[]): Promise<string[]> {
+  const errors: string[] = [];
+  const titles: string[] = [];
+  
+  // Generate all titles from the batch
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    if (row.coworkingname?.trim() && row.buildingname?.trim()) {
+      const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+      titles.push(title);
+    }
+  }
+  
+  if (titles.length === 0) {
+    return errors;
+  }
+  
+  try {
+    // Check if any of these titles already exist in database
+    const existingProperties = await prisma.property.findMany({
+      where: {
+        title: {
+          in: titles
+        }
+      },
+      select: {
+        title: true
+      }
+    });
+    
+    if (existingProperties.length > 0) {
+      const existingTitles = existingProperties.map(p => p.title);
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        if (row.coworkingname?.trim() && row.buildingname?.trim()) {
+          const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+          if (existingTitles.includes(title)) {
+            errors.push(`Row ${i + 2}: Property with title "${title}" already exists in database. Each property must have a unique title.`);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    errors.push(`Error checking existing properties: ${error}`);
+  }
+  
+  return errors;
+}
+
 // Process Excel row to database format
 function processRow(row: ExcelRow, userId: string): ProcessedProperty {
   // Parse categories
@@ -428,6 +506,14 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       }
     }
 
+    // Check for duplicate titles within the batch
+    const duplicateBatchErrors = checkDuplicateTitlesInBatch(data);
+    validationErrors.push(...duplicateBatchErrors);
+
+    // Check for existing properties with same titles in database
+    const existingPropertyErrors = await checkExistingProperties(data);
+    validationErrors.push(...existingPropertyErrors);
+
     // If there are validation errors, return them
     if (validationErrors.length > 0) {
       return NextResponse.json({ 
@@ -449,6 +535,21 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
         const processedProperty = processRow(row, dbUser.id);
         
         console.log(`[Row ${i + 1}] Processing: ${processedProperty.title}`);
+        
+        // Final safety check: Verify property doesn't already exist (prevent race conditions)
+        const existingProperty = await prisma.property.findFirst({
+          where: {
+            title: processedProperty.title
+          }
+        });
+        
+        if (existingProperty) {
+          results.failed++;
+          const errorMsg = `Row ${i + 2}: Property with title "${processedProperty.title}" already exists in database. Skipping duplicate.`;
+          results.errors.push(errorMsg);
+          console.log(`[Row ${i + 1}] ⚠️ Skipped (duplicate): ${processedProperty.title}`);
+          continue;
+        }
         
         // Create property in database
         await prisma.property.create({

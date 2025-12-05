@@ -173,7 +173,7 @@ export default function PropertyDetails() {
       const columnRect = parentColumn.getBoundingClientRect();
       const gridContainer = parentColumn.parentElement;
       const scrollY = window.scrollY;
-      const viewportTop = 24; // 1.5rem
+      const viewportTop = 100; // Account for sticky header height (approximately 80-100px)
       
       // Initialize position on first load - store the natural position
       if (!hasInitialized) {
@@ -590,8 +590,9 @@ export default function PropertyDetails() {
         }
       `}</style>
       <Header />
+      <div className="h-16 sm:h-20 md:h-24"></div>
       
-      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 py-5" style={{ maxWidth: '1920px', width: '100%', overflow: 'visible' }}>
+      <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12 pt-2 pb-5" style={{ maxWidth: '1920px', width: '100%', overflow: 'visible' }}>
         {/* Breadcrumb */}
         <nav className="mb-3">
           <ol className="flex items-center space-x-1.5 text-sm md:text-base text-gray-900 font-bold">
@@ -781,9 +782,8 @@ export default function PropertyDetails() {
                             const text = seg.trim();
                             if (!text) return null;
                             return (
-                              <div key={i} className="text-sm 2xl:text-base text-gray-700 font-semibold leading-relaxed flex items-start gap-2 2xl:gap-2.5">
-                                <span className="text-orange-500 mt-1 2xl:mt-1.5">•</span>
-                                <span>{text}</span>
+                              <div key={i} className="text-sm 2xl:text-base text-gray-700 font-semibold leading-relaxed">
+                                {text}
                               </div>
                             );
                           })}
@@ -792,7 +792,7 @@ export default function PropertyDetails() {
                     </div>
                   )}
                   {property.railwayStationDistance && (
-                    <div className="flex items-start gap-4 2xl:gap-5 flex-1 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 2xl:p-5 border border-blue-200 shadow-sm ml-auto">
+                    <div className="flex items-start gap-4 2xl:gap-5 flex-1 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 2xl:p-5 border border-orange-200 shadow-sm ml-auto">
                       <div className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
                         <img 
                           src="/images/mumbai-railway.jpg" 
@@ -813,9 +813,8 @@ export default function PropertyDetails() {
                             const text = seg.trim();
                             if (!text) return null;
                             return (
-                              <div key={i} className="text-sm 2xl:text-base text-gray-700 font-semibold leading-relaxed flex items-start gap-2 2xl:gap-2.5">
-                                <span className="text-blue-500 mt-1 2xl:mt-1.5">•</span>
-                                <span>{text}</span>
+                              <div key={i} className="text-sm 2xl:text-base text-gray-700 font-semibold leading-relaxed">
+                                {text}
                               </div>
                             );
                           })}
@@ -973,90 +972,270 @@ export default function PropertyDetails() {
                   // Map seating plan titles to default images
                   const getImageForPlan = (title: string) => {
                     const titleLower = title.toLowerCase();
+                    if (titleLower.includes('meeting room')) return '/images/seating/meeting.jpeg';
                     if (titleLower.includes('dedicated desk')) return '/images/1.jpeg';
                     if (titleLower.includes('private cabin')) return '/images/2.jpeg';
                     if (titleLower.includes('virtual office')) return '/images/4.jpeg';
                     return '/images/1.jpeg'; // default
                   };
 
+                  const isMeetingRoom = plan.title.toLowerCase().includes('meeting room');
+                  const isSingleMeetingRoom = finalPlans.length === 1 && isMeetingRoom;
+                  const isManagedOffice = plan.title.toLowerCase().includes('managed office');
+                  const isSingleManagedOffice = finalPlans.length === 1 && isManagedOffice;
+                  
+                  // Parse Managed Office description for A), B), C) points
+                  const parseManagedOfficeDescription = (desc: string) => {
+                    const lines = desc.split('\n').filter(line => line.trim());
+                    const points: string[] = [];
+                    let finalText = '';
+                    
+                    lines.forEach(line => {
+                      const trimmed = line.trim();
+                      if (trimmed.match(/^[A-C]\)/)) {
+                        points.push(trimmed);
+                      } else if (trimmed.toLowerCase().startsWith('to know more')) {
+                        finalText = trimmed;
+                      }
+                    });
+                    
+                    return { points, finalText };
+                  };
+
                   return (
                     <div
                       key={index}
-                      className={`bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-lg shadow-lg py-2 2xl:py-2 px-2 2xl:px-2 ${
+                      className={`${
+                        isSingleManagedOffice
+                          ? 'bg-gradient-to-br from-white via-indigo-50/40 via-blue-50/60 to-purple-50/40 rounded-xl shadow-xl border-2 border-indigo-200/60'
+                          : 'bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-xl border border-blue-200'
+                      } ${
+                        isSingleMeetingRoom 
+                          ? 'py-6 2xl:py-8 px-4 2xl:px-6' 
+                          : isSingleManagedOffice
+                          ? 'py-4 2xl:py-5 px-4 2xl:px-5'
+                          : 'py-2 2xl:py-2 px-2 2xl:px-2'
+                      } ${
                         index < finalPlans.length - 1 ? 'mb-3 2xl:mb-3' : ''
                       }`}
                     >
-                      <div className="flex flex-col md:flex-row 2xl:flex-row gap-2 2xl:gap-2">
+                      <div className={`flex flex-col md:flex-row 2xl:flex-row gap-3 2xl:gap-4 ${
+                        isSingleMeetingRoom ? 'gap-4 2xl:gap-6' : isSingleManagedOffice ? 'gap-3 2xl:gap-4' : ''
+                      }`}>
                         {/* Image on Left - Square */}
-                        <div className="md:w-1/6 2xl:w-1/6 flex-shrink-0">
+                        <div className={`${
+                          isSingleMeetingRoom ? 'md:w-1/4 2xl:w-1/4' 
+                          : isSingleManagedOffice ? 'md:w-1/5 2xl:w-1/5'
+                          : 'md:w-1/6 2xl:w-1/6'
+                        } flex-shrink-0`}>
                           <img 
                             src={getImageForPlan(plan.title)} 
                             alt={plan.title} 
-                            className="w-full aspect-square object-cover rounded-lg"
+                            className={`w-full aspect-square object-cover rounded-xl shadow-md ${
+                              isSingleMeetingRoom ? 'rounded-2xl' : isSingleManagedOffice ? 'rounded-xl' : 'rounded-lg'
+                            }`}
                           />
-              </div>
+                        </div>
 
                         {/* Content on Right */}
-                        <div className="md:w-5/6 2xl:w-5/6 flex flex-col relative min-h-0">
+                        <div className={`${
+                          isSingleMeetingRoom ? 'md:w-3/4 2xl:w-3/4' 
+                          : isSingleManagedOffice ? 'md:w-4/5 2xl:w-4/5'
+                          : 'md:w-5/6 2xl:w-5/6'
+                        } flex flex-col relative min-h-0`}>
                           {/* Left Side - Title and Content */}
-                          <div className="flex-1 pr-2 2xl:pr-2 pt-2 2xl:pt-2 pb-2 2xl:pb-2">
-                            <h4 className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold text-gray-900 mb-2 2xl:mb-2">{plan.title}</h4>
+                          <div className={`flex-1 pr-2 2xl:pr-2 ${
+                            isSingleMeetingRoom ? 'pt-1 2xl:pt-1 pb-2 2xl:pb-2' : 'pt-2 2xl:pt-2 pb-2 2xl:pb-2'
+                          }`}>
+                            <h4 className={`${
+                              isSingleMeetingRoom 
+                                ? 'text-xl md:text-2xl 2xl:text-2xl font-bold' 
+                                : isSingleManagedOffice
+                                ? 'text-lg md:text-xl 2xl:text-xl font-bold text-gray-900'
+                                : 'text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold'
+                            } ${isSingleManagedOffice ? '' : 'text-gray-900'} mb-2 2xl:mb-2.5`}>
+                              {plan.title}
+                            </h4>
                             
                             {plan.description && (
-                              <p className="text-gray-700 mb-2 2xl:mb-2 text-sm 2xl:text-sm font-normal leading-snug line-clamp-2">{plan.description}</p>
+                              isManagedOffice ? (
+                                (() => {
+                                  const { points, finalText } = parseManagedOfficeDescription(plan.description);
+                                  return (
+                                    <div className="mb-3 2xl:mb-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 2xl:gap-3">
+                                        {points.map((point, idx) => {
+                                          const pointText = point.replace(/^[A-C]\)\s*/, '');
+                                          const pointLabel = point.match(/^([A-C])\)/)?.[1] || '';
+                                          // Different gradient colors for each point
+                                          const badgeGradients = [
+                                            'from-blue-500 via-blue-600 to-indigo-600',
+                                            'from-purple-500 via-purple-600 to-indigo-600',
+                                            'from-indigo-500 via-indigo-600 to-blue-600'
+                                          ];
+                                          return (
+                                            <div key={idx} className="flex flex-col items-center text-center bg-gradient-to-br from-white to-blue-50/50 rounded-lg p-2.5 2xl:p-3 border-2 border-blue-200/60 hover:border-blue-500 hover:from-white hover:to-blue-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+                                              <div className={`flex-shrink-0 w-7 h-7 2xl:w-8 2xl:h-8 rounded-full bg-gradient-to-br ${badgeGradients[idx]} flex items-center justify-center shadow-md mb-2 ring-2 ring-white/50`}>
+                                                <span className="text-white font-bold text-xs 2xl:text-sm">{pointLabel}</span>
+                                              </div>
+                                              <p className="text-xs 2xl:text-sm text-gray-800 leading-snug font-medium">
+                                                {pointText}
+                                              </p>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                      {finalText && (
+                                        <div className="mt-3 2xl:mt-3.5 p-3 2xl:p-3.5 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-lg shadow-sm border border-blue-200/60">
+                                          <p className="text-xs 2xl:text-sm text-gray-800 leading-snug font-semibold text-center">
+                                            {finalText}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()
+                              ) : (
+                                <p className={`text-gray-700 mb-3 2xl:mb-3 ${
+                                  isSingleMeetingRoom 
+                                    ? 'text-base 2xl:text-lg font-normal leading-relaxed' 
+                                    : 'text-sm 2xl:text-sm font-normal leading-snug line-clamp-2'
+                                }`}>
+                                  {plan.description}
+                                </p>
+                              )
                             )}
                             
                             {plan.seating && (
-                              <div className="text-sm 2xl:text-sm font-medium mt-1.5 2xl:mt-1.5">
-                                <span className="mr-2 inline-block align-middle">👤 Seating:</span>
-                                {plan.title.toLowerCase().includes('meeting room') ? (
-                                  <span className="inline-flex flex-wrap gap-2 align-middle">
+                              <div className={`${
+                                isSingleMeetingRoom ? 'text-base 2xl:text-lg' : 'text-sm 2xl:text-sm'
+                              } font-medium mt-3 2xl:mt-4`}>
+                                {isMeetingRoom ? (
+                                  <div className="flex items-center gap-2 mb-4 2xl:mb-5">
+                                    <div className="flex items-center justify-center w-8 h-8 2xl:w-10 2xl:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
+                                      <svg className="w-4 h-4 2xl:w-5 2xl:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                      </svg>
+                                    </div>
+                                    <span className={`${
+                                      isSingleMeetingRoom ? 'text-lg 2xl:text-xl' : 'text-base 2xl:text-lg'
+                                    } font-bold text-gray-800`}>Available Seating Options</span>
+                                  </div>
+                                ) : null}
+                                {isManagedOffice ? (
+                                  <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                          <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                          </svg>
+                                        </div>
+                                        <span className="text-xs 2xl:text-sm font-medium text-gray-600">Seating :</span>
+                                        <span className="text-sm 2xl:text-base font-semibold text-gray-800">
+                                          {plan.seating.split(',')[0]?.trim() || plan.seating}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-3">
+                                        {plan.price && (
+                                          <div className="text-right flex items-baseline gap-1">
+                                            <span className="text-base 2xl:text-lg font-bold text-gray-900">₹</span>
+                                            <span className="text-base 2xl:text-lg font-bold text-gray-900">{plan.price}</span>
+                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/seat/month</span>
+                                          </div>
+                                        )}
+                                        <button
+                                          type="button"
+                                          onClick={handleEnquireClick}
+                                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                        >
+                                          Enquire Now
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : isMeetingRoom ? (
+                                  <div className="flex flex-wrap gap-2 2xl:gap-2.5">
                                     {plan.seating.split(',').map((s) => {
                                       const label = s.trim();
                                       if (!label) return null;
                                       const seatingPrice = (plan as SeatingPlan & { seatingPrices?: Record<string, string> }).seatingPrices?.[label];
                                       return (
-                                        <span key={label} className="inline-flex flex-col items-center gap-0.5 px-1.5 py-1 rounded bg-white border border-blue-200 shadow-sm">
-                                          <span className="text-[10px] font-semibold text-blue-700">
-                                            {label}
-                                          </span>
-                                          {seatingPrice && (
-                                            <span className="text-[10px] font-bold text-gray-900">
-                                              {seatingPrice}
-                                            </span>
-                                          )}
-                                        </span>
+                                        <div 
+                                          key={label} 
+                                          className="group relative flex-1 min-w-[110px] max-w-[140px] 2xl:min-w-[125px] 2xl:max-w-[155px] overflow-hidden bg-white rounded-lg border border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+                                        >
+                                          {/* Top accent bar */}
+                                          <div className="h-1 2xl:h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                                          
+                                          {/* Content */}
+                                          <div className="relative p-3 2xl:p-3.5 flex flex-col">
+                                            {/* Seating Count */}
+                                            <div className="flex items-center gap-1.5 mb-2 2xl:mb-2.5">
+                                              <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                                <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                              </div>
+                                              <span className="text-sm 2xl:text-base font-semibold text-gray-800 leading-tight">
+                                                {label}
+                                              </span>
+                                            </div>
+                                            
+                                            {/* Price */}
+                                            {seatingPrice && (
+                                              <div className="mt-auto pt-2 2xl:pt-2.5 border-t border-gray-100">
+                                                <div className="flex items-baseline gap-0.5">
+                                                  <span className="text-xs 2xl:text-sm font-semibold text-gray-700">₹</span>
+                                                  <span className="text-base 2xl:text-lg font-bold text-gray-900">
+                                                    {seatingPrice}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
                                       );
                                     })}
-                                  </span>
+                                  </div>
                                 ) : (
                                   <span className="text-gray-700">{plan.seating}</span>
                                 )}
                               </div>
                             )}
-              </div>
+                          </div>
 
-                          {/* Right Side - Price and Button (Vertically Centered) */}
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                            {/* Don't show general price for Meeting Room as we show individual seating prices */}
-                            {plan.price && !plan.title.toLowerCase().includes('meeting room') && (
+                          {/* Right Side - Price and Button */}
+                          <div className={`absolute right-0 ${
+                            isMeetingRoom ? 'top-0' : 'top-1/2 -translate-y-1/2'
+                          } flex flex-col items-end`}>
+                            {/* Don't show general price for Meeting Room and Managed Office as we show them in seating section */}
+                            {plan.price && !isMeetingRoom && !isManagedOffice && (
                               <div className="text-right mb-1.5 2xl:mb-1.5">
                                 <span className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900">{plan.price}</span>
                                 <span className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/month</span>
-                  </div>
+                              </div>
                             )}
                             
-                            <button
-                        type="button"
-                              onClick={handleEnquireClick}
-                              className="bg-blue-400 text-white px-3 2xl:px-3 py-1 2xl:py-1 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
-                            >
-                        Enquire Now
-                      </button>
+                            {!isManagedOffice && (
+                              <button
+                                type="button"
+                                onClick={handleEnquireClick}
+                                className={`${
+                                  isSingleMeetingRoom
+                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 2xl:px-8 py-2.5 2xl:py-3 rounded-xl text-sm 2xl:text-base font-bold shadow-xl hover:from-blue-600 hover:to-blue-700 hover:shadow-2xl'
+                                    : isMeetingRoom
+                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105'
+                                    : 'bg-blue-400 text-white px-3 2xl:px-3 py-1 2xl:py-1 rounded-lg text-xs 2xl:text-xs font-semibold shadow-lg hover:bg-blue-500'
+                                } transition-all duration-300 transform hover:scale-105`}
+                              >
+                                Enquire Now
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
                   );
                 })}
             </div>
@@ -1337,7 +1516,7 @@ export default function PropertyDetails() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 gap-4 2xl:gap-4">
                 {/* High Speed WiFi */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-white rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/wify.jpeg" 
                       alt="WiFi" 
@@ -1349,7 +1528,7 @@ export default function PropertyDetails() {
 
                 {/* Meeting Rooms */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/meetingroom.PNG" 
                       alt="Meeting Rooms" 
@@ -1359,7 +1538,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
                         }
                       }}
                     />
@@ -1369,7 +1548,7 @@ export default function PropertyDetails() {
 
                 {/* Ergo Workstations */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/workstation.PNG" 
                       alt="Ergo Workstations" 
@@ -1379,7 +1558,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>';
                         }
                       }}
                     />
@@ -1389,7 +1568,7 @@ export default function PropertyDetails() {
 
                 {/* Printer */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/printer.jpg" 
                       alt="Printer" 
@@ -1399,7 +1578,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>';
                         }
                       }}
                     />
@@ -1409,7 +1588,7 @@ export default function PropertyDetails() {
 
                 {/* Car / Bike Parking */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/carparking.PNG" 
                       alt="Car / Bike Parking" 
@@ -1419,7 +1598,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
                         }
                       }}
                     />
@@ -1429,9 +1608,9 @@ export default function PropertyDetails() {
 
                 {/* Pantry */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/pantry.PNG" 
+                      src="/images/amenity/pantry.png" 
                       alt="Pantry" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1439,7 +1618,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" /></svg>';
                         }
                       }}
                     />
@@ -1449,7 +1628,7 @@ export default function PropertyDetails() {
 
                 {/* Housekeeping */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/housekeeping.jpg" 
                       alt="Housekeeping" 
@@ -1459,7 +1638,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
                         }
                       }}
                     />
@@ -1469,7 +1648,7 @@ export default function PropertyDetails() {
 
                 {/* Reception */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-red-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-red-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/reception.PNG" 
                       alt="Reception" 
@@ -1479,7 +1658,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
                         }
                       }}
                     />
@@ -1489,7 +1668,7 @@ export default function PropertyDetails() {
 
                 {/* Air Conditioning */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/aircooler.jpg" 
                       alt="Air Conditioning" 
@@ -1499,7 +1678,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>';
                         }
                       }}
                     />
@@ -1509,7 +1688,7 @@ export default function PropertyDetails() {
 
                 {/* Tea/Coffee */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/cofee.jpg" 
                       alt="Tea/Coffee" 
@@ -1519,7 +1698,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" /></svg>';
                         }
                       }}
                     />
@@ -1529,7 +1708,7 @@ export default function PropertyDetails() {
 
                 {/* Phone Booth */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/phonebooth.jpg" 
                       alt="Phone Booth" 
@@ -1539,7 +1718,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>';
                         }
                       }}
                     />
@@ -1549,7 +1728,7 @@ export default function PropertyDetails() {
 
                 {/* Lounge */}
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
-                  <div className="w-10 h-10 2xl:w-10 2xl:h-10 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
                       src="/images/amenity/loungue.PNG" 
                       alt="Lounge" 
@@ -1559,7 +1738,7 @@ export default function PropertyDetails() {
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.innerHTML = '<svg class="w-6 h-6 2xl:w-6 2xl:h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
+                          parent.innerHTML = '<svg class="w-8 h-8 2xl:w-10 2xl:h-10 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>';
                         }
                       }}
                     />

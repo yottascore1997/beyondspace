@@ -19,6 +19,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
   const [result, setResult] = useState<UploadResult | null>(null);
   const [message, setMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isUploadingRef = useRef(false); // Prevent double-click/race conditions
 
   // Excel template headers in desired order
   const templateHeaders = [
@@ -259,11 +260,19 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
   };
 
   const handleUpload = async () => {
+    // Prevent double-click and multiple simultaneous uploads
+    if (isUploadingRef.current || uploading) {
+      setMessage('Upload already in progress. Please wait...');
+      return;
+    }
+
     if (!file) {
       setMessage('Please select a file first');
       return;
     }
 
+    // Set flags immediately to prevent double-click
+    isUploadingRef.current = true;
     setUploading(true);
     setMessage('');
     setResult(null);
@@ -319,6 +328,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
       setMessage(`Error: ${error.message}`);
     } finally {
       setUploading(false);
+      isUploadingRef.current = false; // Reset flag
     }
   };
 
@@ -398,7 +408,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
               : 'bg-[#a08efe] text-white hover:bg-[#8a7eff]'
           }`}
         >
-          {uploading ? '⏳ Uploading...' : '🚀 Upload Properties'}
+          {uploading ? '⏳ Uploading... Please wait' : '🚀 Upload Properties'}
         </button>
       </div>
 
