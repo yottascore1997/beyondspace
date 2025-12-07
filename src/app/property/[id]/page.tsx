@@ -624,7 +624,7 @@ export default function PropertyDetails() {
           }}
         >
           <div 
-            className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] xl:h-[600px] 2xl:h-[850px]" 
+            className="relative w-full h-[400px] md:h-[450px] lg:h-[450px] xl:h-[500px] 2xl:h-[550px]" 
             style={{ 
               display: 'block',
               position: 'relative',
