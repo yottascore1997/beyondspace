@@ -713,7 +713,7 @@ export default function CategoryPage() {
                 ref={priceSelectRef}
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
-                className={`${poppins.className} block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent`}
+                className={`${poppins.className} font-sans block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent`}
               >
                 <option value="all">Select Price</option>
                 <option value="under-10000">Less than ₹10,000</option>

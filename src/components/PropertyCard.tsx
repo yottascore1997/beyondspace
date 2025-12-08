@@ -243,7 +243,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
         )}
 
         <div className="flex items-center justify-between mt-2">
-          <div className="font-semibold text-gray-800 text-sm sm:text-base">
+          <div className="font-semibold text-gray-800 text-sm sm:text-base font-sans">
             {minSeatingPrice ? (
               <span>{minSeatingPrice}<span className="text-gray-600 font-normal text-xs">/month</span></span>
             ) : (

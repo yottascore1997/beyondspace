@@ -83,6 +83,14 @@ export default function MumbaiPlaces() {
       area: 'Central Mumbai'
     },
     {
+      id: 'goregaon',
+      name: 'Goregaon',
+      description: 'Thriving business hub with excellent connectivity and commercial spaces',
+      image: '/images/mumbai20.jpeg',
+      properties: '0 Properties',
+      area: 'West Mumbai'
+    },
+    {
       id: 'lower-parel',
       name: 'Lower Parel',
       description: 'Historic mill district transformed into modern business hub',
@@ -120,12 +128,13 @@ export default function MumbaiPlaces() {
   const imageMap: Record<string, string> = {
     'andheri-east': '/images/mumbai4.jpeg',
     bkc: '/images/mumbai3.png',
+    goregaon: '/images/mumbai20.jpeg',
     'lower-parel': '/images/mumbai5.jpg',
     thane: '/images/mumbai7.jpg',
     'navi-mumbai': '/images/mumbai8.PNG',
   };
 
-  const priorityOrder = ['andheri-east', 'bkc', 'lower-parel', 'thane', 'navi-mumbai'];
+  const priorityOrder = ['andheri-east', 'bkc', 'goregaon', 'lower-parel', 'thane', 'navi-mumbai'];
   const baseOrdered = [...mumbaiPlaces].sort((a, b) => {
     const pa = priorityOrder.indexOf(a.id);
     const pb = priorityOrder.indexOf(b.id);

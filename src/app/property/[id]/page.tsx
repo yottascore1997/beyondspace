@@ -973,16 +973,19 @@ export default function PropertyDetails() {
                   const getImageForPlan = (title: string) => {
                     const titleLower = title.toLowerCase();
                     if (titleLower.includes('meeting room')) return '/images/seating/meeting.jpeg';
-                    if (titleLower.includes('dedicated desk')) return '/images/1.jpeg';
-                    if (titleLower.includes('private cabin')) return '/images/2.jpeg';
+                    if (titleLower.includes('private cabin')) return '/images/seating/privatecabin.jpeg';
+                    if (titleLower.includes('dedicated desk')) return '/images/seating/dedicated.jpeg';
+                    if (titleLower.includes('flexi desk')) return '/images/seating/flexidesk.jpeg';
+                    if (titleLower.includes('managed office')) return '/images/seating/managedoffice.jpeg';
                     if (titleLower.includes('virtual office')) return '/images/4.jpeg';
-                    return '/images/1.jpeg'; // default
+                    return '/images/seating/dedicated.jpeg'; // default
                   };
 
                   const isMeetingRoom = plan.title.toLowerCase().includes('meeting room');
                   const isSingleMeetingRoom = finalPlans.length === 1 && isMeetingRoom;
                   const isManagedOffice = plan.title.toLowerCase().includes('managed office');
                   const isSingleManagedOffice = finalPlans.length === 1 && isManagedOffice;
+                  const isStandardPlan = ['dedicated desk', 'flexi desk', 'private cabin'].some(type => plan.title.toLowerCase().includes(type));
                   
                   // Parse Managed Office description for A), B), C) points
                   const parseManagedOfficeDescription = (desc: string) => {
@@ -1024,14 +1027,14 @@ export default function PropertyDetails() {
                       }`}>
                         {/* Image on Left - Square */}
                         <div className={`${
-                          isSingleMeetingRoom ? 'md:w-1/4 2xl:w-1/4' 
-                          : isSingleManagedOffice ? 'md:w-1/5 2xl:w-1/5'
-                          : 'md:w-1/6 2xl:w-1/6'
-                        } flex-shrink-0`}>
+                          isSingleMeetingRoom ? 'md:w-1/3 2xl:w-1/3' 
+                          : isSingleManagedOffice ? 'md:w-1/4 2xl:w-1/4'
+                          : 'md:w-1/4 2xl:w-1/4'
+                        } flex-shrink-0 aspect-[4/3]`}>
                           <img 
                             src={getImageForPlan(plan.title)} 
                             alt={plan.title} 
-                            className={`w-full aspect-square object-cover rounded-xl shadow-md ${
+                            className={`w-full h-full object-cover rounded-xl shadow-md ${
                               isSingleMeetingRoom ? 'rounded-2xl' : isSingleManagedOffice ? 'rounded-xl' : 'rounded-lg'
                             }`}
                           />
@@ -1039,21 +1042,23 @@ export default function PropertyDetails() {
 
                         {/* Content on Right */}
                         <div className={`${
-                          isSingleMeetingRoom ? 'md:w-3/4 2xl:w-3/4' 
-                          : isSingleManagedOffice ? 'md:w-4/5 2xl:w-4/5'
-                          : 'md:w-5/6 2xl:w-5/6'
+                          isSingleMeetingRoom ? 'md:w-2/3 2xl:w-2/3' 
+                          : isSingleManagedOffice ? 'md:w-3/4 2xl:w-3/4'
+                          : 'md:w-3/4 2xl:w-3/4'
                         } flex flex-col relative min-h-0`}>
                           {/* Left Side - Title and Content */}
                           <div className={`flex-1 pr-2 2xl:pr-2 ${
-                            isSingleMeetingRoom ? 'pt-1 2xl:pt-1 pb-2 2xl:pb-2' : 'pt-2 2xl:pt-2 pb-2 2xl:pb-2'
+                            isSingleMeetingRoom ? 'pt-1 2xl:pt-1 pb-2 2xl:pb-2' : isStandardPlan ? 'pt-1 2xl:pt-1 pb-1 2xl:pb-1' : 'pt-2 2xl:pt-2 pb-2 2xl:pb-2'
                           }`}>
                             <h4 className={`${
                               isSingleMeetingRoom 
                                 ? 'text-xl md:text-2xl 2xl:text-2xl font-bold' 
                                 : isSingleManagedOffice
                                 ? 'text-lg md:text-xl 2xl:text-xl font-bold text-gray-900'
+                                : isStandardPlan
+                                ? 'text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900'
                                 : 'text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold'
-                            } ${isSingleManagedOffice ? '' : 'text-gray-900'} mb-2 2xl:mb-2.5`}>
+                            } ${isSingleManagedOffice ? '' : 'text-gray-900'} ${isStandardPlan ? 'mb-2 2xl:mb-2' : 'mb-2 2xl:mb-2.5'}`}>
                               {plan.title}
                             </h4>
                             
@@ -1096,9 +1101,11 @@ export default function PropertyDetails() {
                                   );
                                 })()
                               ) : (
-                                <p className={`text-gray-700 mb-3 2xl:mb-3 ${
+                                <p className={`text-gray-700 ${isStandardPlan ? 'mb-2.5 2xl:mb-3' : 'mb-3 2xl:mb-3'} ${
                                   isSingleMeetingRoom 
                                     ? 'text-base 2xl:text-lg font-normal leading-relaxed' 
+                                    : isStandardPlan
+                                    ? 'text-sm 2xl:text-sm font-normal leading-relaxed line-clamp-2'
                                     : 'text-sm 2xl:text-sm font-normal leading-snug line-clamp-2'
                                 }`}>
                                   {plan.description}
@@ -1108,8 +1115,8 @@ export default function PropertyDetails() {
                             
                             {plan.seating && (
                               <div className={`${
-                                isSingleMeetingRoom ? 'text-base 2xl:text-lg' : 'text-sm 2xl:text-sm'
-                              } font-medium mt-3 2xl:mt-4`}>
+                                isSingleMeetingRoom ? 'text-base 2xl:text-lg' : isStandardPlan ? 'text-sm 2xl:text-sm' : 'text-sm 2xl:text-sm'
+                              } font-medium ${isStandardPlan ? 'mt-2 2xl:mt-2.5' : 'mt-3 2xl:mt-4'}`}>
                                 {isMeetingRoom ? (
                                   <div className="flex items-center gap-2 mb-4 2xl:mb-5">
                                     <div className="flex items-center justify-center w-8 h-8 2xl:w-10 2xl:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
@@ -1186,10 +1193,11 @@ export default function PropertyDetails() {
                                             {seatingPrice && (
                                               <div className="mt-auto pt-2 2xl:pt-2.5 border-t border-gray-100">
                                                 <div className="flex items-baseline gap-0.5">
-                                                  <span className="text-xs 2xl:text-sm font-semibold text-gray-700">₹</span>
+                                                  <span className="text-xs 2xl:text-sm font-semibold text-gray-700 font-sans">₹</span>
                                                   <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                                     {seatingPrice}
                                                   </span>
+                                                  <span className="text-xs 2xl:text-sm font-normal text-gray-600">/seat</span>
                                                 </div>
                                               </div>
                                             )}
@@ -1197,6 +1205,40 @@ export default function PropertyDetails() {
                                         </div>
                                       );
                                     })}
+                                  </div>
+                                ) : isStandardPlan ? (
+                                  <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                          <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                          </svg>
+                                        </div>
+                                        <span className="text-sm 2xl:text-base font-medium text-gray-600">Seating :</span>
+                                        <span className="text-base 2xl:text-lg font-semibold text-gray-800">
+                                          {plan.seating.split(',')[0]?.trim() || plan.seating}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-3">
+                                        {plan.price && (
+                                          <div className="text-right flex items-baseline gap-1">
+                                            <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
+                                            <span className="text-base 2xl:text-lg font-bold text-gray-900">
+                                              {plan.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                            </span>
+                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/seat/month</span>
+                                          </div>
+                                        )}
+                                        <button
+                                          type="button"
+                                          onClick={handleEnquireClick}
+                                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                        >
+                                          Enquire Now
+                                        </button>
+                                      </div>
+                                    </div>
                                   </div>
                                 ) : (
                                   <span className="text-gray-700">{plan.seating}</span>
@@ -1209,15 +1251,15 @@ export default function PropertyDetails() {
                           <div className={`absolute right-0 ${
                             isMeetingRoom ? 'top-0' : 'top-1/2 -translate-y-1/2'
                           } flex flex-col items-end`}>
-                            {/* Don't show general price for Meeting Room and Managed Office as we show them in seating section */}
-                            {plan.price && !isMeetingRoom && !isManagedOffice && (
+                            {/* Don't show general price for Meeting Room, Managed Office, and Standard Plans as we show them in seating section */}
+                            {plan.price && !isMeetingRoom && !isManagedOffice && !isStandardPlan && (
                               <div className="text-right mb-1.5 2xl:mb-1.5">
                                 <span className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900">{plan.price}</span>
                                 <span className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/month</span>
                               </div>
                             )}
                             
-                            {!isManagedOffice && (
+                            {!isManagedOffice && !isStandardPlan && (
                               <button
                                 type="button"
                                 onClick={handleEnquireClick}
@@ -1550,7 +1592,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-orange-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/workstation.PNG" 
+                      src="/images/amenity/workstation.jpeg" 
                       alt="Ergo Workstations" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1630,7 +1672,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/housekeeping.jpg" 
+                      src="/images/amenity/housekeeping.jpeg" 
                       alt="Housekeeping" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1710,7 +1752,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/phonebooth.jpg" 
+                      src="/images/amenity/phonebooth.jpeg" 
                       alt="Phone Booth" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -1730,7 +1772,7 @@ export default function PropertyDetails() {
                 <div className="flex items-center gap-3 2xl:gap-3 p-4 2xl:p-4 bg-white rounded-xl shadow-lg border border-gray-100">
                   <div className="w-14 h-14 2xl:w-16 2xl:h-16 bg-pink-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="/images/amenity/loungue.PNG" 
+                      src="/images/amenity/loungue.jpeg" 
                       alt="Lounge" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
