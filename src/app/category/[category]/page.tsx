@@ -267,11 +267,12 @@ export default function CategoryPage() {
     if (searchQuery.trim() !== '') {
       // Category mapping same as API route
       const categoryKeyMap: Record<string, string[]> = {
-        coworking: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+        coworking: ['privatecabin', 'dedicateddesk', 'flexidesk', 'virtualoffice'],
         managed: ['managed'],
-        dedicateddesk: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+        dedicateddesk: ['privatecabin', 'dedicateddesk'],
+        privatecabin: ['privatecabin'],
         flexidesk: ['flexidesk', 'dedicateddesk'],
-        daypass: ['daypass'],
+        daypass: ['daypass', 'flexidesk'],
         virtualoffice: ['virtualoffice'],
         meetingroom: ['meetingroom'],
         enterpriseoffices: ['enterpriseoffices'],
@@ -307,7 +308,37 @@ export default function CategoryPage() {
           return propertyCategories.includes(normalizedKey);
         });
 
-        // Also check property type as fallback
+        // For Managed Office Space, only show if it has 'managed' category (strict filtering)
+        if (normalizedCategory === 'managed') {
+          return hasCategoryMatch; // Don't use type fallback for managed category
+        }
+
+        // For Dedicated Desk, only show if it has 'dedicateddesk' or 'privatecabin' category (strict filtering)
+        if (normalizedCategory === 'dedicateddesk') {
+          return hasCategoryMatch; // Don't use type fallback for dedicated category
+        }
+
+        // For Private Cabin, only show if it has 'privatecabin' category (strict filtering)
+        if (normalizedCategory === 'privatecabin') {
+          return hasCategoryMatch; // Don't use type fallback for private cabin category
+        }
+
+        // For Virtual Office, only show if it has 'virtualoffice' category (strict filtering)
+        if (normalizedCategory === 'virtualoffice') {
+          return hasCategoryMatch; // Don't use type fallback for virtual office category
+        }
+
+        // For Meeting Room, only show if it has 'meetingroom' category (strict filtering)
+        if (normalizedCategory === 'meetingroom') {
+          return hasCategoryMatch; // Don't use type fallback for meeting room category
+        }
+
+        // For Day Pass, only show if it has 'daypass' or 'flexidesk' category (strict filtering)
+        if (normalizedCategory === 'daypass') {
+          return hasCategoryMatch; // Don't use type fallback for day pass category
+        }
+
+        // Also check property type as fallback for other categories
         const categoryTypeMap: Record<string, string[]> = {
           coworking: ['COWORKING'],
           dedicateddesk: ['COWORKING'],

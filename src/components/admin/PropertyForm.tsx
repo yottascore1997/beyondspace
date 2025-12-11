@@ -85,23 +85,23 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'dedicated-desk',
     title: 'Dedicated Desk',
-    description: 'Get your dedicated desk with storage and 24/7 access.',
+    description: 'Get your Dedicated desk, with access to all amenities and services, in shared area.',
     price: '',
-    seating: '',
+    seating: '1-30+',
     isSelected: false,
   },
   {
     id: 'flexi-desk',
     title: 'Flexi Desk',
-    description: 'Hot desk with flexible timing and access.',
+    description: 'Just show up, pick your spot, get connected and get working – no fuss, no hassle!',
     price: '',
-    seating: '',
+    seating: '1-30+',
     isSelected: false,
   },
   {
     id: 'private-cabin',
     title: 'Private Cabin',
-    description: 'Private cabin for focused work with complete privacy.',
+    description: 'Private Cabin\n.Enclosed & Secure: A fully private, lockable room for confidentiality and asset security. \n.Available in various sizes—ranging from 2, 4, 8, to 10+ seater options—making them a perfect fit for businesses of all sizes, \n\nwith customization available to align with a company\'s specific needs and brand ethos.\n.Amenities: Access to communal areas, high-speed internet, printing, meeting rooms, pantry, tea and coffee and reception services.',
     price: '',
     seating: '',
     isSelected: false,
@@ -109,7 +109,7 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
   {
     id: 'virtual-office',
     title: 'Virtual Office',
-    description: 'Business address and mail handling service for remote businesses.',
+    description: 'Don\'t have a physical office, don\'t worry! Get your business registered pan India with our virtual office solutions.',
     price: '',
     seating: '',
     isSelected: false,
@@ -128,15 +128,15 @@ const createDefaultSeatingPlans = (): SeatingPlan[] => ([
     title: 'Managed Office Space',
     description: 'A) Provider offer customized office setups according to company\'s specific needs and brand ethos. \nB) The provider manages day-to-day operations, including maintenance, IT support, and cleaning.\nC) Businesses of all sizes: From startups and SMEs to large enterprises and MNCs, companies use managed spaces for their flexibility and convenience. \nTo know more about managed office space, reach out to us, and let\'s discuss how our managed office solutions can cater to your specific business needs.',
     price: '',
-    seating: '',
+    seating: '40-100+',
     isSelected: false,
   },
   {
     id: 'day-pass',
     title: 'Day Pass',
-    description: 'Single day access to coworking space with all amenities included.',
+    description: 'Just show up, pick your spot, get connected and get working – no fuss, no hassle!',
     price: '',
-    seating: '',
+    seating: '1-30+',
     isSelected: false,
   },
 ]);
@@ -618,9 +618,48 @@ const loadPropertyForEdit = async (propertyId: string) => {
   const handleSeatingPlanToggle = (planId: string) => {
     setFormData(prev => ({
       ...prev,
-      seatingPlans: prev.seatingPlans.map(plan =>
-        plan.id === planId ? { ...plan, isSelected: !plan.isSelected } : plan
-      )
+      seatingPlans: prev.seatingPlans.map(plan => {
+        if (plan.id === planId) {
+          const isNowSelected = !plan.isSelected;
+          // If selecting Dedicated Desk, set default description and seating if empty
+          if (isNowSelected && planId === 'dedicated-desk') {
+            return {
+              ...plan,
+              isSelected: true,
+              description: plan.description || 'Get your Dedicated desk, with access to all amenities and services, in shared area.',
+              seating: plan.seating || '1-30+',
+            };
+          }
+          // If selecting Managed Office Space, set default seating if empty
+          if (isNowSelected && planId === 'managed-office-space') {
+            return {
+              ...plan,
+              isSelected: true,
+              seating: plan.seating || '40-100+',
+            };
+          }
+          // If selecting Flexi Desk, set default description and seating if empty
+          if (isNowSelected && planId === 'flexi-desk') {
+            return {
+              ...plan,
+              isSelected: true,
+              description: plan.description || 'Just show up, pick your spot, get connected and get working – no fuss, no hassle!',
+              seating: plan.seating || '1-30+',
+            };
+          }
+          // If selecting Day Pass, set default description and seating if empty
+          if (isNowSelected && planId === 'day-pass') {
+            return {
+              ...plan,
+              isSelected: true,
+              description: plan.description || 'Just show up, pick your spot, get connected and get working – no fuss, no hassle!',
+              seating: plan.seating || '1-30+',
+            };
+          }
+          return { ...plan, isSelected: isNowSelected };
+        }
+        return plan;
+      })
     }));
   };
 

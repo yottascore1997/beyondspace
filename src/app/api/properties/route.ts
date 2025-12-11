@@ -17,16 +17,18 @@ export async function GET(request: NextRequest) {
     };
 
     const categoryKeyMap: Record<string, string[]> = {
-      // Co-working: Private Cabin, Dedicated Desk, Flexi Desk
-      coworking: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+      // Co-working: Private Cabin, Dedicated Desk, Flexi Desk, Virtual Office
+      coworking: ['privatecabin', 'dedicateddesk', 'flexidesk', 'virtualoffice'],
       // Managed Office Space: Only Managed Office Space
       managed: ['managed'],
-      // Dedicated Desk: Private Cabin, Dedicated Desk, Flexi Desk
-      dedicateddesk: ['privatecabin', 'dedicateddesk', 'flexidesk'],
+      // Dedicated Desk: Private Cabin, Dedicated Desk (no Flexi Desk)
+      dedicateddesk: ['privatecabin', 'dedicateddesk'],
+      // Private Cabin: Only Private Cabin
+      privatecabin: ['privatecabin'],
       // Flexi Desk: Flexi Desk / Dedicated Desk
       flexidesk: ['flexidesk', 'dedicateddesk'],
-      // Day Pass: Only Day Pass
-      daypass: ['daypass'],
+      // Day Pass: Day Pass and Flexi Desk
+      daypass: ['daypass', 'flexidesk'],
       // Virtual Office: Only Virtual Office
       virtualoffice: ['virtualoffice'],
       // Meeting Rooms: Only Meeting Rooms
@@ -52,8 +54,8 @@ export async function GET(request: NextRequest) {
         virtualoffices: 'virtualoffice',
         meetingroom: 'meetingroom',
         meetingrooms: 'meetingroom',
-        privatecabin: 'dedicateddesk',
-        privatecabins: 'dedicateddesk',
+        privatecabin: 'privatecabin',
+        privatecabins: 'privatecabin',
         enterpriseoffice: 'enterpriseoffices',
         enterpriseoffices: 'enterpriseoffices',
       };
@@ -128,7 +130,37 @@ export async function GET(request: NextRequest) {
           return propertyCategories.includes(normalizedKey);
         });
 
-        // Also check property type as fallback
+        // For Managed Office Space, only show if it has 'managed' category (strict filtering)
+        if (category === 'managed') {
+          return hasCategoryMatch; // Don't use type fallback for managed category
+        }
+
+        // For Dedicated Desk, only show if it has 'dedicateddesk' or 'privatecabin' category (strict filtering)
+        if (category === 'dedicateddesk') {
+          return hasCategoryMatch; // Don't use type fallback for dedicated category
+        }
+
+        // For Private Cabin, only show if it has 'privatecabin' category (strict filtering)
+        if (category === 'privatecabin') {
+          return hasCategoryMatch; // Don't use type fallback for private cabin category
+        }
+
+        // For Virtual Office, only show if it has 'virtualoffice' category (strict filtering)
+        if (category === 'virtualoffice') {
+          return hasCategoryMatch; // Don't use type fallback for virtual office category
+        }
+
+        // For Meeting Room, only show if it has 'meetingroom' category (strict filtering)
+        if (category === 'meetingroom') {
+          return hasCategoryMatch; // Don't use type fallback for meeting room category
+        }
+
+        // For Day Pass, only show if it has 'daypass' or 'flexidesk' category (strict filtering)
+        if (category === 'daypass') {
+          return hasCategoryMatch; // Don't use type fallback for day pass category
+        }
+
+        // Also check property type as fallback for other categories
         const hasTypeMatch = types ? types.includes(property.type) : false;
 
         return hasCategoryMatch || hasTypeMatch;

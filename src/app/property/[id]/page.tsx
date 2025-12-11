@@ -619,17 +619,15 @@ export default function PropertyDetails() {
             position: 'relative', 
             zIndex: 0, 
             clear: 'both',
-            overflow: 'hidden',
-            minHeight: '400px'
+            overflow: 'visible'
           }}
         >
           <div 
-            className="relative w-full h-[400px] md:h-[450px] lg:h-[450px] xl:h-[500px] 2xl:h-[550px]" 
+            className="relative w-full" 
             style={{ 
               display: 'block',
               position: 'relative',
-              overflow: 'hidden',
-              minHeight: '400px'
+              overflow: 'visible'
             }}
           >
               {/* Get all available images */}
@@ -640,16 +638,15 @@ export default function PropertyDetails() {
 
                 return (
               <div 
-                className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:gap-6 w-full h-full" 
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:gap-6 w-full" 
                 style={{ 
                   position: 'relative',
-                  height: '100%',
                   overflow: 'visible'
                 }}
               >
                 {/* Large Image (Left) */}
                 <div 
-                  className="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group"
+                  className="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group h-[400px] md:h-[450px] lg:h-[450px] xl:h-[450px] 2xl:h-[450px]"
                   style={{ borderRadius: '1rem' }}
                   onClick={() => setShowGallery(true)}
                 >
@@ -674,11 +671,11 @@ export default function PropertyDetails() {
                 </div>
 
                 {/* 2x2 Grid of Smaller Images (Right) */}
-                <div className="grid grid-cols-2 gap-1.5 xl:gap-2 h-full">
+                <div className="grid grid-cols-2 grid-rows-2 gap-1.5 xl:gap-2 h-[400px] md:h-[450px] lg:h-[450px] xl:h-[450px] 2xl:h-[450px]">
                   {allImages.slice(1, 5).map((image, index) => (
                     <div 
                       key={index} 
-                      className="relative rounded-xl overflow-hidden shadow-md cursor-pointer"
+                      className="relative rounded-xl overflow-hidden shadow-md cursor-pointer h-full"
                       style={{ borderRadius: '0.75rem' }}
                       onClick={() => {
                         setCurrentImageIndex(index + 1);
@@ -710,7 +707,7 @@ export default function PropertyDetails() {
                   ))}
                   {/* Fill remaining spots if less than 4 small images */}
                   {allImages.slice(1, 5).length < 4 && Array.from({ length: 4 - allImages.slice(1, 5).length }).map((_, i) => (
-                    <div key={`placeholder-${i}`} className="bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 shadow-md">
+                    <div key={`placeholder-${i}`} className="bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 shadow-md h-full">
                       No Image
                     </div>
                         ))}
@@ -864,22 +861,31 @@ export default function PropertyDetails() {
               }
 
               // Map seating plan title to property categories that should show this plan
+              // This matches the category filtering logic we implemented
               const getSeatingPlanCategory = (title: string): string[] => {
                 const titleLower = title.toLowerCase();
-                // Dedicated Desk: shows if property has Private Cabin, Dedicated Desk, Flexi Desk, or Coworking
-                if (titleLower.includes('dedicated desk')) return ['dedicateddesk', 'privatecabin', 'flexidesk', 'coworking'];
-                // Flexi Desk: shows if property has Flexi Desk, Dedicated Desk, or Coworking
-                if (titleLower.includes('flexi desk')) return ['flexidesk', 'dedicateddesk', 'coworking'];
-                // Private Cabin: shows if property has Private Cabin, Dedicated Desk, Flexi Desk, or Coworking
-                if (titleLower.includes('private cabin')) return ['privatecabin', 'dedicateddesk', 'flexidesk', 'coworking'];
-                // Virtual Office: only shows if property has Virtual Office
-                if (titleLower.includes('virtual office')) return ['virtualoffice'];
-                // Meeting Room: only shows if property has Meeting Room
+                
+                // Dedicated Desk: shows in Dedicated Desk, Coworking-Space categories
+                if (titleLower.includes('dedicated desk')) return ['dedicateddesk', 'coworking'];
+                
+                // Flexi Desk: shows in Flexi Desk, Day Pass, Coworking-Space categories
+                if (titleLower.includes('flexi desk')) return ['flexidesk', 'daypass', 'coworking'];
+                
+                // Private Cabin: shows in Private Cabin, Dedicated Desk, Coworking-Space categories
+                if (titleLower.includes('private cabin')) return ['privatecabin', 'dedicateddesk', 'coworking'];
+                
+                // Virtual Office: only shows in Virtual Office, Coworking-Space categories
+                if (titleLower.includes('virtual office')) return ['virtualoffice', 'coworking'];
+                
+                // Meeting Room: only shows in Meeting Room category
                 if (titleLower.includes('meeting room')) return ['meetingroom'];
-                // Managed Office Space: only shows if property has Managed
+                
+                // Managed Office Space: only shows in Managed Office category
                 if (titleLower.includes('managed office')) return ['managed'];
-                // Day Pass: only shows if property has Day Pass
-                if (titleLower.includes('day pass')) return ['daypass'];
+                
+                // Day Pass: shows in Day Pass, Coworking-Space categories
+                if (titleLower.includes('day pass')) return ['daypass', 'coworking'];
+                
                 return [];
               };
 
@@ -984,8 +990,10 @@ export default function PropertyDetails() {
                   const isMeetingRoom = plan.title.toLowerCase().includes('meeting room');
                   const isSingleMeetingRoom = finalPlans.length === 1 && isMeetingRoom;
                   const isManagedOffice = plan.title.toLowerCase().includes('managed office');
+                  const isPrivateCabin = plan.title.toLowerCase().includes('private cabin');
                   const isSingleManagedOffice = finalPlans.length === 1 && isManagedOffice;
-                  const isStandardPlan = ['dedicated desk', 'flexi desk', 'private cabin'].some(type => plan.title.toLowerCase().includes(type));
+                  const isSinglePrivateCabin = finalPlans.length === 1 && isPrivateCabin;
+                  const isStandardPlan = ['dedicated desk', 'flexi desk', 'day pass'].some(type => plan.title.toLowerCase().includes(type));
                   
                   // Parse Managed Office description for A), B), C) points
                   const parseManagedOfficeDescription = (desc: string) => {
@@ -1005,17 +1013,46 @@ export default function PropertyDetails() {
                     return { points, finalText };
                   };
 
+                  // Parse Private Cabin description for bullet points
+                  const parsePrivateCabinDescription = (desc: string) => {
+                    const lines = desc.split('\n');
+                    const points: string[] = [];
+                    let currentPoint = '';
+                    
+                    lines.forEach(line => {
+                      const trimmed = line.trim();
+                      if (trimmed.startsWith('.')) {
+                        // Save previous point if exists
+                        if (currentPoint) {
+                          points.push(currentPoint.trim());
+                        }
+                        // Start new point
+                        currentPoint = trimmed.substring(1).trim();
+                      } else if (trimmed && currentPoint) {
+                        // Continue current point if line doesn't start with "."
+                        currentPoint += ' ' + trimmed;
+                      }
+                    });
+                    
+                    // Add last point
+                    if (currentPoint) {
+                      points.push(currentPoint.trim());
+                    }
+                    
+                    return { points };
+                  };
+
                   return (
                     <div
                       key={index}
                       className={`${
-                        isSingleManagedOffice
+                        isSingleManagedOffice || isSinglePrivateCabin
                           ? 'bg-gradient-to-br from-white via-indigo-50/40 via-blue-50/60 to-purple-50/40 rounded-xl shadow-xl border-2 border-indigo-200/60'
                           : 'bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl shadow-xl border border-blue-200'
                       } ${
                         isSingleMeetingRoom 
                           ? 'py-6 2xl:py-8 px-4 2xl:px-6' 
-                          : isSingleManagedOffice
+                          : isSingleManagedOffice || isSinglePrivateCabin
                           ? 'py-4 2xl:py-5 px-4 2xl:px-5'
                           : 'py-2 2xl:py-2 px-2 2xl:px-2'
                       } ${
@@ -1023,19 +1060,19 @@ export default function PropertyDetails() {
                       }`}
                     >
                       <div className={`flex flex-col md:flex-row 2xl:flex-row gap-3 2xl:gap-4 ${
-                        isSingleMeetingRoom ? 'gap-4 2xl:gap-6' : isSingleManagedOffice ? 'gap-3 2xl:gap-4' : ''
+                        isSingleMeetingRoom ? 'gap-4 2xl:gap-6' : isSingleManagedOffice || isSinglePrivateCabin ? 'gap-3 2xl:gap-4' : ''
                       }`}>
                         {/* Image on Left - Square */}
                         <div className={`${
                           isSingleMeetingRoom ? 'md:w-1/3 2xl:w-1/3' 
-                          : isSingleManagedOffice ? 'md:w-1/4 2xl:w-1/4'
+                          : isSingleManagedOffice || isSinglePrivateCabin ? 'md:w-1/4 2xl:w-1/4'
                           : 'md:w-1/4 2xl:w-1/4'
                         } flex-shrink-0 aspect-[4/3]`}>
                           <img 
                             src={getImageForPlan(plan.title)} 
                             alt={plan.title} 
                             className={`w-full h-full object-cover rounded-xl shadow-md ${
-                              isSingleMeetingRoom ? 'rounded-2xl' : isSingleManagedOffice ? 'rounded-xl' : 'rounded-lg'
+                              isSingleMeetingRoom ? 'rounded-2xl' : isSingleManagedOffice || isSinglePrivateCabin ? 'rounded-xl' : 'rounded-lg'
                             }`}
                           />
                         </div>
@@ -1043,7 +1080,7 @@ export default function PropertyDetails() {
                         {/* Content on Right */}
                         <div className={`${
                           isSingleMeetingRoom ? 'md:w-2/3 2xl:w-2/3' 
-                          : isSingleManagedOffice ? 'md:w-3/4 2xl:w-3/4'
+                          : isSingleManagedOffice || isSinglePrivateCabin ? 'md:w-3/4 2xl:w-3/4'
                           : 'md:w-3/4 2xl:w-3/4'
                         } flex flex-col relative min-h-0`}>
                           {/* Left Side - Title and Content */}
@@ -1053,23 +1090,54 @@ export default function PropertyDetails() {
                             <h4 className={`${
                               isSingleMeetingRoom 
                                 ? 'text-xl md:text-2xl 2xl:text-2xl font-bold' 
-                                : isSingleManagedOffice
+                                : isSingleManagedOffice || isSinglePrivateCabin
                                 ? 'text-lg md:text-xl 2xl:text-xl font-bold text-gray-900'
                                 : isStandardPlan
                                 ? 'text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900'
                                 : 'text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-semibold'
-                            } ${isSingleManagedOffice ? '' : 'text-gray-900'} ${isStandardPlan ? 'mb-2 2xl:mb-2' : 'mb-2 2xl:mb-2.5'}`}>
+                            } ${isSingleManagedOffice || isSinglePrivateCabin ? '' : 'text-gray-900'} ${isStandardPlan ? 'mb-2 2xl:mb-2' : 'mb-2 2xl:mb-2.5'}`}>
                               {plan.title}
                             </h4>
                             
                             {plan.description && (
-                              isManagedOffice ? (
+                              isManagedOffice || isPrivateCabin ? (
                                 (() => {
-                                  const { points, finalText } = parseManagedOfficeDescription(plan.description);
+                                  let displayPoints: string[] = [];
+                                  let finalText = '';
+                                  
+                                  if (isPrivateCabin) {
+                                    // For Private Cabin, use Private Cabin parser
+                                    const { points: cabinPoints } = parsePrivateCabinDescription(plan.description);
+                                    displayPoints = cabinPoints.map((p, idx) => {
+                                      const labels = ['A', 'B', 'C'];
+                                      return `${labels[idx]}) ${p}`;
+                                    });
+                                  } else {
+                                    // For Managed Office, use Managed Office parser
+                                    const parsed = parseManagedOfficeDescription(plan.description);
+                                    displayPoints = parsed.points;
+                                    finalText = parsed.finalText;
+                                  }
+                                  
+                                  if (displayPoints.length === 0) {
+                                    // Fallback: show description as plain text if no points found
+                                    return (
+                                      <p className={`text-gray-700 ${isStandardPlan ? 'mb-2.5 2xl:mb-3' : 'mb-3 2xl:mb-3'} ${
+                                        isSingleMeetingRoom 
+                                          ? 'text-base 2xl:text-lg font-normal leading-relaxed' 
+                                          : isStandardPlan
+                                          ? 'text-sm 2xl:text-sm font-normal leading-relaxed line-clamp-2'
+                                          : 'text-sm 2xl:text-sm font-normal leading-snug line-clamp-2'
+                                      }`}>
+                                        {plan.description}
+                                      </p>
+                                    );
+                                  }
+                                  
                                   return (
                                     <div className="mb-3 2xl:mb-4">
                                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 2xl:gap-3">
-                                        {points.map((point, idx) => {
+                                        {displayPoints.map((point, idx) => {
                                           const pointText = point.replace(/^[A-C]\)\s*/, '');
                                           const pointLabel = point.match(/^([A-C])\)/)?.[1] || '';
                                           // Different gradient colors for each point
@@ -1129,7 +1197,7 @@ export default function PropertyDetails() {
                                     } font-bold text-gray-800`}>Available Seating Options</span>
                                   </div>
                                 ) : null}
-                                {isManagedOffice ? (
+                                {isManagedOffice || isPrivateCabin ? (
                                   <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
                                     <div className="flex items-center justify-between gap-4">
                                       <div className="flex items-center gap-2">
@@ -1251,15 +1319,15 @@ export default function PropertyDetails() {
                           <div className={`absolute right-0 ${
                             isMeetingRoom ? 'top-0' : 'top-1/2 -translate-y-1/2'
                           } flex flex-col items-end`}>
-                            {/* Don't show general price for Meeting Room, Managed Office, and Standard Plans as we show them in seating section */}
-                            {plan.price && !isMeetingRoom && !isManagedOffice && !isStandardPlan && (
+                            {/* Don't show general price for Meeting Room, Managed Office, Private Cabin, and Standard Plans as we show them in seating section */}
+                            {plan.price && !isMeetingRoom && !isManagedOffice && !isPrivateCabin && !isStandardPlan && (
                               <div className="text-right mb-1.5 2xl:mb-1.5">
                                 <span className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900">{plan.price}</span>
                                 <span className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/month</span>
                               </div>
                             )}
                             
-                            {!isManagedOffice && !isStandardPlan && (
+                            {!isManagedOffice && !isPrivateCabin && !isStandardPlan && (
                               <button
                                 type="button"
                                 onClick={handleEnquireClick}

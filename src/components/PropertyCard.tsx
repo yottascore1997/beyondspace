@@ -67,25 +67,208 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     enterpriseoffices: 'Enterprise Offices',
   };
 
-  // Get minimum price from seating plans
+  // Get price from seating plans with priority: Managed Office first, then Dedicated Desk, then Private Cabin
   const getMinSeatingPlanPrice = () => {
     if (!property.propertyOptions || !Array.isArray(property.propertyOptions) || property.propertyOptions.length === 0) {
       return null;
     }
 
+    // Helper function to extract numeric price from price string
+    const extractNumericPrice = (priceStr: string): number | null => {
+      if (!priceStr || priceStr.trim() === '') return null;
+      // Remove currency symbols, commas, and spaces, then parse
+      const numericPrice = parseFloat(priceStr.replace(/[₹,\s]/g, ''));
+      return isNaN(numericPrice) ? null : numericPrice;
+    };
+
+    // Check if property has Managed Office category
+    const hasManagedCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('managed')
+    ) || category?.toLowerCase().includes('managed');
+
+    // Check if property is in Dedicated category
+    const hasDedicatedCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('dedicateddesk') || cat.toLowerCase().includes('dedicated')
+    ) || category?.toLowerCase().includes('dedicated');
+
+    // Check if property is in Private Cabin category
+    const hasPrivateCabinCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('privatecabin') || cat.toLowerCase().includes('private cabin')
+    ) || category?.toLowerCase().includes('privatecabin') || category?.toLowerCase().includes('private-cabin');
+
+    // Check if property is in Virtual Office category
+    const hasVirtualOfficeCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
+    ) || category?.toLowerCase().includes('virtualoffice') || category?.toLowerCase().includes('virtual-office');
+
+    // Check if property is in Day Pass category
+    const hasDayPassCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('daypass') || cat.toLowerCase().includes('day pass')
+    ) || category?.toLowerCase().includes('daypass') || category?.toLowerCase().includes('day-pass');
+
+    // Check if property is in Meeting Room category
+    const hasMeetingRoomCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('meetingroom') || cat.toLowerCase().includes('meeting room')
+    ) || category?.toLowerCase().includes('meetingroom') || category?.toLowerCase().includes('meeting-room');
+
+    // Priority 1: Look for Managed Office Space (if property has Managed category)
+    // For Managed Office, ONLY show Managed Office Space price, no fallback
+    if (hasManagedCategory) {
+      const managedOfficePlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('managed office')
+      );
+      if (managedOfficePlan && managedOfficePlan.price) {
+        const numericPrice = extractNumericPrice(managedOfficePlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Managed category but no Managed Office Space price found, return null (don't show other prices)
+      return null;
+    }
+
+    // Priority 2: Look for Private Cabin (if property has Private Cabin category)
+    // For Private Cabin category, ONLY show Private Cabin price, no fallback
+    if (hasPrivateCabinCategory) {
+      const privateCabinPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('private cabin')
+      );
+      if (privateCabinPlan && privateCabinPlan.price) {
+        const numericPrice = extractNumericPrice(privateCabinPlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Private Cabin category but no Private Cabin price found, return null (don't show other prices)
+      return null;
+    }
+
+    // Priority 3: Look for Dedicated Desk
+    const dedicatedDeskPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+      plan.title.toLowerCase().includes('dedicated desk')
+    );
+    if (dedicatedDeskPlan && dedicatedDeskPlan.price) {
+      const numericPrice = extractNumericPrice(dedicatedDeskPlan.price);
+      if (numericPrice !== null) {
+        return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+      }
+    }
+
+    // For Dedicated category, ONLY show Dedicated Desk price, no Private Cabin fallback
+    if (hasDedicatedCategory) {
+      // If Dedicated category but no Dedicated Desk price found, return null (don't show Private Cabin price)
+      return null;
+    }
+
+    // Priority 4: Look for Virtual Office (if property has Virtual Office category)
+    // For Virtual Office category, ONLY show Virtual Office price, no fallback
+    if (hasVirtualOfficeCategory) {
+      const virtualOfficePlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('virtual office')
+      );
+      if (virtualOfficePlan && virtualOfficePlan.price) {
+        const numericPrice = extractNumericPrice(virtualOfficePlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Virtual Office category but no Virtual Office price found, return null
+      return null;
+    }
+
+    // Priority 5: Look for Day Pass (if property has Day Pass category)
+    // For Day Pass category, ONLY show Day Pass price, no fallback
+    if (hasDayPassCategory) {
+      const dayPassPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('day pass')
+      );
+      if (dayPassPlan && dayPassPlan.price) {
+        const numericPrice = extractNumericPrice(dayPassPlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Day Pass category but no Day Pass price found, return null
+      return null;
+    }
+
+    // Check if property is in Flexi Desk category
+    const hasFlexiCategory = property.categories?.some(cat => 
+      cat.toLowerCase().includes('flexidesk') || cat.toLowerCase().includes('flexi desk')
+    ) || category?.toLowerCase().includes('flexidesk') || category?.toLowerCase().includes('flexi-desk');
+
+    // Priority 5.5: Look for Flexi Desk (if property has Flexi Desk category)
+    // For Flexi Desk category, ONLY show Flexi Desk price, no fallback
+    if (hasFlexiCategory) {
+      const flexiDeskPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('flexi desk')
+      );
+      if (flexiDeskPlan && flexiDeskPlan.price) {
+        const numericPrice = extractNumericPrice(flexiDeskPlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Flexi Desk category but no Flexi Desk price found, return null
+      return null;
+    }
+
+    // Priority 6: Look for Meeting Room (if property has Meeting Room category)
+    // For Meeting Room, get 04 Seater or lowest price
+    if (hasMeetingRoomCategory) {
+      const meetingRoomPlans = property.propertyOptions.filter((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('meeting room')
+      );
+
+      if (meetingRoomPlans.length > 0) {
+        // First, try to find 04 Seater
+        const fourSeaterPlan = meetingRoomPlans.find(plan => 
+          plan.seating && (plan.seating.toLowerCase().includes('04') || plan.seating.toLowerCase().includes('4 seater'))
+        );
+
+        if (fourSeaterPlan && fourSeaterPlan.price) {
+          const numericPrice = extractNumericPrice(fourSeaterPlan.price);
+          if (numericPrice !== null) {
+            return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+          }
+        }
+
+        // If no 04 Seater, get the lowest price
+        const pricesWithNumeric = meetingRoomPlans
+          .map(plan => ({
+            plan,
+            numericPrice: extractNumericPrice(plan.price)
+          }))
+          .filter(item => item.numericPrice !== null)
+          .sort((a, b) => a.numericPrice! - b.numericPrice!);
+
+        if (pricesWithNumeric.length > 0) {
+          return `₹ ${pricesWithNumeric[0].numericPrice!.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Meeting Room category but no Meeting Room price found, return null
+      return null;
+    }
+
+    // Priority 7: Look for Private Cabin (only for non-managed, non-dedicated, and non-private-cabin properties)
+    const privateCabinPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+      plan.title.toLowerCase().includes('private cabin')
+    );
+    if (privateCabinPlan && privateCabinPlan.price) {
+      const numericPrice = extractNumericPrice(privateCabinPlan.price);
+      if (numericPrice !== null) {
+        return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+      }
+    }
+
+    // Fallback: Get minimum price from all available plans
     const prices = property.propertyOptions
-      .map((plan: SeatingPlan) => {
-        if (!plan.price || plan.price.trim() === '') return null;
-        // Remove currency symbols, commas, and spaces, then parse
-        const numericPrice = parseFloat(plan.price.replace(/[₹,\s]/g, ''));
-        return isNaN(numericPrice) ? null : numericPrice;
-      })
+      .map((plan: SeatingPlan) => extractNumericPrice(plan.price))
       .filter((price): price is number => price !== null);
 
     if (prices.length === 0) return null;
 
     const minPrice = Math.min(...prices);
-    // Format back to currency format
     return `₹ ${minPrice.toLocaleString('en-IN')}`;
   };
 
@@ -244,11 +427,36 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
 
         <div className="flex items-center justify-between mt-2">
           <div className="font-semibold text-gray-800 text-sm sm:text-base font-sans">
-            {minSeatingPrice ? (
-              <span>{minSeatingPrice}<span className="text-gray-600 font-normal text-xs">/month</span></span>
-            ) : (
-              <span>{property.priceDisplay}<span className="text-gray-600 font-normal text-xs">/month</span></span>
-            )}
+            {(() => {
+              // Get the appropriate suffix based on category
+              const hasVirtualOfficeCategory = property.categories?.some(cat => 
+                cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
+              ) || category?.toLowerCase().includes('virtualoffice') || category?.toLowerCase().includes('virtual-office');
+              
+              const hasDayPassCategory = property.categories?.some(cat => 
+                cat.toLowerCase().includes('daypass') || cat.toLowerCase().includes('day pass')
+              ) || category?.toLowerCase().includes('daypass') || category?.toLowerCase().includes('day-pass');
+              
+              const hasMeetingRoomCategory = property.categories?.some(cat => 
+                cat.toLowerCase().includes('meetingroom') || cat.toLowerCase().includes('meeting room')
+              ) || category?.toLowerCase().includes('meetingroom') || category?.toLowerCase().includes('meeting-room');
+              
+              const hasFlexiCategory = property.categories?.some(cat => 
+                cat.toLowerCase().includes('flexidesk') || cat.toLowerCase().includes('flexi desk')
+              ) || category?.toLowerCase().includes('flexidesk') || category?.toLowerCase().includes('flexi-desk');
+
+              let priceSuffix = '/month';
+              if (hasVirtualOfficeCategory) priceSuffix = '/Year';
+              else if (hasDayPassCategory) priceSuffix = '/seat/Day';
+              else if (hasMeetingRoomCategory) priceSuffix = '/Per Hour';
+              else if (hasFlexiCategory) priceSuffix = '/seat/month';
+
+              if (minSeatingPrice) {
+                return <span>{minSeatingPrice}<span className="text-gray-600 font-normal text-xs">{priceSuffix}</span></span>;
+              } else {
+                return <span>{property.priceDisplay}<span className="text-gray-600 font-normal text-xs">{priceSuffix}</span></span>;
+              }
+            })()}
           </div>
           <button
             onClick={(e) => {
