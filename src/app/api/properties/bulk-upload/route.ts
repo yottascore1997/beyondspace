@@ -141,41 +141,42 @@ function parseAmenities(amenitiesStr?: string): any[] {
 }
 
 // Predefined seating plans with fixed descriptions and seating values
+// These match the preloaded values in PropertyForm.tsx
 const SEATING_PLANS_MAP: Record<string, { title: string; description: string; seating: string }> = {
   'dedicated-desk': {
     title: 'Dedicated Desk',
-    description: 'Get your dedicated desk with storage and 24/7 access. Perfect for professionals who need a fixed workspace.',
-    seating: '1-50'
+    description: 'Get your Dedicated desk, with access to all amenities and services, in shared area.',
+    seating: '1-30+'
   },
   'flexi-desk': {
     title: 'Flexi Desk',
-    description: 'Hot desk with flexible timing. Work from anywhere in the coworking space with flexible access.',
-    seating: '1-20'
+    description: 'Just show up, pick your spot, get connected and get working – no fuss, no hassle!',
+    seating: '1-30+'
   },
   'private-cabin': {
     title: 'Private Cabin',
-    description: 'Private cabin for focused work with complete privacy and dedicated space.',
-    seating: '1-10'
+    description: 'Private Cabin\n.Enclosed & Secure: A fully private, lockable room for confidentiality and asset security. \n.Available in various sizes—ranging from 2, 4, 8, to 10+ seater options—making them a perfect fit for businesses of all sizes, \n\nwith customization available to align with a company\'s specific needs and brand ethos.\n.Amenities: Access to communal areas, high-speed internet, printing, meeting rooms, pantry, tea and coffee and reception services.',
+    seating: ''
   },
   'virtual-office': {
     title: 'Virtual Office',
-    description: 'Business address and mail handling service. Perfect for remote businesses needing a professional address.',
-    seating: 'Virtual'
+    description: 'Don\'t have a physical office, don\'t worry! Get your business registered pan India with our virtual office solutions.',
+    seating: ''
   },
   'meeting-room': {
     title: 'Meeting Room',
     description: 'Perfect for Meetings, Team huddles, and Presentations – Pick Your Room, Book it, & Impress! Meeting Rooms Come Equip With Monitor/TV, Whiteboard, WIFI, and Unlimited Tea and Coffee.',
-    seating: '04 Seater'
+    seating: ''
   },
   'managed-office-space': {
     title: 'Managed Office Space',
     description: 'A) Provider offer customized office setups according to company\'s specific needs and brand ethos. \nB) The provider manages day-to-day operations, including maintenance, IT support, and cleaning.\nC) Businesses of all sizes: From startups and SMEs to large enterprises and MNCs, companies use managed spaces for their flexibility and convenience. \nTo know more about managed office space, reach out to us, and let\'s discuss how our managed office solutions can cater to your specific business needs.',
-    seating: '10-100'
+    seating: '40-100+'
   },
   'day-pass': {
     title: 'Day Pass',
-    description: 'Single day access to coworking space with all amenities included.',
-    seating: '1'
+    description: 'Just show up, pick your spot, get connected and get working – no fuss, no hassle!',
+    seating: '1-30+'
   }
 };
 

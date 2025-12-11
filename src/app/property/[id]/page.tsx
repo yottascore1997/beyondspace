@@ -968,7 +968,16 @@ export default function PropertyDetails() {
                 };
               }
 
-              const finalPlans = [...(combinedMeetingRoom ? [combinedMeetingRoom] : []), ...otherPlans];
+              // Sort other plans: Virtual Office should be last
+              const sortedOtherPlans = [...otherPlans].sort((a, b) => {
+                const aIsVirtual = a.title.toLowerCase().includes('virtual office');
+                const bIsVirtual = b.title.toLowerCase().includes('virtual office');
+                if (aIsVirtual && !bIsVirtual) return 1; // Virtual Office goes to end
+                if (!aIsVirtual && bIsVirtual) return -1;
+                return 0; // Keep original order for others
+              });
+
+              const finalPlans = [...(combinedMeetingRoom ? [combinedMeetingRoom] : []), ...sortedOtherPlans];
 
               return (
             <div className="mb-5">
@@ -993,7 +1002,19 @@ export default function PropertyDetails() {
                   const isPrivateCabin = plan.title.toLowerCase().includes('private cabin');
                   const isSingleManagedOffice = finalPlans.length === 1 && isManagedOffice;
                   const isSinglePrivateCabin = finalPlans.length === 1 && isPrivateCabin;
-                  const isStandardPlan = ['dedicated desk', 'flexi desk', 'day pass'].some(type => plan.title.toLowerCase().includes(type));
+                  const isDayPass = plan.title.toLowerCase().includes('day pass');
+                  const isFlexiDesk = plan.title.toLowerCase().includes('flexi desk');
+                  const isVirtualOffice = plan.title.toLowerCase().includes('virtual office');
+                  const isStandardPlan = ['dedicated desk', 'flexi desk', 'day pass', 'virtual office'].some(type => plan.title.toLowerCase().includes(type));
+                  
+                  // Get price suffix based on plan type
+                  const getPriceSuffix = () => {
+                    if (isDayPass) return '/seat/Day';
+                    if (isFlexiDesk) return '/seat/month';
+                    if (isVirtualOffice) return '/Year';
+                    if (isMeetingRoom) return '/Per Hour';
+                    return '/seat/month'; // default
+                  };
                   
                   // Parse Managed Office description for A), B), C) points
                   const parseManagedOfficeDescription = (desc: string) => {
@@ -1216,7 +1237,7 @@ export default function PropertyDetails() {
                                           <div className="text-right flex items-baseline gap-1">
                                             <span className="text-base 2xl:text-lg font-bold text-gray-900">₹</span>
                                             <span className="text-base 2xl:text-lg font-bold text-gray-900">{plan.price}</span>
-                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/seat/month</span>
+                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
                                           </div>
                                         )}
                                         <button
@@ -1265,7 +1286,7 @@ export default function PropertyDetails() {
                                                   <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                                     {seatingPrice}
                                                   </span>
-                                                  <span className="text-xs 2xl:text-sm font-normal text-gray-600">/seat</span>
+                                                  <span className="text-xs 2xl:text-sm font-normal text-gray-600">/Per Hour</span>
                                                 </div>
                                               </div>
                                             )}
@@ -1295,7 +1316,7 @@ export default function PropertyDetails() {
                                             <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                               {plan.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                             </span>
-                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/seat/month</span>
+                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
                                           </div>
                                         )}
                                         <button
@@ -1323,7 +1344,7 @@ export default function PropertyDetails() {
                             {plan.price && !isMeetingRoom && !isManagedOffice && !isPrivateCabin && !isStandardPlan && (
                               <div className="text-right mb-1.5 2xl:mb-1.5">
                                 <span className="text-base md:text-lg 2xl:text-base 2xl:md:text-lg font-bold text-gray-900">{plan.price}</span>
-                                <span className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">/month</span>
+                                <span className="text-sm md:text-base 2xl:text-sm 2xl:md:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{isVirtualOffice ? '/Year' : '/month'}</span>
                               </div>
                             )}
                             
@@ -1354,7 +1375,7 @@ export default function PropertyDetails() {
 
             {/* Price Disclaimer */}
             <div className="mb-4">
-              <p className={`${poppins.className} text-sm 2xl:text-sm text-gray-600 italic`}>*Prices mentioned above are starting prices & as per availability</p>
+              <p className={`${poppins.className} text-sm 2xl:text-sm text-gray-900 font-medium italic`}>*Prices mentioned above are starting prices & as per availability</p>
             </div>
 
             {/* Managed Office Space and Enterprise Solutions Section */}
