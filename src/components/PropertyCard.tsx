@@ -96,10 +96,180 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       cat.toLowerCase().includes('privatecabin') || cat.toLowerCase().includes('private cabin')
     ) || category?.toLowerCase().includes('privatecabin') || category?.toLowerCase().includes('private-cabin');
 
-    // Check if property is in Virtual Office category
-    const hasVirtualOfficeCategory = property.categories?.some(cat => 
-      cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
-    ) || category?.toLowerCase().includes('virtualoffice') || category?.toLowerCase().includes('virtual-office');
+    // Check category parameter first - this is critical for category page filtering
+    const normalizedCategory = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+    const categoryLower = category?.toLowerCase() || '';
+    
+    // Check if we're on virtual-office category page (from URL parameter)
+    const isVirtualOfficeCategoryPage = normalizedCategory === 'virtualoffice' || 
+                                        categoryLower === 'virtual-office' ||
+                                        categoryLower === 'virtualoffice' ||
+                                        categoryLower === 'virtual office' ||
+                                        categoryLower.includes('virtual-office');
+    
+    // CRITICAL: If we're on virtual-office category page, ONLY show Virtual Office price
+    // Check for Virtual Office plan FIRST, before any other category checks
+    if (isVirtualOfficeCategoryPage) {
+      const virtualOfficePlan = property.propertyOptions.find((plan: SeatingPlan) => {
+        if (!plan || !plan.title) return false;
+        const titleLower = plan.title.toLowerCase().trim();
+        return titleLower.includes('virtual office') || 
+               titleLower.includes('virtualoffice') ||
+               titleLower === 'virtual office' ||
+               titleLower.startsWith('virtual') ||
+               (titleLower.includes('virtual') && titleLower.includes('office'));
+      });
+      
+      if (virtualOfficePlan && virtualOfficePlan.price) {
+        const numericPrice = extractNumericPrice(virtualOfficePlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Virtual Office plan not found, return null (don't show any other price)
+      return null;
+    }
+    
+    // Check if we're on meeting-room category page (from URL parameter)
+    const isMeetingRoomCategoryPage = normalizedCategory === 'meetingroom' || 
+                                      categoryLower === 'meeting-room' ||
+                                      categoryLower === 'meetingroom' ||
+                                      categoryLower === 'meeting room' ||
+                                      categoryLower.includes('meeting-room');
+    
+    // CRITICAL: If we're on meeting-room category page, ONLY show Meeting Room price
+    // Check for Meeting Room plan FIRST, before any other category checks
+    if (isMeetingRoomCategoryPage) {
+      const meetingRoomPlans = property.propertyOptions.filter((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('meeting room')
+      );
+
+      if (meetingRoomPlans.length > 0) {
+        // First, try to find 04 Seater
+        const fourSeaterPlan = meetingRoomPlans.find(plan => 
+          plan.seating && (plan.seating.toLowerCase().includes('04') || plan.seating.toLowerCase().includes('4 seater'))
+        );
+
+        if (fourSeaterPlan && fourSeaterPlan.price) {
+          const numericPrice = extractNumericPrice(fourSeaterPlan.price);
+          if (numericPrice !== null && numericPrice > 0) {
+            return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+          }
+        }
+
+        // If no 04 Seater, get the lowest price
+        const pricesWithNumeric = meetingRoomPlans
+          .map(plan => ({
+            plan,
+            numericPrice: extractNumericPrice(plan.price)
+          }))
+          .filter(item => item.numericPrice !== null && item.numericPrice > 0)
+          .sort((a, b) => a.numericPrice! - b.numericPrice!);
+
+        if (pricesWithNumeric.length > 0) {
+          return `₹ ${pricesWithNumeric[0].numericPrice!.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Meeting Room plan not found, return null (don't show any other price)
+      return null;
+    }
+    
+    // Check if we're on coworking category page (from URL parameter)
+    const isCoworkingCategoryPage = normalizedCategory === 'coworking' || 
+                                     normalizedCategory === 'coworkingspace' ||
+                                     categoryLower === 'coworking-space' ||
+                                     categoryLower === 'coworking' ||
+                                     categoryLower.includes('coworking');
+    
+    // CRITICAL: If we're on coworking category page, show Dedicated Desk first, then Private Cabin
+    // Both should use /seat/month suffix
+    if (isCoworkingCategoryPage) {
+      // First, try to find Dedicated Desk
+      const dedicatedDeskPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('dedicated desk')
+      );
+      
+      if (dedicatedDeskPlan && dedicatedDeskPlan.price) {
+        const numericPrice = extractNumericPrice(dedicatedDeskPlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      
+      // If Dedicated Desk not found, try Private Cabin
+      const privateCabinPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('private cabin')
+      );
+      
+      if (privateCabinPlan && privateCabinPlan.price) {
+        const numericPrice = extractNumericPrice(privateCabinPlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      
+      // If neither found, return null (don't show other prices)
+      return null;
+    }
+    
+    // Check if we're on dedicated-desk category page (from URL parameter)
+    const isDedicatedDeskCategoryPage = normalizedCategory === 'dedicateddesk' || 
+                                        normalizedCategory === 'dedicateddesks' ||
+                                        categoryLower === 'dedicated-desk' ||
+                                        categoryLower === 'dedicateddesk' ||
+                                        categoryLower.includes('dedicated-desk');
+    
+    // CRITICAL: If we're on dedicated-desk category page, ONLY show Dedicated Desk price
+    // Use /seat/month suffix
+    if (isDedicatedDeskCategoryPage) {
+      const dedicatedDeskPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('dedicated desk')
+      );
+      
+      if (dedicatedDeskPlan && dedicatedDeskPlan.price) {
+        const numericPrice = extractNumericPrice(dedicatedDeskPlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Dedicated Desk plan not found, return null (don't show other prices)
+      return null;
+    }
+    
+    // Check if we're on private-cabin category page (from URL parameter)
+    const isPrivateCabinCategoryPage = normalizedCategory === 'privatecabin' || 
+                                       normalizedCategory === 'privatecabins' ||
+                                       categoryLower === 'private-cabin' ||
+                                       categoryLower === 'privatecabin' ||
+                                       categoryLower.includes('private-cabin');
+    
+    // CRITICAL: If we're on private-cabin category page, ONLY show Private Cabin price
+    // Use /seat/month suffix
+    if (isPrivateCabinCategoryPage) {
+      const privateCabinPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('private cabin')
+      );
+      
+      if (privateCabinPlan && privateCabinPlan.price) {
+        const numericPrice = extractNumericPrice(privateCabinPlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Private Cabin plan not found, return null (don't show other prices)
+      return null;
+    }
+    
+    // Check if property has virtualoffice in its categories (for non-category-page scenarios)
+    const propertyHasVirtualOffice = property.categories?.some(cat => {
+      const catLower = cat.toLowerCase();
+      return catLower.includes('virtualoffice') || 
+             catLower.includes('virtual office') ||
+             catLower === 'virtual office';
+    }) || false;
+    
+    // If property has virtualoffice category (but we're not on virtual-office category page)
+    const hasVirtualOfficeCategory = propertyHasVirtualOffice;
 
     // Check if property is in Day Pass category
     const hasDayPassCategory = property.categories?.some(cat => 
@@ -143,36 +313,49 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       return null;
     }
 
-    // Priority 3: Look for Dedicated Desk
-    const dedicatedDeskPlan = property.propertyOptions.find((plan: SeatingPlan) => 
-      plan.title.toLowerCase().includes('dedicated desk')
-    );
-    if (dedicatedDeskPlan && dedicatedDeskPlan.price) {
-      const numericPrice = extractNumericPrice(dedicatedDeskPlan.price);
-      if (numericPrice !== null) {
-        return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+    // Priority 3: Look for Virtual Office (if property has Virtual Office category) - Check BEFORE Dedicated Desk
+    // For Virtual Office category, ONLY show Virtual Office price, no fallback to other plans
+    if (hasVirtualOfficeCategory) {
+      // Try multiple variations of Virtual Office title - be very flexible
+      const virtualOfficePlan = property.propertyOptions.find((plan: SeatingPlan) => {
+        if (!plan || !plan.title) return false;
+        const titleLower = plan.title.toLowerCase().trim();
+        // Check for various Virtual Office title patterns
+        return titleLower.includes('virtual office') || 
+               titleLower.includes('virtualoffice') ||
+               titleLower === 'virtual office' ||
+               titleLower.startsWith('virtual') ||
+               (titleLower.includes('virtual') && titleLower.includes('office'));
+      });
+      
+      if (virtualOfficePlan && virtualOfficePlan.price) {
+        const numericPrice = extractNumericPrice(virtualOfficePlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Virtual Office category but no Virtual Office price found, return null (don't show other prices)
+      return null;
+    }
+    
+
+    // Priority 4: Look for Dedicated Desk (only if not Virtual Office category)
+    // Skip Dedicated Desk if we're on Virtual Office category page
+    if (!hasVirtualOfficeCategory) {
+      const dedicatedDeskPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('dedicated desk')
+      );
+      if (dedicatedDeskPlan && dedicatedDeskPlan.price) {
+        const numericPrice = extractNumericPrice(dedicatedDeskPlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
       }
     }
 
     // For Dedicated category, ONLY show Dedicated Desk price, no Private Cabin fallback
     if (hasDedicatedCategory) {
       // If Dedicated category but no Dedicated Desk price found, return null (don't show Private Cabin price)
-      return null;
-    }
-
-    // Priority 4: Look for Virtual Office (if property has Virtual Office category)
-    // For Virtual Office category, ONLY show Virtual Office price, no fallback
-    if (hasVirtualOfficeCategory) {
-      const virtualOfficePlan = property.propertyOptions.find((plan: SeatingPlan) => 
-        plan.title.toLowerCase().includes('virtual office')
-      );
-      if (virtualOfficePlan && virtualOfficePlan.price) {
-        const numericPrice = extractNumericPrice(virtualOfficePlan.price);
-        if (numericPrice !== null) {
-          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
-        }
-      }
-      // If Virtual Office category but no Virtual Office price found, return null
       return null;
     }
 
@@ -213,9 +396,10 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       return null;
     }
 
-    // Priority 6: Look for Meeting Room (if property has Meeting Room category)
+    // Priority 6: Look for Meeting Room (if property has Meeting Room category, but not on meeting-room category page)
     // For Meeting Room, get 04 Seater or lowest price
-    if (hasMeetingRoomCategory) {
+    // Note: If we're on meeting-room category page, this check is already done above
+    if (hasMeetingRoomCategory && !isMeetingRoomCategoryPage) {
       const meetingRoomPlans = property.propertyOptions.filter((plan: SeatingPlan) => 
         plan.title.toLowerCase().includes('meeting room')
       );
@@ -250,18 +434,26 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       return null;
     }
 
-    // Priority 7: Look for Private Cabin (only for non-managed, non-dedicated, and non-private-cabin properties)
-    const privateCabinPlan = property.propertyOptions.find((plan: SeatingPlan) => 
-      plan.title.toLowerCase().includes('private cabin')
-    );
-    if (privateCabinPlan && privateCabinPlan.price) {
-      const numericPrice = extractNumericPrice(privateCabinPlan.price);
-      if (numericPrice !== null) {
-        return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+    // Priority 7: Look for Private Cabin (only for non-managed, non-dedicated, non-private-cabin, non-virtual-office, and non-meeting-room properties)
+    // Skip Private Cabin if we're on virtual-office or meeting-room category page
+    if (!isVirtualOfficeCategoryPage && !isMeetingRoomCategoryPage) {
+      const privateCabinPlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('private cabin')
+      );
+      if (privateCabinPlan && privateCabinPlan.price) {
+        const numericPrice = extractNumericPrice(privateCabinPlan.price);
+        if (numericPrice !== null) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
       }
     }
 
     // Fallback: Get minimum price from all available plans
+    // BUT: If we're on virtual-office or meeting-room category page and plan was not found, return null
+    if (isVirtualOfficeCategoryPage || isMeetingRoomCategoryPage) {
+      return null; // Don't show any price if category-specific plan not found on category page
+    }
+    
     const prices = property.propertyOptions
       .map((plan: SeatingPlan) => extractNumericPrice(plan.price))
       .filter((price): price is number => price !== null);
@@ -429,9 +621,48 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
           <div className="font-semibold text-gray-800 text-sm sm:text-base font-sans">
             {(() => {
               // Get the appropriate suffix based on category
+              // Check category parameter first (for category pages)
+              const categoryLowerForSuffix = category?.toLowerCase() || '';
+              const normalizedCategoryForSuffix = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+              
+              // Check if we're on virtual-office category page
+              const isVirtualOfficeCategoryPageForSuffix = normalizedCategoryForSuffix === 'virtualoffice' || 
+                                                            categoryLowerForSuffix === 'virtual-office' ||
+                                                            categoryLowerForSuffix === 'virtualoffice' ||
+                                                            categoryLowerForSuffix === 'virtual office' ||
+                                                            categoryLowerForSuffix.includes('virtual-office');
+              
+              // Check if we're on meeting-room category page
+              const isMeetingRoomCategoryPageForSuffix = normalizedCategoryForSuffix === 'meetingroom' || 
+                                                          categoryLowerForSuffix === 'meeting-room' ||
+                                                          categoryLowerForSuffix === 'meetingroom' ||
+                                                          categoryLowerForSuffix === 'meeting room' ||
+                                                          categoryLowerForSuffix.includes('meeting-room');
+              
+              // Check if we're on coworking category page
+              const isCoworkingCategoryPageForSuffix = normalizedCategoryForSuffix === 'coworking' || 
+                                                       normalizedCategoryForSuffix === 'coworkingspace' ||
+                                                       categoryLowerForSuffix === 'coworking-space' ||
+                                                       categoryLowerForSuffix === 'coworking' ||
+                                                       categoryLowerForSuffix.includes('coworking');
+              
+              // Check if we're on dedicated-desk category page
+              const isDedicatedDeskCategoryPageForSuffix = normalizedCategoryForSuffix === 'dedicateddesk' || 
+                                                            normalizedCategoryForSuffix === 'dedicateddesks' ||
+                                                            categoryLowerForSuffix === 'dedicated-desk' ||
+                                                            categoryLowerForSuffix === 'dedicateddesk' ||
+                                                            categoryLowerForSuffix.includes('dedicated-desk');
+              
+              // Check if we're on private-cabin category page
+              const isPrivateCabinCategoryPageForSuffix = normalizedCategoryForSuffix === 'privatecabin' || 
+                                                           normalizedCategoryForSuffix === 'privatecabins' ||
+                                                           categoryLowerForSuffix === 'private-cabin' ||
+                                                           categoryLowerForSuffix === 'privatecabin' ||
+                                                           categoryLowerForSuffix.includes('private-cabin');
+              
               const hasVirtualOfficeCategory = property.categories?.some(cat => 
                 cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
-              ) || category?.toLowerCase().includes('virtualoffice') || category?.toLowerCase().includes('virtual-office');
+              ) || isVirtualOfficeCategoryPageForSuffix;
               
               const hasDayPassCategory = property.categories?.some(cat => 
                 cat.toLowerCase().includes('daypass') || cat.toLowerCase().includes('day pass')
@@ -439,16 +670,22 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
               
               const hasMeetingRoomCategory = property.categories?.some(cat => 
                 cat.toLowerCase().includes('meetingroom') || cat.toLowerCase().includes('meeting room')
-              ) || category?.toLowerCase().includes('meetingroom') || category?.toLowerCase().includes('meeting-room');
+              ) || isMeetingRoomCategoryPageForSuffix;
               
               const hasFlexiCategory = property.categories?.some(cat => 
                 cat.toLowerCase().includes('flexidesk') || cat.toLowerCase().includes('flexi desk')
               ) || category?.toLowerCase().includes('flexidesk') || category?.toLowerCase().includes('flexi-desk');
 
               let priceSuffix = '/month';
-              if (hasVirtualOfficeCategory) priceSuffix = '/Year';
+              // Priority order: Check category page first, then property categories
+              if (isVirtualOfficeCategoryPageForSuffix) priceSuffix = '/Year';
+              else if (isMeetingRoomCategoryPageForSuffix) priceSuffix = '/Hour';
+              else if (isCoworkingCategoryPageForSuffix) priceSuffix = '/seat/month';
+              else if (isDedicatedDeskCategoryPageForSuffix) priceSuffix = '/seat/month';
+              else if (isPrivateCabinCategoryPageForSuffix) priceSuffix = '/seat/month';
+              else if (hasVirtualOfficeCategory) priceSuffix = '/Year';
               else if (hasDayPassCategory) priceSuffix = '/seat/Day';
-              else if (hasMeetingRoomCategory) priceSuffix = '/Per Hour';
+              else if (hasMeetingRoomCategory) priceSuffix = '/Hour';
               else if (hasFlexiCategory) priceSuffix = '/seat/month';
 
               if (minSeatingPrice) {

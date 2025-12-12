@@ -1012,7 +1012,7 @@ export default function PropertyDetails() {
                     if (isDayPass) return '/seat/Day';
                     if (isFlexiDesk) return '/seat/month';
                     if (isVirtualOffice) return '/Year';
-                    if (isMeetingRoom) return '/Per Hour';
+                    if (isMeetingRoom) return '/Hour';
                     if (isPrivateCabin) return '/seat/month';
                     return '/seat/month'; // default
                   };
@@ -1208,7 +1208,7 @@ export default function PropertyDetails() {
                               )
                             )}
                             
-                            {(plan.seating || isManagedOffice || isPrivateCabin) && (
+                            {(plan.seating || isManagedOffice || isPrivateCabin || isStandardPlan) && (
                               <div className={`${
                                 isSingleMeetingRoom ? 'text-base 2xl:text-lg' : isStandardPlan ? 'text-sm 2xl:text-sm' : 'text-sm 2xl:text-sm'
                               } font-medium ${isStandardPlan ? 'mt-2 2xl:mt-2.5' : 'mt-3 2xl:mt-4'}`}>
@@ -1336,7 +1336,7 @@ export default function PropertyDetails() {
                                                   <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                                     {seatingPrice}
                                                   </span>
-                                                  <span className="text-xs 2xl:text-sm font-normal text-gray-600">/Per Hour</span>
+                                                  <span className="text-xs 2xl:text-sm font-normal text-gray-600">/Hour</span>
                                                 </div>
                                               </div>
                                             )}
@@ -1348,27 +1348,44 @@ export default function PropertyDetails() {
                                 ) : isStandardPlan ? (
                                   <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
                                     <div className="flex items-center justify-between gap-4">
-                                      <div className="flex items-center gap-2">
-                                        <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
-                                          <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                          </svg>
-                                        </div>
-                                        <span className="text-sm 2xl:text-base font-medium text-gray-600">Seating :</span>
-                                        <span className="text-base 2xl:text-lg font-semibold text-gray-800">
-                                          {plan.seating.split(',')[0]?.trim() || plan.seating}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-3">
-                                        {plan.price && (
-                                          <div className="text-right flex items-baseline gap-1">
-                                            <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
-                                            <span className="text-base 2xl:text-lg font-bold text-gray-900">
-                                              {plan.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                            </span>
-                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
+                                      {plan.seating && plan.seating.trim() !== '' && (
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                            <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
                                           </div>
-                                        )}
+                                          <span className="text-sm 2xl:text-base font-medium text-gray-600">Seating :</span>
+                                          <span className="text-base 2xl:text-lg font-semibold text-gray-800">
+                                            {plan.seating.split(',')[0]?.trim() || plan.seating}
+                                          </span>
+                                        </div>
+                                      )}
+                                      <div className={`flex items-center gap-3 ${!plan.seating || plan.seating.trim() === '' ? 'ml-auto' : ''}`}>
+                                        {(() => {
+                                          // Check if price exists and is valid
+                                          const priceValue = plan.price;
+                                          const hasValidPrice = priceValue != null && 
+                                                               priceValue !== '' && 
+                                                               String(priceValue).trim() !== '';
+                                          
+                                          if (!hasValidPrice) return null;
+                                          
+                                          // Format price
+                                          const priceStr = String(priceValue).trim();
+                                          const priceNum = parseFloat(priceStr.replace(/[₹,\s]/g, ''));
+                                          const formattedPrice = isNaN(priceNum) ? priceStr : priceNum.toLocaleString('en-IN');
+                                          
+                                          return (
+                                            <div className="text-right flex items-baseline gap-1">
+                                              <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
+                                              <span className="text-base 2xl:text-lg font-bold text-gray-900">
+                                                {formattedPrice}
+                                              </span>
+                                              <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
+                                            </div>
+                                          );
+                                        })()}
                                         <button
                                           type="button"
                                           onClick={handleEnquireClick}
