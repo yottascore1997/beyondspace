@@ -58,7 +58,7 @@ export default function Home() {
 
         <TrustedCompanies />
 
-        <WorkspaceCategories />
+        <WorkspaceCategories onEnterpriseClick={() => setShareModalOpen(true)} />
 
         <QuickCategories />
 

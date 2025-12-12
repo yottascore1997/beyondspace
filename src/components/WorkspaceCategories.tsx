@@ -3,12 +3,24 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function WorkspaceCategories() {
+interface WorkspaceCategoriesProps {
+  onEnterpriseClick?: () => void;
+}
+
+export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCategoriesProps) {
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleCategoryClick = (categoryName: string) => {
     router.push(`/category/${encodeURIComponent(categoryName.toLowerCase().replace(/\s+/g, '-'))}`);
+  };
+
+  const handleEnterpriseClick = () => {
+    if (onEnterpriseClick) {
+      onEnterpriseClick();
+    } else {
+      handleCategoryClick('Enterprise Offices');
+    }
   };
 
   // Hero images from public/images folder (same as Hero component)
@@ -73,21 +85,21 @@ export default function WorkspaceCategories() {
       ]
     },
     {
+      name: 'Private Cabin',
+      description: 'Fully private, lockable room for confidentiality',
+      features: [
+        'Enclosed & secure workspace',
+        'Available in various sizes (2, 4, 8, 10+ seater)',
+        'Perfect for businesses of all sizes'
+      ]
+    },
+    {
       name: 'Dedicated Desk',
       description: 'Personal workspace in a shared environment',
       features: [
         'Fixed desk with storage',
         'Access to shared facilities',
         'Cost-effective for individuals'
-      ]
-    },
-    {
-      name: 'Enterprise Offices',
-      description: 'Custom-built offices for fast-growing teams',
-      features: [
-        'End-to-end design, build and manage',
-        'Full customizations, branding and amenities',
-        'Ideal for 100+ team size'
       ]
     },
     {
@@ -114,8 +126,8 @@ export default function WorkspaceCategories() {
   const categoryImages = [
     '/images/co1.jpeg', // Coworking Space
     '/images/co2.jpeg', // Managed Office
+    '/images/seating/privatecabin.jpeg', // Private Cabin
     '/images/co3.jpeg', // Dedicated Desk
-    '/images/co4.jpeg', // Enterprise Offices
     '/images/co5.jpeg', // Virtual Office
     '/images/co6.jpeg'  // Meeting Room
   ];
@@ -184,6 +196,59 @@ export default function WorkspaceCategories() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Enterprise Offices Section */}
+        <div className="mt-12 md:mt-16 xl:mt-20">
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-3xl shadow-xl border border-gray-200 p-6 md:p-8 xl:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-12 items-center">
+              {/* Left Side - Image */}
+              <div className="w-full h-64 md:h-80 xl:h-96 rounded-2xl overflow-hidden shadow-lg">
+                <img
+                  src="/images/co4.jpeg"
+                  alt="Enterprise Offices"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Right Side - Content */}
+              <div className="space-y-4 md:space-y-6">
+                <h3 className="text-2xl md:text-3xl xl:text-4xl font-bold text-gray-900">
+                  Enterprise Offices
+                </h3>
+                
+                <p className="text-black text-sm md:text-base font-medium">
+                  Custom-built offices for fast-growing teams
+                </p>
+
+                {/* Bullet Points */}
+                <ul className="space-y-2 md:space-y-3">
+                  <li className="flex items-start text-sm md:text-base text-black">
+                    <span className="text-orange-400 mr-3 mt-1">•</span>
+                    <span>End-to-end design, build and manage</span>
+                  </li>
+                  <li className="flex items-start text-sm md:text-base text-black">
+                    <span className="text-orange-400 mr-3 mt-1">•</span>
+                    <span>Full customizations, branding and amenities</span>
+                  </li>
+                  <li className="flex items-start text-sm md:text-base text-black">
+                    <span className="text-orange-400 mr-3 mt-1">•</span>
+                    <span>Ideal for 100+ team size</span>
+                  </li>
+                </ul>
+
+                {/* Explore Button */}
+                <div className="pt-2">
+                  <button
+                    onClick={handleEnterpriseClick}
+                    className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-sm md:text-base font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300 hover:scale-105"
+                  >
+                    Explore Enterprise Offices →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

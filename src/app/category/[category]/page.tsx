@@ -54,6 +54,7 @@ interface Filters {
   sortBy: string;
   area: string | string[]; // Support both single and multiple areas
   price: string;
+  category: string | string[]; // Support both single and multiple categories
 }
 
 interface PrimeLocation {
@@ -67,7 +68,7 @@ const primeLocations: PrimeLocation[] = [
   { name: 'Navi Mumbai', slug: 'navi mumbai', image: '/images/mumbai8.PNG' },
   { name: 'Andheri West', slug: 'andheri west', image: '/images/mumbai4.jpeg' },
   { name: 'Andheri East', slug: 'andheri east', image: '/images/mumbai4.jpeg' },
-  { name: 'Andheri', slug: 'andheri', image: '/images/mumbai4.jpeg' },
+  { name: 'Goregaon East', slug: 'goregaon east', image: '/images/mumbai4.jpeg' },
   { name: 'BKC', slug: 'bkc', image: '/images/mumbai3.png' },
   { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpg' },
   { name: 'Powai', slug: 'powai', image: '/images/mumbai8.PNG' }
@@ -94,10 +95,15 @@ export default function CategoryPage() {
   const initialArea = initialAreaParam 
     ? (initialAreaParam.includes(',') ? initialAreaParam.split(',').map(a => decodeURIComponent(a.trim())) : decodeURIComponent(initialAreaParam))
     : 'all';
+  const initialCategoryParam = searchParams.get('subcategory');
+  const initialCategory = initialCategoryParam 
+    ? (initialCategoryParam.includes(',') ? initialCategoryParam.split(',').map(c => decodeURIComponent(c.trim())) : decodeURIComponent(initialCategoryParam))
+    : 'all';
   const [filters, setFilters] = useState<Filters>({
     sortBy: 'Popularity',
     area: initialArea,
-    price: 'all'
+    price: 'all',
+    category: initialCategory
   });
   const [isGridShaking, setIsGridShaking] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -382,6 +388,29 @@ export default function CategoryPage() {
       }
     }
 
+    // Category filter - filter by sub-categories
+    if (filters.category !== 'all') {
+      if (Array.isArray(filters.category)) {
+        // Multiple categories selected
+        const categoryArray = filters.category as string[];
+        filtered = filtered.filter(property => {
+          const propertyCategories = Array.isArray(property.categories)
+            ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
+            : [];
+          return categoryArray.some((cat: string) => propertyCategories.includes(cat.toLowerCase()));
+        });
+      } else {
+        // Single category (backward compatibility)
+        const singleCategory = filters.category as string;
+        filtered = filtered.filter(property => {
+          const propertyCategories = Array.isArray(property.categories)
+            ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
+            : [];
+          return propertyCategories.includes(singleCategory.toLowerCase());
+        });
+      }
+    }
+
     // Price filter
     if (filters.price !== 'all') {
       filtered = filtered.filter(property => {
@@ -419,7 +448,8 @@ export default function CategoryPage() {
     setFilters({
       sortBy: 'Popularity',
       area: 'all',
-      price: 'all'
+      price: 'all',
+      category: 'all'
     });
   };
 
@@ -543,6 +573,82 @@ export default function CategoryPage() {
     });
   };
 
+  // Category filter handlers - show sub-categories based on main category
+  const getAvailableCategories = () => {
+    const normalizedCategory = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    if (normalizedCategory.includes('coworking')) {
+      return [
+        { key: 'dedicateddesk', label: 'Dedicated Desk' },
+        { key: 'privatecabin', label: 'Private Cabin' },
+        { key: 'flexidesk', label: 'Flexi Desk' },
+        { key: 'virtualoffice', label: 'Virtual Office' }
+      ];
+    } else if (normalizedCategory.includes('dedicateddesk')) {
+      return [
+        { key: 'dedicateddesk', label: 'Dedicated Desk' },
+        { key: 'privatecabin', label: 'Private Cabin' }
+      ];
+    } else if (normalizedCategory.includes('daypass')) {
+      return [
+        { key: 'daypass', label: 'Day Pass' },
+        { key: 'flexidesk', label: 'Flexi Desk' }
+      ];
+    } else if (normalizedCategory.includes('flexidesk')) {
+      return [
+        { key: 'flexidesk', label: 'Flexi Desk' },
+        { key: 'dedicateddesk', label: 'Dedicated Desk' }
+      ];
+    } else if (normalizedCategory.includes('privatecabin')) {
+      return [
+        { key: 'privatecabin', label: 'Private Cabin' }
+      ];
+    } else if (normalizedCategory.includes('virtualoffice')) {
+      return [
+        { key: 'virtualoffice', label: 'Virtual Office' }
+      ];
+    } else if (normalizedCategory.includes('meetingroom')) {
+      return [
+        { key: 'meetingroom', label: 'Meeting Room' }
+      ];
+    } else if (normalizedCategory.includes('managed')) {
+      return [
+        { key: 'managed', label: 'Managed Office Space' }
+      ];
+    } else if (normalizedCategory.includes('enterprise')) {
+      return [
+        { key: 'enterpriseoffices', label: 'Enterprise Offices' }
+      ];
+    }
+    
+    return [];
+  };
+
+  const availableCategories = getAvailableCategories();
+
+  const handleToggleCategory = (categoryKey: string) => {
+    // Directly apply category filter (like area filter)
+    setFilters(prev => {
+      if (prev.category === 'all') {
+        return { ...prev, category: [categoryKey] };
+      } else if (Array.isArray(prev.category)) {
+        if (prev.category.includes(categoryKey)) {
+          const newCategories = prev.category.filter(c => c !== categoryKey);
+          return { ...prev, category: newCategories.length === 0 ? 'all' : newCategories };
+        } else {
+          return { ...prev, category: [...prev.category, categoryKey] };
+        }
+      } else {
+        // Single category, convert to array
+        if (prev.category === categoryKey) {
+          return { ...prev, category: 'all' };
+        } else {
+          return { ...prev, category: [prev.category, categoryKey] };
+        }
+      }
+    });
+  };
+
   return (
     <div className={`${poppins.className} min-h-screen bg-gray-50`} style={{ fontFamily: 'Poppins, sans-serif', overflow: 'visible' }}>
       <style jsx global>{`
@@ -584,6 +690,38 @@ export default function CategoryPage() {
               </span>
             </h1>
           </div>
+
+          {/* Quick Category Filters */}
+          {availableCategories.length > 0 && (
+            <div className="mb-1.5 sm:mb-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <h3 className={`${poppins.className} text-xs sm:text-sm md:text-base font-semibold text-gray-700`}>
+                  Categories :
+                </h3>
+                <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                  {availableCategories.map(category => {
+                    const isSelected = Array.isArray(filters.category)
+                      ? filters.category.includes(category.key)
+                      : filters.category === category.key;
+                    
+                    return (
+                      <button
+                        key={category.key}
+                        onClick={() => handleToggleCategory(category.key)}
+                        className={`${poppins.className} px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-medium border transition-all duration-200 ${
+                          isSelected
+                            ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                        }`}
+                      >
+                        {category.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick Area Filters */}
           <div className="mb-1.5 sm:mb-2">

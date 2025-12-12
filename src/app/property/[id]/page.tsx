@@ -883,8 +883,8 @@ export default function PropertyDetails() {
                 // Managed Office Space: only shows in Managed Office category
                 if (titleLower.includes('managed office')) return ['managed'];
                 
-                // Day Pass: shows in Day Pass, Coworking-Space categories
-                if (titleLower.includes('day pass')) return ['daypass', 'coworking'];
+                // Day Pass: only shows in Day Pass category (not in Coworking)
+                if (titleLower.includes('day pass')) return ['daypass'];
                 
                 return [];
               };
@@ -1013,6 +1013,7 @@ export default function PropertyDetails() {
                     if (isFlexiDesk) return '/seat/month';
                     if (isVirtualOffice) return '/Year';
                     if (isMeetingRoom) return '/Per Hour';
+                    if (isPrivateCabin) return '/seat/month';
                     return '/seat/month'; // default
                   };
                   
@@ -1039,10 +1040,13 @@ export default function PropertyDetails() {
                     const lines = desc.split('\n');
                     const points: string[] = [];
                     let currentPoint = '';
+                    let finalText = '';
                     
                     lines.forEach(line => {
                       const trimmed = line.trim();
-                      if (trimmed.startsWith('.')) {
+                      if (trimmed.toLowerCase().startsWith('to know more')) {
+                        finalText = trimmed;
+                      } else if (trimmed.startsWith('.')) {
                         // Save previous point if exists
                         if (currentPoint) {
                           points.push(currentPoint.trim());
@@ -1060,7 +1064,7 @@ export default function PropertyDetails() {
                       points.push(currentPoint.trim());
                     }
                     
-                    return { points };
+                    return { points, finalText };
                   };
 
                   return (
@@ -1128,11 +1132,13 @@ export default function PropertyDetails() {
                                   
                                   if (isPrivateCabin) {
                                     // For Private Cabin, use Private Cabin parser
-                                    const { points: cabinPoints } = parsePrivateCabinDescription(plan.description);
+                                    const { points: cabinPoints, finalText: cabinFinalText } = parsePrivateCabinDescription(plan.description);
                                     displayPoints = cabinPoints.map((p, idx) => {
                                       const labels = ['A', 'B', 'C'];
                                       return `${labels[idx]}) ${p}`;
                                     });
+                                    // If no finalText in description, use default message
+                                    finalText = cabinFinalText || "To know more about private cabin, reach out to us, and let's discuss how our private cabin solutions can cater to your specific business needs.";
                                   } else {
                                     // For Managed Office, use Managed Office parser
                                     const parsed = parseManagedOfficeDescription(plan.description);
@@ -1202,7 +1208,7 @@ export default function PropertyDetails() {
                               )
                             )}
                             
-                            {plan.seating && (
+                            {(plan.seating || isManagedOffice || isPrivateCabin) && (
                               <div className={`${
                                 isSingleMeetingRoom ? 'text-base 2xl:text-lg' : isStandardPlan ? 'text-sm 2xl:text-sm' : 'text-sm 2xl:text-sm'
                               } font-medium ${isStandardPlan ? 'mt-2 2xl:mt-2.5' : 'mt-3 2xl:mt-4'}`}>
@@ -1229,17 +1235,61 @@ export default function PropertyDetails() {
                                         </div>
                                         <span className="text-xs 2xl:text-sm font-medium text-gray-600">Seating :</span>
                                         <span className="text-sm 2xl:text-base font-semibold text-gray-800">
-                                          {plan.seating.split(',')[0]?.trim() || plan.seating}
+                                          {plan.seating && plan.seating.trim() !== '' 
+                                            ? (plan.seating.split(',')[0]?.trim() || plan.seating)
+                                            : '2, 4, 8, 10 to 30+'
+                                          }
                                         </span>
                                       </div>
                                       <div className="flex items-center gap-3">
-                                        {plan.price && (
-                                          <div className="text-right flex items-baseline gap-1">
-                                            <span className="text-base 2xl:text-lg font-bold text-gray-900">₹</span>
-                                            <span className="text-base 2xl:text-lg font-bold text-gray-900">{plan.price}</span>
-                                            <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
-                                          </div>
-                                        )}
+                                        {(() => {
+                                          // Check if price exists and is valid
+                                          const priceValue = plan.price;
+                                          
+                                          // Debug logging
+                                          if (process.env.NODE_ENV === 'development' && isPrivateCabin) {
+                                            console.log('[Private Cabin Price Debug]', {
+                                              priceValue,
+                                              type: typeof priceValue,
+                                              isNull: priceValue === null,
+                                              isUndefined: priceValue === undefined,
+                                              isEmpty: priceValue === '',
+                                              stringValue: String(priceValue),
+                                              trimmed: String(priceValue).trim()
+                                            });
+                                          }
+                                          
+                                          // More lenient check - just ensure it exists and is not empty
+                                          const hasValidPrice = priceValue != null && 
+                                                               priceValue !== '' && 
+                                                               String(priceValue).trim() !== '';
+                                          
+                                          if (!hasValidPrice) {
+                                            if (process.env.NODE_ENV === 'development' && isPrivateCabin) {
+                                              console.log('[Private Cabin] Price not valid, returning null');
+                                            }
+                                            return null;
+                                          }
+                                          
+                                          // Format price
+                                          const priceStr = String(priceValue).trim();
+                                          const priceNum = parseFloat(priceStr);
+                                          const formattedPrice = isNaN(priceNum) ? priceStr : priceNum.toLocaleString('en-IN');
+                                          
+                                          if (process.env.NODE_ENV === 'development' && isPrivateCabin) {
+                                            console.log('[Private Cabin] Rendering price:', formattedPrice);
+                                          }
+                                          
+                                          return (
+                                            <div className="text-right flex items-baseline gap-1">
+                                              <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
+                                              <span className="text-base 2xl:text-lg font-bold text-gray-900">
+                                                {formattedPrice}
+                                              </span>
+                                              <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
+                                            </div>
+                                          );
+                                        })()}
                                         <button
                                           type="button"
                                           onClick={handleEnquireClick}
