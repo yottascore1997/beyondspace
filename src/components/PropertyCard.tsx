@@ -260,6 +260,29 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       return null;
     }
     
+    // Check if we're on managed-office category page (from URL parameter)
+    const isManagedOfficeCategoryPage = normalizedCategory === 'managed' || 
+                                        normalizedCategory === 'managedoffice' ||
+                                        categoryLower === 'managed-office' ||
+                                        categoryLower === 'managedoffice' ||
+                                        categoryLower.includes('managed-office');
+    
+    // CRITICAL: If we're on managed-office category page, ONLY show Managed Office Space price
+    if (isManagedOfficeCategoryPage) {
+      const managedOfficePlan = property.propertyOptions.find((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('managed office')
+      );
+      
+      if (managedOfficePlan && managedOfficePlan.price) {
+        const numericPrice = extractNumericPrice(managedOfficePlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Managed Office plan not found, return null (don't show other prices)
+      return null;
+    }
+    
     // Check if property has virtualoffice in its categories (for non-category-page scenarios)
     const propertyHasVirtualOffice = property.categories?.some(cat => {
       const catLower = cat.toLowerCase();
@@ -449,8 +472,8 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     }
 
     // Fallback: Get minimum price from all available plans
-    // BUT: If we're on virtual-office or meeting-room category page and plan was not found, return null
-    if (isVirtualOfficeCategoryPage || isMeetingRoomCategoryPage) {
+    // BUT: If we're on category-specific pages and plan was not found, return null
+    if (isVirtualOfficeCategoryPage || isMeetingRoomCategoryPage || isManagedOfficeCategoryPage) {
       return null; // Don't show any price if category-specific plan not found on category page
     }
     
@@ -660,6 +683,13 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                                                            categoryLowerForSuffix === 'privatecabin' ||
                                                            categoryLowerForSuffix.includes('private-cabin');
               
+              // Check if we're on managed-office category page
+              const isManagedOfficeCategoryPageForSuffix = normalizedCategoryForSuffix === 'managed' || 
+                                                            normalizedCategoryForSuffix === 'managedoffice' ||
+                                                            categoryLowerForSuffix === 'managed-office' ||
+                                                            categoryLowerForSuffix === 'managedoffice' ||
+                                                            categoryLowerForSuffix.includes('managed-office');
+              
               const hasVirtualOfficeCategory = property.categories?.some(cat => 
                 cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
               ) || isVirtualOfficeCategoryPageForSuffix;
@@ -680,6 +710,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
               // Priority order: Check category page first, then property categories
               if (isVirtualOfficeCategoryPageForSuffix) priceSuffix = '/Year';
               else if (isMeetingRoomCategoryPageForSuffix) priceSuffix = '/Hour';
+              else if (isManagedOfficeCategoryPageForSuffix) priceSuffix = '/seat/month';
               else if (isCoworkingCategoryPageForSuffix) priceSuffix = '/seat/month';
               else if (isDedicatedDeskCategoryPageForSuffix) priceSuffix = '/seat/month';
               else if (isPrivateCabinCategoryPageForSuffix) priceSuffix = '/seat/month';

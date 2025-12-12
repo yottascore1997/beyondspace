@@ -691,37 +691,47 @@ export default function CategoryPage() {
             </h1>
           </div>
 
-          {/* Quick Category Filters */}
-          {availableCategories.length > 0 && (
-            <div className="mb-1.5 sm:mb-2">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <h3 className={`${poppins.className} text-xs sm:text-sm md:text-base font-semibold text-gray-700`}>
-                  Categories :
-                </h3>
-                <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                  {availableCategories.map(category => {
-                    const isSelected = Array.isArray(filters.category)
-                      ? filters.category.includes(category.key)
-                      : filters.category === category.key;
-                    
-                    return (
-                      <button
-                        key={category.key}
-                        onClick={() => handleToggleCategory(category.key)}
-                        className={`${poppins.className} px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-medium border transition-all duration-200 ${
-                          isSelected
-                            ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
-                        }`}
-                      >
-                        {category.label}
-                      </button>
-                    );
-                  })}
-                </div>
+          {/* Main Category Navigation - Opens in new tab */}
+          <div className="mb-2 sm:mb-3">
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-2.5 sm:p-3 border border-blue-100 shadow-md">
+              <h3 className={`${poppins.className} text-xs sm:text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5`}>
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Browse Categories
+              </h3>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {[
+                  { key: 'coworking-space', label: 'Coworking' },
+                  { key: 'dedicated-desk', label: 'Dedicated Desk' },
+                  { key: 'private-cabin', label: 'Private Cabin' },
+                  { key: 'virtual-office', label: 'Virtual Office' },
+                  { key: 'meeting-room', label: 'Meeting Room' },
+                  { key: 'managed-office', label: 'Managed Office' },
+                  { key: 'day-pass', label: 'Day Pass' },
+                  { key: 'flexi-desk', label: 'Flexi Desk' }
+                ].map(cat => (
+                  <a
+                    key={cat.key}
+                    href={`/category/${cat.key}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${poppins.className} group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer`}
+                  >
+                    {/* Label */}
+                    <span className="text-[10px] sm:text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors duration-200 whitespace-nowrap">
+                      {cat.label}
+                    </span>
+                    {/* External link icon */}
+                    <svg className="w-3 h-3 text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
               </div>
             </div>
-          )}
+          </div>
+
 
           {/* Quick Area Filters */}
           <div className="mb-1.5 sm:mb-2">
