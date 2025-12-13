@@ -1081,7 +1081,7 @@ export default function PropertyDetails() {
                           ? 'py-4 2xl:py-5 px-4 2xl:px-5'
                           : 'py-2 2xl:py-2 px-2 2xl:px-2'
                       } ${
-                        index < finalPlans.length - 1 ? 'mb-3 2xl:mb-3' : ''
+                        index < finalPlans.length - 1 ? 'mb-6 2xl:mb-8' : ''
                       }`}
                     >
                       <div className={`flex flex-col md:flex-row 2xl:flex-row gap-3 2xl:gap-4 ${
@@ -1149,15 +1149,78 @@ export default function PropertyDetails() {
                                   if (displayPoints.length === 0) {
                                     // Fallback: show description as plain text if no points found
                                     return (
-                                      <p className={`text-gray-700 ${isStandardPlan ? 'mb-2.5 2xl:mb-3' : 'mb-3 2xl:mb-3'} ${
-                                        isSingleMeetingRoom 
-                                          ? 'text-base 2xl:text-lg font-normal leading-relaxed' 
-                                          : isStandardPlan
-                                          ? 'text-sm 2xl:text-sm font-normal leading-relaxed line-clamp-2'
-                                          : 'text-sm 2xl:text-sm font-normal leading-snug line-clamp-2'
-                                      }`}>
-                                        {plan.description}
-                                      </p>
+                                      <div>
+                                        <p className={`text-gray-700 ${isStandardPlan ? 'mb-2.5 2xl:mb-3' : 'mb-3 2xl:mb-3'} ${
+                                          isSingleMeetingRoom 
+                                            ? 'text-base 2xl:text-lg font-normal leading-relaxed' 
+                                            : isStandardPlan
+                                            ? 'text-sm 2xl:text-sm font-normal leading-relaxed line-clamp-2'
+                                            : 'text-sm 2xl:text-sm font-normal leading-snug line-clamp-2'
+                                        }`}>
+                                          {plan.description}
+                                        </p>
+                                        {/* Seating section - just above "To know more" */}
+                                        {(plan.seating || isManagedOffice || isPrivateCabin) && (
+                                          <div className="mb-3 2xl:mb-4">
+                                            <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
+                                              <div className="flex items-center justify-between gap-4">
+                                                <div className="flex items-center gap-2">
+                                                  <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                                    <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                    </svg>
+                                                  </div>
+                                                  <span className="text-xs 2xl:text-sm font-medium text-gray-600">Seating :</span>
+                                                  <span className="text-sm 2xl:text-base font-semibold text-gray-800">
+                                                    {plan.seating && plan.seating.trim() !== '' 
+                                                      ? (plan.seating.split(',')[0]?.trim() || plan.seating)
+                                                      : '2, 4, 8, 10 to 30+'
+                                                    }
+                                                  </span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                  {(() => {
+                                                    const priceValue = plan.price;
+                                                    const hasValidPrice = priceValue != null && 
+                                                                         priceValue !== '' && 
+                                                                         String(priceValue).trim() !== '';
+                                                    
+                                                    if (!hasValidPrice) return null;
+                                                    
+                                                    const priceStr = String(priceValue).trim();
+                                                    const priceNum = parseFloat(priceStr.replace(/[₹,\s]/g, ''));
+                                                    const formattedPrice = isNaN(priceNum) ? priceStr : priceNum.toLocaleString('en-IN');
+                                                    
+                                                    return (
+                                                      <div className="text-right flex items-baseline gap-1">
+                                                        <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
+                                                        <span className="text-base 2xl:text-lg font-bold text-gray-900">
+                                                          {formattedPrice}
+                                                        </span>
+                                                        <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
+                                                      </div>
+                                                    );
+                                                  })()}
+                                                  <button
+                                                    type="button"
+                                                    onClick={handleEnquireClick}
+                                                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                                  >
+                                                    Enquire Now
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {finalText && (
+                                          <div className="mt-3 2xl:mt-3.5 p-3 2xl:p-3.5 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-lg shadow-sm border border-blue-200/60">
+                                            <p className="text-xs 2xl:text-sm text-gray-800 leading-snug font-semibold text-center">
+                                              {finalText}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
                                     );
                                   }
                                   
@@ -1185,6 +1248,61 @@ export default function PropertyDetails() {
                                           );
                                         })}
                                       </div>
+                                      {/* Seating section - just above "To know more" */}
+                                      {(plan.seating || isManagedOffice || isPrivateCabin) && (
+                                        <div className="mt-3 2xl:mt-4 mb-3 2xl:mb-3.5">
+                                          <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
+                                            <div className="flex items-center justify-between gap-4">
+                                              <div className="flex items-center gap-2">
+                                                <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                                  <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                  </svg>
+                                                </div>
+                                                <span className="text-xs 2xl:text-sm font-medium text-gray-600">Seating :</span>
+                                                <span className="text-sm 2xl:text-base font-semibold text-gray-800">
+                                                  {plan.seating && plan.seating.trim() !== '' 
+                                                    ? (plan.seating.split(',')[0]?.trim() || plan.seating)
+                                                    : '2, 4, 8, 10 to 30+'
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex items-center gap-3">
+                                                {(() => {
+                                                  const priceValue = plan.price;
+                                                  const hasValidPrice = priceValue != null && 
+                                                                       priceValue !== '' && 
+                                                                       String(priceValue).trim() !== '';
+                                                  
+                                                  if (!hasValidPrice) return null;
+                                                  
+                                                  const priceStr = String(priceValue).trim();
+                                                  const priceNum = parseFloat(priceStr.replace(/[₹,\s]/g, ''));
+                                                  const formattedPrice = isNaN(priceNum) ? priceStr : priceNum.toLocaleString('en-IN');
+                                                  
+                                                  return (
+                                                    <div className="text-right flex items-baseline gap-1">
+                                                      <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
+                                                      <span className="text-base 2xl:text-lg font-bold text-gray-900">
+                                                        {formattedPrice}
+                                                      </span>
+                                                      <span className="text-sm 2xl:text-base font-normal text-gray-600 ml-0.5 2xl:ml-0.5">{getPriceSuffix()}</span>
+                                                    </div>
+                                                  );
+                                                })()}
+                                                <button
+                                                  type="button"
+                                                  onClick={handleEnquireClick}
+                                                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                                >
+                                                  Enquire Now
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {/* "To know more" message at the bottom */}
                                       {finalText && (
                                         <div className="mt-3 2xl:mt-3.5 p-3 2xl:p-3.5 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-lg shadow-sm border border-blue-200/60">
                                           <p className="text-xs 2xl:text-sm text-gray-800 leading-snug font-semibold text-center">
@@ -1208,7 +1326,8 @@ export default function PropertyDetails() {
                               )
                             )}
                             
-                            {(plan.seating || isManagedOffice || isPrivateCabin || isStandardPlan) && (
+                            {/* Seating section for other plans (not Managed Office or Private Cabin) */}
+                            {(plan.seating || isStandardPlan) && !isManagedOffice && !isPrivateCabin && (
                               <div className={`${
                                 isSingleMeetingRoom ? 'text-base 2xl:text-lg' : isStandardPlan ? 'text-sm 2xl:text-sm' : 'text-sm 2xl:text-sm'
                               } font-medium ${isStandardPlan ? 'mt-2 2xl:mt-2.5' : 'mt-3 2xl:mt-4'}`}>
