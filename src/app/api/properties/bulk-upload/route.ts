@@ -180,25 +180,80 @@ const SEATING_PLANS_MAP: Record<string, { title: string; description: string; se
   }
 };
 
-// Helper function to parse seating plans from individual columns or old format
-function parseSeatingPlansFromColumns(row: ExcelRow): any[] {
-  const plans: any[] = [];
-  const seatingPlanIds = ['dedicated-desk', 'flexi-desk', 'private-cabin', 'managed-office-space', 'virtual-office', 'day-pass'];
+// Helper function to get relevant seating plans based on categories
+function getRelevantSeatingPlansFromCategories(categories: string[]): string[] {
+  const relevantPlans: string[] = [];
+  const normalizedCategories = categories.map(cat => cat.toLowerCase().trim());
   
-  // Check each seating plan column
+  // Map categories to seating plans
+  if (normalizedCategories.includes('coworking') || normalizedCategories.includes('coworkingspace')) {
+    relevantPlans.push('dedicated-desk', 'flexi-desk', 'private-cabin', 'virtual-office');
+  }
+  if (normalizedCategories.includes('dedicateddesk') || normalizedCategories.includes('dedicated-desk')) {
+    relevantPlans.push('dedicated-desk');
+  }
+  if (normalizedCategories.includes('flexidesk') || normalizedCategories.includes('flexi-desk')) {
+    relevantPlans.push('flexi-desk');
+  }
+  if (normalizedCategories.includes('privatecabin') || normalizedCategories.includes('private-cabin')) {
+    relevantPlans.push('private-cabin');
+  }
+  if (normalizedCategories.includes('virtualoffice') || normalizedCategories.includes('virtual-office')) {
+    relevantPlans.push('virtual-office');
+  }
+  if (normalizedCategories.includes('meetingroom') || normalizedCategories.includes('meeting-room')) {
+    relevantPlans.push('meeting-room');
+  }
+  if (normalizedCategories.includes('managed') || normalizedCategories.includes('managedoffice') || normalizedCategories.includes('managed-office')) {
+    relevantPlans.push('managed-office-space');
+  }
+  if (normalizedCategories.includes('daypass') || normalizedCategories.includes('day-pass')) {
+    relevantPlans.push('day-pass');
+  }
+  
+  // Remove duplicates
+  return Array.from(new Set(relevantPlans));
+}
+
+// Helper function to parse seating plans from individual columns or old format
+function parseSeatingPlansFromColumns(row: ExcelRow, categories: string[] = []): any[] {
+  const plans: any[] = [];
+  const seatingPlanIds = ['dedicated-desk', 'flexi-desk', 'private-cabin', 'managed-office-space', 'virtual-office', 'day-pass', 'meeting-room'];
+  
+  // Get relevant seating plans based on categories
+  const relevantPlansFromCategories = getRelevantSeatingPlansFromCategories(categories);
+  
+  // Check each seating plan column for prices OR if it's relevant based on categories
   for (const planId of seatingPlanIds) {
     const price = (row as any)[planId];
-    if (price && price.toString().trim()) {
+    const hasPrice = price && price.toString().trim();
+    const isRelevant = relevantPlansFromCategories.includes(planId);
+    
+    // Add plan if it has a price OR if it's relevant based on categories
+    if (hasPrice || isRelevant) {
       const planInfo = SEATING_PLANS_MAP[planId];
       if (planInfo) {
-        plans.push({
-          id: planId,
-          title: planInfo.title,
-          description: planInfo.description,
-          price: price.toString().trim(),
-          seating: planInfo.seating,
-          isSelected: true
-        });
+        // Special handling for Meeting Room - it uses seatingPrices instead of single price
+        if (planId === 'meeting-room') {
+          plans.push({
+            id: planId,
+            title: planInfo.title,
+            description: planInfo.description,
+            price: '', // Meeting Room doesn't have a general price
+            seating: planInfo.seating,
+            seatingPrices: {}, // Will be populated if needed
+            isSelected: true
+          });
+        } else {
+          plans.push({
+            id: planId,
+            title: planInfo.title,
+            description: planInfo.description,
+            price: hasPrice ? price.toString().trim() : '', // Use price if available, else empty
+            seating: planInfo.seating,
+            isSelected: true
+          });
+        }
       }
     }
   }
@@ -208,9 +263,9 @@ function parseSeatingPlansFromColumns(row: ExcelRow): any[] {
 
 // Helper function to parse seating plans
 // Priority: 1. Individual columns, 2. Simplified format "id1:price1,id2:price2", 3. JSON format (backward compatible)
-function parseSeatingPlans(row: ExcelRow, seatingPlansStr?: string): any[] {
-  // First, try individual columns (new format)
-  const columnPlans = parseSeatingPlansFromColumns(row);
+function parseSeatingPlans(row: ExcelRow, seatingPlansStr: string | undefined, categories: string[] = []): any[] {
+  // First, try individual columns (new format) - this will also auto-add relevant plans based on categories
+  const columnPlans = parseSeatingPlansFromColumns(row, categories);
   if (columnPlans.length > 0) {
     return columnPlans;
   }
@@ -428,7 +483,7 @@ function processRow(row: ExcelRow, userId: string): ProcessedProperty {
   
   // Parse complex fields
   const amenities = parseAmenities(row.amenities);
-  const seatingPlans = parseSeatingPlans(row, row.seatingPlans);
+  const seatingPlans = parseSeatingPlans(row, row.seatingPlans, categories);
   
   // Combine coworkingname and buildingname to create title
   const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
