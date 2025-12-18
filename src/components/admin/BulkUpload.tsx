@@ -222,7 +222,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
           
           if (jsonData.length < 2) {
-            reject(new Error('Excel file must have at least a header row and one data row'));
+            reject(new Error('Excel file mein kam se kam header row aur ek data row hona chahiye. Template download karein aur data fill karein.'));
             return;
           }
           
@@ -233,7 +233,29 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
           // Validate headers
           const missingHeaders = templateHeaders.filter(h => !headers.includes(h));
           if (missingHeaders.length > 0) {
-            reject(new Error(`Missing required columns: ${missingHeaders.join(', ')}`));
+            const friendlyHeaders = missingHeaders.map(h => {
+              const translations: Record<string, string> = {
+                'coworkingname': 'Coworking Name',
+                'buildingname': 'Building Name',
+                'locationDetails': 'Address Details',
+                'propertyTier': 'Property Tier',
+                'dedicated-desk': 'Dedicated Desk',
+                'flexi-desk': 'Flexi Desk',
+                'private-cabin': 'Private Cabin',
+                'managed-office-space': 'Managed Office Space',
+                'virtual-office': 'Virtual Office',
+                'day-pass': 'Day Pass',
+                'metroStationDistance': 'Metro Station Distance',
+                'railwayStationDistance': 'Railway Station Distance',
+                'monFriTime': 'Monday-Friday Time',
+                'saturdayTime': 'Saturday Time',
+                'sundayTime': 'Sunday Time',
+                'googleMapLink': 'Google Map Link',
+                'aboutWorkspace': 'About Workspace'
+              };
+              return translations[h] || h;
+            });
+            reject(new Error(`Ye columns Excel file mein nahi mil rahe: ${friendlyHeaders.join(', ')}. Template download karein aur sahi format use karein.`));
             return;
           }
           
@@ -254,7 +276,7 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
         }
       };
       
-      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onerror = () => reject(new Error('File read nahi ho rahi. Kripya file check karein aur phir se try karein.'));
       reader.readAsArrayBuffer(file);
     });
   };
@@ -283,17 +305,17 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
       const data = await parseExcelFile(file);
       
       if (data.length === 0) {
-        setMessage('No valid data found in Excel file');
+        setMessage('Excel file mein koi valid data nahi mila. Pehle data fill karein.');
         setUploading(false);
         return;
       }
 
-      setMessage(`Found ${data.length} properties. Uploading...`);
+      setMessage(`${data.length} properties mil gaye. Upload kar rahe hain...`);
 
       // Get auth token
       const token = localStorage.getItem('token');
       if (!token) {
-        setMessage('Authentication required. Please login again.');
+        setMessage('Aapka login expire ho gaya hai. Kripya phir se login karein.');
         setUploading(false);
         return;
       }
@@ -312,10 +334,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
 
       if (response.ok) {
         setResult(responseData.results);
-        setMessage(responseData.message);
+        // Format success message
+        let successMsg = responseData.message || 'Upload successful!';
+        if (successMsg.includes('Bulk upload completed')) {
+          const match = successMsg.match(/(\d+) properties created successfully/);
+          if (match) {
+            successMsg = `✅ ${match[1]} properties successfully add ho gaye hain!`;
+          }
+        }
+        setMessage(successMsg);
         onUploadComplete?.();
       } else {
-        setMessage(`Upload failed: ${responseData.error}`);
+        // Format error message
+        let errorMessage = responseData.error || 'Upload failed';
+        if (errorMessage === 'Validation failed') {
+          errorMessage = 'Kuch information galat ya missing hai. Neeche errors dekhein.';
+        } else if (errorMessage === 'No data provided') {
+          errorMessage = 'Excel file mein koi data nahi mila. Pehle data fill karein.';
+        }
+        setMessage(errorMessage);
         if (responseData.details) {
           setResult({
             success: 0,
@@ -441,15 +478,25 @@ export default function BulkUpload({ onUploadComplete }: BulkUploadProps) {
           {/* Errors */}
           {result.errors.length > 0 && (
             <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-              <h4 className="font-medium text-red-900 mb-2">Errors:</h4>
-              <ul className="text-sm text-red-700 space-y-1">
-                {result.errors.map((error, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="text-red-500 mt-0.5">•</span>
-                    <span>{error}</span>
-                  </li>
-                ))}
-              </ul>
+              <h4 className="font-medium text-red-900 mb-3 flex items-center gap-2">
+                <span className="text-xl">⚠️</span>
+                <span>Kuch Problems Hain - Inhein Fix Karein:</span>
+              </h4>
+              <div className="bg-white rounded-lg p-3 border border-red-300 max-h-96 overflow-y-auto">
+                <ul className="text-sm text-red-800 space-y-2">
+                  {result.errors.map((error, index) => (
+                    <li key={index} className="flex items-start gap-2 p-2 bg-red-50 rounded border-l-4 border-red-400">
+                      <span className="text-red-600 font-bold mt-0.5 min-w-[20px]">#{index + 1}</span>
+                      <span className="flex-1 leading-relaxed">{error}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-3 p-2 bg-yellow-100 rounded border border-yellow-300">
+                <p className="text-xs text-yellow-800">
+                  <strong>💡 Tip:</strong> Excel file mein in rows ko check karein aur sahi information fill karein. Phir se upload karein.
+                </p>
+              </div>
             </div>
           )}
         </div>

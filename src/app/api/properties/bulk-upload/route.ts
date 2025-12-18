@@ -322,32 +322,100 @@ function parseSeatingPlans(row: ExcelRow, seatingPlansStr: string | undefined, c
   }
 }
 
+// Helper function to safely convert to string and trim
+function safeTrim(value: any): string {
+  if (value === null || value === undefined) return '';
+  return String(value).trim();
+}
+
+// Helper function to convert technical error messages to user-friendly Hindi/English mix
+function formatUserFriendlyError(error: string): string {
+  // Extract row number if present
+  const rowMatch = error.match(/Row (\d+):/);
+  const rowNum = rowMatch ? rowMatch[1] : '';
+  const errorText = error.replace(/Row \d+: /, '');
+  
+  // Field name translations
+  const fieldTranslations: Record<string, string> = {
+    'Coworking Name': 'Coworking Name (Workspace ka naam)',
+    'Building Name': 'Building Name (Building ka naam)',
+    'City': 'City (Shahar)',
+    'Area': 'Area (Ilaka)',
+    'Categories': 'Categories (Property ki category)',
+    'Address Details': 'Address Details (Pura address)',
+  };
+  
+  // Replace field names with translations
+  let friendlyError = errorText;
+  Object.entries(fieldTranslations).forEach(([key, translation]) => {
+    friendlyError = friendlyError.replace(key, translation);
+  });
+  
+  // Convert specific error patterns
+  if (friendlyError.includes('is required')) {
+    friendlyError = friendlyError.replace('is required', 'fill karein (yeh zaroori hai)');
+  }
+  
+  if (friendlyError.includes('does not exist in database')) {
+    if (friendlyError.includes('City')) {
+      friendlyError = friendlyError.replace('does not exist in database', 'system mein nahi mila. Pehle yeh city add karein');
+    } else if (friendlyError.includes('Area')) {
+      friendlyError = friendlyError.replace('does not exist for city', 'ke liye nahi mila. Pehle yeh area add karein');
+    }
+  }
+  
+  if (friendlyError.includes('already exists in database')) {
+    friendlyError = friendlyError.replace('already exists in database', 'pehle se system mein hai. Koi aur naam use karein');
+  }
+  
+  if (friendlyError.includes('Duplicate property title')) {
+    friendlyError = friendlyError.replace('Duplicate property title', 'Same naam ki property');
+    friendlyError = friendlyError.replace('found in rows:', 'yeh rows mein mili:');
+    friendlyError = friendlyError.replace('Each property must have a unique title.', 'Har property ka naam alag hona chahiye.');
+  }
+  
+  if (friendlyError.includes('Error validating city/area')) {
+    friendlyError = friendlyError.replace('Error validating city/area -', 'City/Area check karte waqt problem hui:');
+  }
+  
+  if (friendlyError.includes('Error checking existing properties')) {
+    friendlyError = friendlyError.replace('Error checking existing properties:', 'Existing properties check karte waqt problem hui:');
+  }
+  
+  // Add row number back if present
+  if (rowNum) {
+    friendlyError = `Row ${rowNum} (Line ${rowNum}): ${friendlyError}`;
+  }
+  
+  return friendlyError;
+}
+
 // Helper function to validate required fields
 function validateProperty(row: ExcelRow, rowIndex: number): string[] {
   const errors: string[] = [];
   
-  if (!row.coworkingname?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Coworking Name is required`);
+  if (!safeTrim(row.coworkingname)) {
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Coworking Name is required`));
   }
   
-  if (!row.buildingname?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Building Name is required`);
+  if (!safeTrim(row.buildingname)) {
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Building Name is required`));
   }
   
-  if (!row.city?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: City is required`);
+  if (!safeTrim(row.city)) {
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: City is required`));
   }
   
-  if (!row.area?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Area is required`);
+  if (!safeTrim(row.area)) {
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Area is required`));
   }
   
-  if (!row.categories?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Categories is required`);
+  if (!safeTrim(row.categories)) {
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Categories is required`));
   }
   
-  if (!row.locationDetails?.trim()) {
-    errors.push(`Row ${rowIndex + 2}: Address Details is required`);
+  if (!safeTrim(row.locationDetails)) {
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Address Details is required`));
   }
   
   return errors;
@@ -364,7 +432,7 @@ async function validateCityArea(city: string, area: string, rowIndex: number): P
     });
     
     if (!cityRecord) {
-      errors.push(`Row ${rowIndex + 2}: City "${city}" does not exist in database`);
+      errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: City "${city}" does not exist in database`));
       return errors; // No point checking area if city doesn't exist
     }
     
@@ -377,10 +445,10 @@ async function validateCityArea(city: string, area: string, rowIndex: number): P
     });
     
     if (!areaRecord) {
-      errors.push(`Row ${rowIndex + 2}: Area "${area}" does not exist for city "${city}"`);
+      errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Area "${area}" does not exist for city "${city}"`));
     }
   } catch (error) {
-    errors.push(`Row ${rowIndex + 2}: Error validating city/area - ${error}`);
+    errors.push(formatUserFriendlyError(`Row ${rowIndex + 2}: Error validating city/area - ${error}`));
   }
   
   return errors;
@@ -394,8 +462,10 @@ function checkDuplicateTitlesInBatch(data: ExcelRow[]): string[] {
   // Generate titles and track their row indices
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
-    if (row.coworkingname?.trim() && row.buildingname?.trim()) {
-      const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+    const coworkingName = safeTrim(row.coworkingname);
+    const buildingName = safeTrim(row.buildingname);
+    if (coworkingName && buildingName) {
+      const title = `${coworkingName} - ${buildingName}`;
       
       if (!titleMap.has(title)) {
         titleMap.set(title, []);
@@ -407,7 +477,7 @@ function checkDuplicateTitlesInBatch(data: ExcelRow[]): string[] {
   // Check for duplicates
   titleMap.forEach((rowIndices, title) => {
     if (rowIndices.length > 1) {
-      errors.push(`Duplicate property title "${title}" found in rows: ${rowIndices.join(', ')}. Each property must have a unique title.`);
+      errors.push(formatUserFriendlyError(`Duplicate property title "${title}" found in rows: ${rowIndices.join(', ')}. Each property must have a unique title.`));
     }
   });
   
@@ -422,8 +492,10 @@ async function checkExistingProperties(data: ExcelRow[]): Promise<string[]> {
   // Generate all titles from the batch
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
-    if (row.coworkingname?.trim() && row.buildingname?.trim()) {
-      const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+    const coworkingName = safeTrim(row.coworkingname);
+    const buildingName = safeTrim(row.buildingname);
+    if (coworkingName && buildingName) {
+      const title = `${coworkingName} - ${buildingName}`;
       titles.push(title);
     }
   }
@@ -449,16 +521,18 @@ async function checkExistingProperties(data: ExcelRow[]): Promise<string[]> {
       const existingTitles = existingProperties.map(p => p.title);
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
-        if (row.coworkingname?.trim() && row.buildingname?.trim()) {
-          const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+        const coworkingName = safeTrim(row.coworkingname);
+        const buildingName = safeTrim(row.buildingname);
+        if (coworkingName && buildingName) {
+          const title = `${coworkingName} - ${buildingName}`;
           if (existingTitles.includes(title)) {
-            errors.push(`Row ${i + 2}: Property with title "${title}" already exists in database. Each property must have a unique title.`);
+            errors.push(formatUserFriendlyError(`Row ${i + 2}: Property with title "${title}" already exists in database. Each property must have a unique title.`));
           }
         }
       }
     }
   } catch (error) {
-    errors.push(`Error checking existing properties: ${error}`);
+    errors.push(formatUserFriendlyError(`Error checking existing properties: ${error}`));
   }
   
   return errors;
@@ -466,8 +540,9 @@ async function checkExistingProperties(data: ExcelRow[]): Promise<string[]> {
 
 // Process Excel row to database format
 function processRow(row: ExcelRow, userId: string): ProcessedProperty {
-  // Parse categories
-  const categories = row.categories
+  // Parse categories - safely convert to string first
+  const categoriesStr = safeTrim(row.categories);
+  const categories = categoriesStr
     .split(',')
     .map(cat => cat.trim().toLowerCase())
     .filter(Boolean);
@@ -486,13 +561,13 @@ function processRow(row: ExcelRow, userId: string): ProcessedProperty {
   const seatingPlans = parseSeatingPlans(row, row.seatingPlans, categories);
   
   // Combine coworkingname and buildingname to create title
-  const title = `${row.coworkingname.trim()} - ${row.buildingname.trim()}`;
+  const title = `${safeTrim(row.coworkingname)} - ${safeTrim(row.buildingname)}`;
   
   return {
     title: title,
-    city: row.city.trim(),
-    area: row.area.trim(),
-    sublocation: row.sublocation?.trim() || null,
+    city: safeTrim(row.city),
+    area: safeTrim(row.area),
+    sublocation: safeTrim(row.sublocation) || null,
     purpose: purpose as any,
     type: type as any,
     displayOrder: 0,
@@ -502,19 +577,19 @@ function processRow(row: ExcelRow, userId: string): ProcessedProperty {
     size: 0, // Default 0
     beds: '', // Default empty
     rating: 0, // Default 0
-    image: row.image?.trim() || '', // Optional - user will add images separately
+    image: safeTrim(row.image) || '', // Optional - user will add images separately
     tag: '', // Default empty
     description: '', // Default empty
     workspaceName: null, // Not in form
     workspaceTimings: workspaceTimings || null,
     workspaceClosedDays: null, // Not in form
     amenities: amenities, // Will always have default amenities if none provided
-    locationDetails: row.locationDetails?.trim() || null,
+    locationDetails: safeTrim(row.locationDetails) || null,
     metroStationDistance: metroDistance || null,
     railwayStationDistance: railwayDistance || null,
-    googleMapLink: row.googleMapLink?.trim() || null,
-    propertyTier: row.propertyTier?.trim() || null,
-    aboutWorkspace: row.aboutWorkspace?.trim() || null,
+    googleMapLink: safeTrim(row.googleMapLink) || null,
+    propertyTier: safeTrim(row.propertyTier) || null,
+    aboutWorkspace: safeTrim(row.aboutWorkspace) || null,
     capacity: null, // Not in form
     superArea: null, // Not in form
     propertyOptions: seatingPlans.length > 0 ? seatingPlans : null,
@@ -528,7 +603,10 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
     const { data } = await request.json();
     
     if (!Array.isArray(data) || data.length === 0) {
-      return NextResponse.json({ error: 'No data provided' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Excel file mein koi data nahi mila', 
+        details: ['Excel file khali hai ya format galat hai. Pehle template download karein aur data fill karein.']
+      }, { status: 400 });
     }
 
     // Verify user exists in database
@@ -538,7 +616,10 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
 
     if (!dbUser) {
       return NextResponse.json(
-        { error: 'User not found in database' },
+        { 
+          error: 'Authentication problem (Login issue)', 
+          details: ['Aapka login expire ho gaya hai. Phir se login karein.']
+        },
         { status: 404 }
       );
     }
@@ -557,7 +638,7 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       
       // City/Area validation (only if basic fields are valid)
       if (fieldErrors.length === 0 && row.city && row.area) {
-        const cityAreaErrors = await validateCityArea(row.city.trim(), row.area.trim(), i);
+        const cityAreaErrors = await validateCityArea(safeTrim(row.city), safeTrim(row.area), i);
         validationErrors.push(...cityAreaErrors);
       }
     }
@@ -601,7 +682,7 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
         
         if (existingProperty) {
           results.failed++;
-          const errorMsg = `Row ${i + 2}: Property with title "${processedProperty.title}" already exists in database. Skipping duplicate.`;
+          const errorMsg = formatUserFriendlyError(`Row ${i + 2}: Property with title "${processedProperty.title}" already exists in database. Skipping duplicate.`);
           results.errors.push(errorMsg);
           console.log(`[Row ${i + 1}] ⚠️ Skipped (duplicate): ${processedProperty.title}`);
           continue;
@@ -617,24 +698,42 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
         
       } catch (error: any) {
         results.failed++;
-        const errorMsg = `Row ${i + 2}: ${error.message || 'Unknown error'}`;
-        results.errors.push(errorMsg);
+        let errorMsg = error.message || 'Unknown error';
+        // Format common database errors
+        if (errorMsg.includes('Unique constraint')) {
+          errorMsg = `Ye property pehle se system mein hai. Koi aur naam use karein.`;
+        } else if (errorMsg.includes('Foreign key constraint')) {
+          errorMsg = `City ya Area galat hai. Pehle verify karein.`;
+        } else if (errorMsg.includes('required')) {
+          errorMsg = `Kuch zaroori information missing hai.`;
+        }
+        results.errors.push(formatUserFriendlyError(`Row ${i + 2}: ${errorMsg}`));
         console.error(`[Row ${i + 1}] ❌ Error:`, error);
       }
     }
 
     console.log(`[Bulk Upload] Complete - Success: ${results.success}, Failed: ${results.failed}`);
 
+    // Format success message
+    let successMessage = '';
+    if (results.success > 0 && results.failed === 0) {
+      successMessage = `✅ ${results.success} properties successfully add ho gaye hain!`;
+    } else if (results.success > 0 && results.failed > 0) {
+      successMessage = `⚠️ ${results.success} properties add ho gaye, lekin ${results.failed} properties mein problem hui. Neeche errors dekhein.`;
+    } else {
+      successMessage = `❌ Koi bhi property add nahi hui. Neeche errors dekhein.`;
+    }
+
     return NextResponse.json({
-      message: `Bulk upload completed. ${results.success} properties created successfully.`,
+      message: successMessage,
       results
     });
 
   } catch (error: any) {
     console.error('[Bulk Upload] Server Error:', error);
     return NextResponse.json({ 
-      error: 'Server error', 
-      details: error.message 
+      error: 'Server error (System mein kuch problem hui)', 
+      details: formatUserFriendlyError(`System error: ${error.message || 'Unknown error'}`)
     }, { status: 500 });
   }
 });
