@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Poppins } from 'next/font/google';
 
 const poppins = Poppins({
@@ -56,6 +57,35 @@ interface PropertyCardProps {
 export default function PropertyCard({ property, onEnquireClick, hideCategory = false, category }: PropertyCardProps) {
   const [isFav, setIsFav] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0])); // Load first image immediately
+  const cardRef = useRef<HTMLElement | null>(null);
+  
+  // Get all available images (main image + additional images)
+  const allImages = property.propertyImages && property.propertyImages.length > 0 
+    ? [property.image, ...property.propertyImages.map(img => img.imageUrl).filter(img => img !== property.image)]
+    : [property.image];
+  
+  // Lazy load images when card comes into view
+  useEffect(() => {
+    if (!cardRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Load all images when card is visible
+            setLoadedImages(new Set(allImages.map((_, idx) => idx)));
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '50px' } // Start loading 50px before card is visible
+    );
+    
+    observer.observe(cardRef.current);
+    
+    return () => observer.disconnect();
+  }, [allImages.length]); // Only depend on length, not the array itself
   
   const categoryLabelMap: Record<string, string> = {
     coworking: 'Coworking',
@@ -276,6 +306,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       if (managedOfficePlan && managedOfficePlan.price) {
         const numericPrice = extractNumericPrice(managedOfficePlan.price);
         if (numericPrice !== null && numericPrice > 0) {
+          // Return price without suffix - suffix will be added in display
           return `₹ ${numericPrice.toLocaleString('en-IN')}`;
         }
       }
@@ -489,11 +520,6 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
 
   const minSeatingPrice = getMinSeatingPlanPrice();
 
-  // Get all available images (main image + additional images)
-  const allImages = property.propertyImages && property.propertyImages.length > 0 
-    ? [property.image, ...property.propertyImages.map(img => img.imageUrl).filter(img => img !== property.image)]
-    : [property.image];
-  
   const nextImage = () => {
     setCurrentImageIndex((prev) => {
       // Stop at last image, don't loop back
@@ -526,7 +552,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       rel="noopener noreferrer"
       className="block"
     >
-      <article className={`${poppins.className} bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200`}>
+      <article ref={cardRef} className={`${poppins.className} bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200`}>
         <div className="relative h-56 sm:h-64 md:h-72 2xl:h-80 overflow-hidden rounded-t-xl group">
         {property.propertyTier && (
           <span className="absolute top-2 left-2 z-20 inline-flex items-center rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-white shadow-md capitalize">
@@ -542,14 +568,27 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
             }}
           >
             {allImages.map((image, index) => (
-              <img
-                key={image}
-                src={image}
-                alt={property.title}
-                className="w-full h-full object-cover flex-shrink-0"
-                style={{ minWidth: '100%', width: '100%' }}
-                loading={index === 0 ? "lazy" : "eager"}
-              />
+              loadedImages.has(index) ? (
+                <Image
+                  key={image}
+                  src={image}
+                  alt={`${property.title} - Image ${index + 1}`}
+                  width={400}
+                  height={300}
+                  className="w-full h-full object-cover flex-shrink-0"
+                  style={{ minWidth: '100%', width: '100%' }}
+                  loading={index === 0 ? "lazy" : "lazy"}
+                  quality={85}
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  unoptimized={image.startsWith('http') && !image.includes('files.beyondspacework.com')}
+                />
+              ) : (
+                <div
+                  key={image}
+                  className="w-full h-full flex-shrink-0 bg-gray-200 animate-pulse"
+                  style={{ minWidth: '100%', width: '100%' }}
+                />
+              )
             ))}
           </div>
         </div>
@@ -640,6 +679,63 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
           </div>
         )}
 
+        {/* Show seating options for Meeting Room category page */}
+        {(() => {
+          const categoryLowerForSeating = category?.toLowerCase() || '';
+          const normalizedCategoryForSeating = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+          const isMeetingRoomCategoryPageForSeating = normalizedCategoryForSeating === 'meetingroom' || 
+                                                        categoryLowerForSeating === 'meeting-room' ||
+                                                        categoryLowerForSeating === 'meetingroom' ||
+                                                        categoryLowerForSeating === 'meeting room' ||
+                                                        categoryLowerForSeating.includes('meeting-room');
+          
+          if (isMeetingRoomCategoryPageForSeating && property.propertyOptions && property.propertyOptions.length > 0) {
+            // Find meeting room plans
+            const meetingRoomPlans = property.propertyOptions.filter((plan: SeatingPlan) => 
+              plan.title.toLowerCase().includes('meeting room')
+            );
+            
+            if (meetingRoomPlans.length > 0) {
+              // Get all unique seating options from all meeting room plans
+              const allSeatingOptions = new Set<string>();
+              meetingRoomPlans.forEach((plan: SeatingPlan) => {
+                if (plan.seating) {
+                  plan.seating.split(',').forEach((s: string) => {
+                    const trimmed = s.trim();
+                    if (trimmed) {
+                      allSeatingOptions.add(trimmed);
+                    }
+                  });
+                }
+              });
+              
+              // Convert to array and sort
+              const sortedSeatingOptions = Array.from(allSeatingOptions).sort((a, b) => {
+                // Extract numbers for sorting (e.g., "04 Seater" -> 4, "12+ Seats" -> 12)
+                const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+                const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+                return numA - numB;
+              });
+              
+              if (sortedSeatingOptions.length > 0) {
+                return (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {sortedSeatingOptions.map((seating, index) => (
+                      <span
+                        key={index}
+                        className="px-2.5 py-1 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-md text-[10px] sm:text-xs text-indigo-700 font-semibold shadow-sm"
+                      >
+                        {seating}
+                      </span>
+                    ))}
+                  </div>
+                );
+              }
+            }
+          }
+          return null;
+        })()}
+
         <div className="flex items-center justify-between mt-2">
           <div className="font-semibold text-gray-800 text-sm sm:text-base font-sans">
             {(() => {
@@ -688,7 +784,9 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                                                             normalizedCategoryForSuffix === 'managedoffice' ||
                                                             categoryLowerForSuffix === 'managed-office' ||
                                                             categoryLowerForSuffix === 'managedoffice' ||
-                                                            categoryLowerForSuffix.includes('managed-office');
+                                                            categoryLowerForSuffix === 'managed' ||
+                                                            categoryLowerForSuffix.includes('managed-office') ||
+                                                            categoryLowerForSuffix.includes('managed');
               
               const hasVirtualOfficeCategory = property.categories?.some(cat => 
                 cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')

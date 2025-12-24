@@ -91,6 +91,25 @@ export default function CategoryPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('grid');
   
   // Initialize filters from URL params if available
+  const initialCityParam = searchParams.get('city');
+  // Handle double encoding - try decoding twice if needed
+  let initialCity = 'all';
+  if (initialCityParam) {
+    try {
+      // First decode
+      let decoded = decodeURIComponent(initialCityParam);
+      // Check if still encoded (contains %)
+      if (decoded.includes('%')) {
+        // Try decoding again
+        decoded = decodeURIComponent(decoded);
+      }
+      initialCity = decoded;
+    } catch (e) {
+      // If decoding fails, use as is
+      initialCity = initialCityParam;
+    }
+  }
+  
   const initialAreaParam = searchParams.get('area');
   const initialArea = initialAreaParam 
     ? (initialAreaParam.includes(',') ? initialAreaParam.split(',').map(a => decodeURIComponent(a.trim())) : decodeURIComponent(initialAreaParam))
@@ -99,6 +118,8 @@ export default function CategoryPage() {
   const initialCategory = initialCategoryParam 
     ? (initialCategoryParam.includes(',') ? initialCategoryParam.split(',').map(c => decodeURIComponent(c.trim())) : decodeURIComponent(initialCategoryParam))
     : 'all';
+  
+  const [selectedCity, setSelectedCity] = useState<string>(initialCity);
   const [filters, setFilters] = useState<Filters>({
     sortBy: 'Popularity',
     area: initialArea,
@@ -129,7 +150,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchCategoryProperties();
-  }, [category, searchQuery]);
+  }, [category, searchQuery, categoryName, selectedCity]);
 
   // Auto-search: Update searchQuery when searchInput changes (with debounce)
   useEffect(() => {
@@ -141,13 +162,42 @@ export default function CategoryPage() {
   }, [searchInput]);
 
   useEffect(() => {
-    const loadCitiesAreas = async () => {
+    const loadCities = async () => {
       try {
         const citiesRes = await fetch('/api/public/cities', { cache: 'no-store' });
         if (citiesRes.ok) {
           const cities = await citiesRes.json();
           setCityOptions(cities);
-          const mumbai = cities.find((c: { name: string }) => c.name?.toLowerCase() === 'mumbai');
+        }
+      } catch {
+        // ignore
+      }
+    };
+    loadCities();
+  }, []);
+
+  // Load areas based on selected city
+  useEffect(() => {
+    const loadAreasForCity = async () => {
+      try {
+        // Find city by name (case-insensitive)
+        const cityToLoad = selectedCity && selectedCity !== 'all' 
+          ? selectedCity 
+          : 'Mumbai'; // Default to Mumbai if no city selected
+        
+        const city = cityOptions.find((c: { name: string }) => 
+          c.name?.toLowerCase() === cityToLoad.toLowerCase()
+        );
+        
+        if (city?.id) {
+          const areasRes = await fetch(`/api/public/areas?cityId=${encodeURIComponent(city.id)}`, { cache: 'no-store' });
+          if (areasRes.ok) {
+            const areas = await areasRes.json();
+            setAreaOptions(areas);
+          }
+        } else if (cityOptions.length > 0) {
+          // If city not found but cities are loaded, try to find Mumbai as fallback
+          const mumbai = cityOptions.find((c: { name: string }) => c.name?.toLowerCase() === 'mumbai');
           if (mumbai?.id) {
             setMumbaiCityId(mumbai.id);
             const areasRes = await fetch(`/api/public/areas?cityId=${encodeURIComponent(mumbai.id)}`, { cache: 'no-store' });
@@ -161,16 +211,64 @@ export default function CategoryPage() {
         // ignore
       }
     };
-    loadCitiesAreas();
-  }, []);
+    
+    // Only load areas if cities are loaded
+    if (cityOptions.length > 0) {
+      loadAreasForCity();
+    }
+  }, [selectedCity, cityOptions]);
 
   // Update filters from URL params when they change
   useEffect(() => {
+    const urlCity = searchParams.get('city');
     const urlArea = searchParams.get('area');
+    
+    // Handle city with double encoding
+    if (urlCity) {
+      try {
+        let decoded = decodeURIComponent(urlCity);
+        // Check if still encoded (contains %)
+        if (decoded.includes('%')) {
+          // Try decoding again
+          decoded = decodeURIComponent(decoded);
+        }
+        setSelectedCity(decoded);
+      } catch (e) {
+        // If decoding fails, use as is
+        setSelectedCity(urlCity);
+      }
+    } else {
+      setSelectedCity('all');
+    }
+    
+    // Handle area
     if (urlArea) {
+      const decodedArea = urlArea.includes(',') 
+        ? urlArea.split(',').map(a => {
+            try {
+              let decoded = decodeURIComponent(a.trim());
+              if (decoded.includes('%')) {
+                decoded = decodeURIComponent(decoded);
+              }
+              return decoded;
+            } catch (e) {
+              return a.trim();
+            }
+          })
+        : (() => {
+            try {
+              let decoded = decodeURIComponent(urlArea);
+              if (decoded.includes('%')) {
+                decoded = decodeURIComponent(decoded);
+              }
+              return decoded;
+            } catch (e) {
+              return urlArea;
+            }
+          })();
       setFilters(prev => {
-        if (prev.area !== urlArea) {
-          return { ...prev, area: urlArea };
+        if (JSON.stringify(prev.area) !== JSON.stringify(decodedArea)) {
+          return { ...prev, area: decodedArea };
         }
         return prev;
       });
@@ -192,7 +290,9 @@ export default function CategoryPage() {
     } else {
       params.set('page', page.toString());
     }
-    router.push(`?${params.toString()}`, { scroll: false });
+    // Maintain category path in URL
+    const categoryPath = `/category/${encodeURIComponent(category)}`;
+    router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
   };
 
   // Sync currentPage with URL when URL changes (only when URL changes, not when currentPage changes)
@@ -201,12 +301,39 @@ export default function CategoryPage() {
     setCurrentPage(urlPage);
   }, [searchParams]);
 
+  // Filter and sort properties whenever they or filters/search change
   useEffect(() => {
-    filterAndSortProperties();
-    // Reset to page 1 when filters change
-    setCurrentPage(1);
-    updatePageInURL(1);
-  }, [properties, filters, searchQuery]);
+    // Only filter if properties are loaded
+    if (properties.length > 0 || filteredProperties.length > 0) {
+      filterAndSortProperties();
+    }
+  }, [properties, filters, searchQuery, categoryName]);
+
+  // Reset to page 1 only when filters or search query actually change (not when properties load or page changes)
+  const prevFiltersRef = useRef<string>(JSON.stringify(filters));
+  const prevSearchQueryRef = useRef<string>(searchQuery);
+  const isInitialMount = useRef(true);
+  
+  useEffect(() => {
+    // Skip on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      prevFiltersRef.current = JSON.stringify(filters);
+      prevSearchQueryRef.current = searchQuery;
+      return;
+    }
+    
+    const filtersChanged = prevFiltersRef.current !== JSON.stringify(filters);
+    const searchChanged = prevSearchQueryRef.current !== searchQuery;
+    
+    // Only reset page if filters or search actually changed (not on page navigation)
+    if (filtersChanged || searchChanged) {
+      setCurrentPage(1);
+      updatePageInURL(1);
+      prevFiltersRef.current = JSON.stringify(filters);
+      prevSearchQueryRef.current = searchQuery;
+    }
+  }, [filters, searchQuery]);
 
   useEffect(() => {
     if (filters.area === 'all') {
@@ -250,12 +377,19 @@ export default function CategoryPage() {
   const fetchCategoryProperties = async () => {
     try {
       setLoading(true);
-      // If search is active, fetch all properties (without category filter) so search can work on all data
-      // Otherwise, fetch only category-filtered properties for better performance
-      const url = searchQuery.trim() !== ''
-        ? `/api/properties?city=Mumbai` // Fetch all properties when searching
-        : `/api/properties?category=${encodeURIComponent(categoryName)}&city=Mumbai`; // Fetch category-filtered when not searching
+      // Build query params
+      const queryParams = new URLSearchParams();
       
+      // Add category filter if not searching
+      if (searchQuery.trim() === '') {
+        queryParams.set('category', categoryName);
+      }
+      
+      // Add city filter from URL or default to Mumbai
+      const cityToUse = selectedCity && selectedCity !== 'all' ? selectedCity : 'Mumbai';
+      queryParams.set('city', cityToUse);
+      
+      const url = `/api/properties?${queryParams.toString()}`;
       const response = await fetch(url);
       const data = await response.json();
       setProperties(data);
@@ -269,13 +403,14 @@ export default function CategoryPage() {
   const filterAndSortProperties = () => {
     let filtered = [...properties];
 
-    // Category filter - Apply when search is active (since we fetch all properties when searching)
-    if (searchQuery.trim() !== '') {
+    // Category filter - Always apply category filtering based on current category page
+    // This ensures that even if API returns all properties, we filter by category on client side
+    const applyCategoryFilter = () => {
       // Category mapping same as API route
       const categoryKeyMap: Record<string, string[]> = {
         coworking: ['privatecabin', 'dedicateddesk', 'flexidesk', 'virtualoffice'],
         managed: ['managed'],
-        dedicateddesk: ['privatecabin', 'dedicateddesk'],
+        dedicateddesk: ['dedicateddesk'],
         privatecabin: ['privatecabin'],
         flexidesk: ['flexidesk', 'dedicateddesk'],
         daypass: ['daypass', 'flexidesk'],
@@ -302,21 +437,39 @@ export default function CategoryPage() {
 
       const normalizedCategory = normalizeCategoryKey(categoryName);
       const relatedCategoryKeys = categoryKeyMap[normalizedCategory] || [normalizedCategory];
+      
+      // Debug: Log category filtering (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Category Filter] Category Name:', categoryName);
+        console.log('[Category Filter] Normalized Category:', normalizedCategory);
+        console.log('[Category Filter] Related Category Keys:', relatedCategoryKeys);
+        console.log('[Category Filter] Properties before filter:', filtered.length);
+      }
 
       filtered = filtered.filter(property => {
         const propertyCategories = Array.isArray(property.categories)
           ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
           : [];
 
-        // Check if any property category matches any of the related category keys
+        // Check if any property category matches any of the related category keys (exact match only)
         const hasCategoryMatch = relatedCategoryKeys.some(key => {
-          const normalizedKey = key.toLowerCase();
-          return propertyCategories.includes(normalizedKey);
+          const normalizedKey = key.toLowerCase().trim();
+          // Exact match only - check if property categories array contains exactly this key
+          return propertyCategories.some(cat => cat.trim() === normalizedKey);
         });
 
-        // For Managed Office Space, only show if it has 'managed' category (strict filtering)
+        // For Managed Office Space, only show if it has exact 'managed' category (strict filtering)
         if (normalizedCategory === 'managed') {
-          return hasCategoryMatch; // Don't use type fallback for managed category
+          // Double check: must have exact 'managed' category, not partial matches like "year", "seat", "day"
+          const hasExactManaged = propertyCategories.some(cat => {
+            const trimmed = cat.trim();
+            return trimmed === 'managed';
+          });
+          // Debug log for managed category
+          if (process.env.NODE_ENV === 'development' && !hasExactManaged) {
+            console.log('[Category Filter] Property does not have managed category:', property.title, 'Categories:', propertyCategories);
+          }
+          return hasExactManaged; // Strict: only return true if exact 'managed' category exists
         }
 
         // For Dedicated Desk, only show if it has 'dedicateddesk' or 'privatecabin' category (strict filtering)
@@ -360,7 +513,17 @@ export default function CategoryPage() {
 
         return hasCategoryMatch || hasTypeMatch;
       });
-    }
+      
+      // Debug: Log filtered count (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Category Filter] Properties after filter:', filtered.length);
+      }
+    };
+
+    // Always apply category filter to ensure only current category properties are shown
+    // This ensures that even on page 2+, only current category properties are shown
+    // Apply filter regardless of properties length to ensure filtering works
+    applyCategoryFilter();
 
     // Search filter
     if (searchQuery.trim() !== '') {
@@ -371,6 +534,15 @@ export default function CategoryPage() {
       );
     }
 
+    // City filter - filter by city if selected
+    if (selectedCity && selectedCity !== 'all') {
+      filtered = filtered.filter(property => {
+        const propertyCity = property.city?.toLowerCase().trim();
+        const filterCity = selectedCity.toLowerCase().trim();
+        return propertyCity === filterCity;
+      });
+    }
+    
     // Area filter - support both single area (string) and multiple areas (array)
     if (filters.area !== 'all') {
       if (Array.isArray(filters.area)) {
@@ -548,19 +720,58 @@ export default function CategoryPage() {
   const popularDropdownAreas = areaOptions.slice(0, 16).map(a => ({ key: a.name, label: a.name }));
 
   const handleApplyArea = () => {
+    let newArea: string | string[] = 'all';
     if (pendingAreas.length === 0) {
+      newArea = 'all';
       setFilters(prev => ({ ...prev, area: 'all' }));
     } else if (pendingAreas.length === 1) {
+      newArea = pendingAreas[0];
       setFilters(prev => ({ ...prev, area: pendingAreas[0] }));
     } else {
+      newArea = pendingAreas;
       setFilters(prev => ({ ...prev, area: pendingAreas }));
     }
+    
+    // Update URL with area filter
+    const params = new URLSearchParams(searchParams.toString());
+    if (newArea === 'all') {
+      params.delete('area');
+    } else if (Array.isArray(newArea)) {
+      params.set('area', newArea.map(a => encodeURIComponent(a)).join(','));
+    } else {
+      params.set('area', encodeURIComponent(newArea));
+    }
+    
+    // Maintain city in URL
+    if (selectedCity && selectedCity !== 'all') {
+      params.set('city', encodeURIComponent(selectedCity));
+    }
+    
+    // Reset to page 1 when area changes
+    params.delete('page');
+    const categoryPath = `/category/${encodeURIComponent(category)}`;
+    router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
+    
     setIsLocationMenuOpen(false);
   };
 
   const handleResetArea = () => {
     setPendingAreas([]);
     setFilters(prev => ({ ...prev, area: 'all' }));
+    
+    // Update URL - remove area filter
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('area');
+    
+    // Maintain city in URL
+    if (selectedCity && selectedCity !== 'all') {
+      params.set('city', encodeURIComponent(selectedCity));
+    }
+    
+    // Reset to page 1
+    params.delete('page');
+    const categoryPath = `/category/${encodeURIComponent(category)}`;
+    router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
   };
 
   const handleToggleArea = (areaKey: string) => {
@@ -686,7 +897,7 @@ export default function CategoryPage() {
           <div className="mb-1.5 sm:mb-2">
             <h1 className={`${poppins.className} text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
               <span className="text-gray-800">
-                {categoryDisplayName} in Mumbai
+                {categoryDisplayName} in {selectedCity && selectedCity !== 'all' ? selectedCity : 'Mumbai'}
               </span>
             </h1>
           </div>
@@ -710,24 +921,67 @@ export default function CategoryPage() {
                   { key: 'managed-office', label: 'Managed Office' },
                   { key: 'day-pass', label: 'Day Pass' },
                   { key: 'flexi-desk', label: 'Flexi Desk' }
-                ].map(cat => (
-                  <a
-                    key={cat.key}
-                    href={`/category/${cat.key}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${poppins.className} group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer`}
-                  >
-                    {/* Label */}
-                    <span className="text-[10px] sm:text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors duration-200 whitespace-nowrap">
-                      {cat.label}
-                    </span>
-                    {/* External link icon */}
-                    <svg className="w-3 h-3 text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                ))}
+                ].map(cat => {
+                  // Normalize category names for comparison
+                  const normalizeCategory = (catName: string) => {
+                    const cleaned = catName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    // Map common variations
+                    const mapping: Record<string, string> = {
+                      'managed': 'managedoffice',
+                      'managedoffice': 'managedoffice',
+                      'coworking': 'coworkingspace',
+                      'coworkingspace': 'coworkingspace',
+                      'dedicateddesk': 'dedicateddesk',
+                      'dedicateddesks': 'dedicateddesk',
+                      'privatecabin': 'privatecabin',
+                      'privatecabins': 'privatecabin',
+                      'virtualoffice': 'virtualoffice',
+                      'virtualoffices': 'virtualoffice',
+                      'meetingroom': 'meetingroom',
+                      'meetingrooms': 'meetingroom',
+                      'daypass': 'daypass',
+                      'daypasses': 'daypass',
+                      'flexidesk': 'flexidesk',
+                      'flexidesks': 'flexidesk',
+                    };
+                    return mapping[cleaned] || cleaned;
+                  };
+                  
+                  const currentCategoryNormalized = normalizeCategory(categoryName);
+                  const catKeyNormalized = normalizeCategory(cat.key);
+                  const isCurrentCategory = currentCategoryNormalized === catKeyNormalized;
+                  
+                  return (
+                    <a
+                      key={cat.key}
+                      href={`/category/${cat.key}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${poppins.className} group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer ${
+                        isCurrentCategory
+                          ? 'bg-blue-500 text-white border-blue-600'
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      {/* Label */}
+                      <span className={`text-[10px] sm:text-xs font-semibold transition-colors duration-200 whitespace-nowrap ${
+                        isCurrentCategory
+                          ? 'text-white'
+                          : 'text-gray-700 group-hover:text-blue-600'
+                      }`}>
+                        {cat.label}
+                      </span>
+                      {/* External link icon */}
+                      <svg className={`w-3 h-3 flex-shrink-0 transform group-hover:translate-x-0.5 transition-all duration-200 ${
+                        isCurrentCategory
+                          ? 'text-white opacity-100'
+                          : 'text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100'
+                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -747,30 +1001,57 @@ export default function CategoryPage() {
                   <button
                     key={area.key}
                     onClick={() => {
+                      let newArea: string | string[] = 'all';
                       if (area.key === 'all') {
+                        newArea = 'all';
                         setFilters(prev => ({ ...prev, area: 'all' }));
                       } else {
                         // Toggle area in multi-select
                         setFilters(prev => {
                           if (prev.area === 'all') {
+                            newArea = [area.key];
                             return { ...prev, area: [area.key] };
                           } else if (Array.isArray(prev.area)) {
                             if (prev.area.includes(area.key)) {
                               const newAreas = prev.area.filter(a => a !== area.key);
+                              newArea = newAreas.length === 0 ? 'all' : newAreas;
                               return { ...prev, area: newAreas.length === 0 ? 'all' : newAreas };
                             } else {
+                              newArea = [...prev.area, area.key];
                               return { ...prev, area: [...prev.area, area.key] };
                             }
                           } else {
                             // Single area, convert to array
                             if (prev.area === area.key) {
+                              newArea = 'all';
                               return { ...prev, area: 'all' };
                             } else {
+                              newArea = [prev.area, area.key];
                               return { ...prev, area: [prev.area, area.key] };
                             }
                           }
                         });
                       }
+                      
+                      // Update URL with area filter
+                      const params = new URLSearchParams(searchParams.toString());
+                      if (newArea === 'all') {
+                        params.delete('area');
+                      } else if (Array.isArray(newArea)) {
+                        params.set('area', newArea.map(a => encodeURIComponent(a)).join(','));
+                      } else {
+                        params.set('area', encodeURIComponent(newArea));
+                      }
+                      
+                      // Maintain city in URL
+                      if (selectedCity && selectedCity !== 'all') {
+                        params.set('city', encodeURIComponent(selectedCity));
+                      }
+                      
+                      // Reset to page 1 when area changes
+                      params.delete('page');
+                      const categoryPath = `/category/${encodeURIComponent(category)}`;
+                      router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
                     }}
                     className={`${poppins.className} px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-medium border transition-all duration-200 ${
                       isSelected
@@ -821,6 +1102,41 @@ export default function CategoryPage() {
 
             {/* Filters */}
             <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2 sm:gap-3 sm:ml-auto">
+              {/* City Filter */}
+              <div className="relative flex-1 sm:flex-none w-full sm:w-auto">
+                <select
+                  value={selectedCity}
+                  onChange={(e) => {
+                    const newCity = e.target.value;
+                    setSelectedCity(newCity);
+                    // Reset area filter when city changes (areas will be different for new city)
+                    setFilters(prev => ({ ...prev, area: 'all' }));
+                    setPendingAreas([]);
+                    // Update URL with city filter
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (newCity && newCity !== 'all') {
+                      params.set('city', encodeURIComponent(newCity));
+                    } else {
+                      params.delete('city');
+                    }
+                    // Remove area from URL when city changes
+                    params.delete('area');
+                    // Reset to page 1 when city changes
+                    params.delete('page');
+                    const categoryPath = `/category/${encodeURIComponent(category)}`;
+                    router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
+                  }}
+                  className={`${poppins.className} w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
+                >
+                  <option value="all">All Cities</option>
+                  {cityOptions.map((city) => (
+                    <option key={city.id} value={city.name}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
               <div className="relative flex-1 sm:flex-none w-full sm:w-auto" ref={locationMenuRef}>
                 <button
                   type="button"
@@ -1052,8 +1368,11 @@ export default function CategoryPage() {
                   
                   // Show remaining properties with pagination (after 32)
                   // Page 1 shows only first 32, pagination starts from page 2
-                  if (remainingProperties.length > 0) {
-                    const totalPages = Math.ceil(remainingProperties.length / propertiesPerPage) + 1; // +1 for the first 32 properties page
+                  if (remainingProperties.length > 0 || currentPage > 1) {
+                    // Calculate total pages: first 32 properties on page 1, then remaining properties divided by 8
+                    const totalPages = first32Properties.length > 0 
+                      ? Math.ceil(remainingProperties.length / propertiesPerPage) + 1 // +1 for the first 32 properties page
+                      : Math.ceil(filteredProperties.length / propertiesPerPage); // If no first 32, use all properties
                     
                     // Show remaining properties if currentPage > 1
                     if (currentPage > 1) {
@@ -1072,6 +1391,7 @@ export default function CategoryPage() {
                               property={property}
                               onEnquireClick={handleEnquireClick}
                               hideCategory={true}
+                              category={categoryName}
                             />
                           ))}
                         </div>
@@ -1117,7 +1437,12 @@ export default function CategoryPage() {
                           };
                           
                           const handlePageChange = (page: number, e?: React.MouseEvent) => {
-                            // If Ctrl/Cmd or middle mouse button, let browser handle it (open in new tab)
+                            // For page 2+, always open in new tab
+                            if (page > 1) {
+                              // Let the link handle it (will open in new tab due to target="_blank")
+                              return;
+                            }
+                            // For page 1, handle normally
                             if (e && (e.ctrlKey || e.metaKey || e.button === 1)) {
                               return; // Let the link handle it
                             }
@@ -1137,7 +1462,9 @@ export default function CategoryPage() {
                               params.set('page', page.toString());
                             }
                             const queryString = params.toString();
-                            return `?${queryString}`;
+                            // Maintain category path in URL
+                            const categoryPath = `/category/${encodeURIComponent(category)}`;
+                            return queryString ? `${categoryPath}?${queryString}` : categoryPath;
                           };
                           
                           const prevPage = Math.max(1, currentPage - 1);
@@ -1154,6 +1481,8 @@ export default function CategoryPage() {
                                 <Link
                                   href={getPageUrl(prevPage)}
                                   onClick={(e) => handlePageChange(prevPage, e)}
+                                  target={prevPage > 1 ? "_blank" : undefined}
+                                  rel={prevPage > 1 ? "noopener noreferrer" : undefined}
                                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all bg-blue-400 text-white hover:bg-blue-500`}
                                 >
                                   Previous
@@ -1169,6 +1498,8 @@ export default function CategoryPage() {
                                     key={page}
                                     href={getPageUrl(page as number)}
                                     onClick={(e) => handlePageChange(page as number, e)}
+                                    target={(page as number) > 1 ? "_blank" : undefined}
+                                    rel={(page as number) > 1 ? "noopener noreferrer" : undefined}
                                     className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all ${
                                       currentPage === page
                                         ? 'bg-blue-400 text-white'
@@ -1189,6 +1520,8 @@ export default function CategoryPage() {
                                 <Link
                                   href={getPageUrl(nextPage)}
                                   onClick={(e) => handlePageChange(nextPage, e)}
+                                  target={nextPage > 1 ? "_blank" : undefined}
+                                  rel={nextPage > 1 ? "noopener noreferrer" : undefined}
                                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all bg-blue-400 text-white hover:bg-blue-500`}
                                 >
                                   Next

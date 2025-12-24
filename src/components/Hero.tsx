@@ -312,19 +312,30 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
             <button
               onClick={() => {
                 // Handle navigation based on filters
+                const queryParams = new URLSearchParams();
+                
+                // Add city if selected
+                if (filters.city && filters.city !== 'all') {
+                  queryParams.set('city', encodeURIComponent(filters.city));
+                }
+                
+                // Add area if selected
+                if (filters.area && filters.area !== 'all') {
+                  queryParams.set('area', encodeURIComponent(filters.area));
+                }
+                
+                const queryString = queryParams.toString();
+                const urlSuffix = queryString ? `?${queryString}` : '';
+                
                 if (filters.purpose) {
                   // If category/purpose is selected, go to category page
-                  // Add area query param if area is selected
-                  const url = filters.area && filters.area !== 'all'
-                    ? `/category/${filters.purpose}?area=${encodeURIComponent(filters.area)}`
-                    : `/category/${filters.purpose}`;
-                  router.push(url);
+                  router.push(`/category/${filters.purpose}${urlSuffix}`);
                 } else if (filters.area && filters.area !== 'all') {
-                  // If only area is selected (no category), go to default category (coworking) with area filter
-                  router.push(`/category/coworking?area=${encodeURIComponent(filters.area)}`);
+                  // If only area is selected (no category), go to default category (coworking) with filters
+                  router.push(`/category/coworking${urlSuffix}`);
                 } else {
                   // Default: show all properties or first category
-                  router.push('/category/coworking');
+                  router.push(`/category/coworking${urlSuffix}`);
                 }
               }}
               className="w-full mt-1 py-1.5 2xl:py-2.5 rounded-lg bg-blue-400 text-white text-xs 2xl:text-base font-semibold shadow-lg hover:bg-blue-500 transition-all duration-300"
