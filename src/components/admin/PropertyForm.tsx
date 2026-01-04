@@ -1636,7 +1636,7 @@ const loadPropertyForEdit = async (propertyId: string) => {
                         </label>
                         {plan.id === 'meeting-room' ? (
                           <div className="flex flex-col gap-2">
-                            {['04 Seater','06 Seater','08 Seater','10 Seater','12+ Seats'].map((opt) => {
+                            {['04 Seater','06 Seater','08 Seater','10 Seater','12+ Seater'].map((opt) => {
                               const current = (plan.seating || '').split(',').map(s => s.trim()).filter(Boolean);
                               const checked = current.includes(opt);
                               

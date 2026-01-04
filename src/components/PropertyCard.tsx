@@ -596,36 +596,46 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
         {/* Image Navigation Arrows - Only show if multiple images */}
         {allImages.length > 1 && (
           <>
-            {/* Previous Button - Hide when at first image */}
-            {currentImageIndex > 0 && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+            {/* Previous Button - Grayed out when at first image */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (currentImageIndex > 0) {
                   prevImage();
-                }}
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-            )}
-            {/* Next Button - Hide when at last image */}
-            {currentImageIndex < allImages.length - 1 && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+                }
+              }}
+              disabled={currentImageIndex === 0}
+              className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30 ${
+                currentImageIndex === 0
+                  ? 'bg-gray-100/90 text-gray-400 cursor-not-allowed'
+                  : 'bg-white/90 text-black cursor-pointer'
+              }`}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            {/* Next Button - Grayed out when at last image */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (currentImageIndex < allImages.length - 1) {
                   nextImage();
-                }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 text-black rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            )}
+                }
+              }}
+              disabled={currentImageIndex >= allImages.length - 1}
+              className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30 ${
+                currentImageIndex >= allImages.length - 1
+                  ? 'bg-gray-100/90 text-gray-400 cursor-not-allowed'
+                  : 'bg-white/90 text-black cursor-pointer'
+              }`}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </>
         )}
         
@@ -703,7 +713,9 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                   plan.seating.split(',').forEach((s: string) => {
                     const trimmed = s.trim();
                     if (trimmed) {
-                      allSeatingOptions.add(trimmed);
+                      // Map "12+ Seats" to "12+ Seater" for consistency
+                      const normalizedSeating = trimmed === '12+ Seats' ? '12+ Seater' : trimmed;
+                      allSeatingOptions.add(normalizedSeating);
                     }
                   });
                 }
@@ -711,7 +723,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
               
               // Convert to array and sort
               const sortedSeatingOptions = Array.from(allSeatingOptions).sort((a, b) => {
-                // Extract numbers for sorting (e.g., "04 Seater" -> 4, "12+ Seats" -> 12)
+                // Extract numbers for sorting (e.g., "04 Seater" -> 4, "12+ Seater" -> 12)
                 const numA = parseInt(a.match(/\d+/)?.[0] || '0');
                 const numB = parseInt(b.match(/\d+/)?.[0] || '0');
                 return numA - numB;
@@ -719,7 +731,8 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
               
               if (sortedSeatingOptions.length > 0) {
                 return (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs sm:text-sm font-semibold text-black">Available Options :</span>
                     {sortedSeatingOptions.map((seating, index) => (
                       <span
                         key={index}

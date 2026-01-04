@@ -10,6 +10,14 @@ import ShareRequirementsModal from '@/components/ShareRequirementsModal';
 import GetOfferModal from '@/components/GetOfferModal';
 import Link from 'next/link';
 
+interface SeatingPlan {
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  seating: string;
+}
+
 interface Property {
   id: string;
   title: string;
@@ -30,6 +38,7 @@ interface Property {
   tag?: string;
   propertyTier?: string | null;
   description?: string;
+  propertyOptions?: SeatingPlan[] | null;
   // Coworking specific fields
   workspaceName?: string;
   workspaceTimings?: string;
@@ -64,13 +73,13 @@ interface PrimeLocation {
 }
 
 const primeLocations: PrimeLocation[] = [
-  { name: 'Thane', slug: 'thane', image: '/images/mumbai7.jpg' },
+  { name: 'Thane West', slug: 'thane west', image: '/images/mumbai7.jpg' },
   { name: 'Navi Mumbai', slug: 'navi mumbai', image: '/images/mumbai8.PNG' },
   { name: 'Andheri West', slug: 'andheri west', image: '/images/mumbai4.jpeg' },
   { name: 'Andheri East', slug: 'andheri east', image: '/images/mumbai4.jpeg' },
   { name: 'Goregaon East', slug: 'goregaon east', image: '/images/mumbai4.jpeg' },
-  { name: 'BKC', slug: 'bkc', image: '/images/mumbai3.png' },
-  { name: 'Lower Parel', slug: 'lower parel', image: '/images/mumbai5.jpg' },
+  { name: 'Bandra East (BKC)', slug: 'bkc', image: '/images/mumbai3.png' },
+  { name: 'Lower Parel West', slug: 'lower parel west', image: '/images/mumbai5.jpg' },
   { name: 'Powai', slug: 'powai', image: '/images/mumbai8.PNG' }
 ];
 
@@ -400,6 +409,117 @@ export default function CategoryPage() {
     }
   };
 
+  // Helper function to extract numeric price from price string
+  const extractNumericPrice = (priceStr: string): number | null => {
+    if (!priceStr || priceStr.trim() === '') return null;
+    // Remove currency symbols, commas, and spaces, then parse
+    const numericPrice = parseFloat(priceStr.replace(/[₹,\s]/g, ''));
+    return isNaN(numericPrice) ? null : numericPrice;
+  };
+
+  // Get the relevant price from seating plans based on current category
+  const getPropertyPriceForCategory = (property: Property): number | null => {
+    // If no propertyOptions, fallback to property.price
+    if (!property.propertyOptions || !Array.isArray(property.propertyOptions) || property.propertyOptions.length === 0) {
+      return property.price || null;
+    }
+
+    const normalizedCategory = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const categoryLower = categoryName.toLowerCase();
+
+    // Helper to find plan by title
+    const findPlanByTitle = (titleKeywords: string[]) => {
+      return property.propertyOptions!.find((plan: SeatingPlan) => {
+        if (!plan || !plan.title) return false;
+        const titleLower = plan.title.toLowerCase().trim();
+        return titleKeywords.some(keyword => titleLower.includes(keyword));
+      });
+    };
+
+    // Virtual Office category page
+    if (normalizedCategory === 'virtualoffice' || categoryLower === 'virtual-office' || categoryLower.includes('virtual-office')) {
+      const plan = findPlanByTitle(['virtual office', 'virtualoffice']);
+      if (plan && plan.price) {
+        const price = extractNumericPrice(plan.price);
+        if (price !== null && price > 0) return price;
+      }
+      return null;
+    }
+
+    // Meeting Room category page
+    if (normalizedCategory === 'meetingroom' || categoryLower === 'meeting-room' || categoryLower.includes('meeting-room')) {
+      const meetingRoomPlans = property.propertyOptions!.filter((plan: SeatingPlan) => 
+        plan.title.toLowerCase().includes('meeting room')
+      );
+      if (meetingRoomPlans.length > 0) {
+        // Try 04 Seater first
+        const fourSeater = meetingRoomPlans.find(plan => 
+          plan.seating && (plan.seating.toLowerCase().includes('04') || plan.seating.toLowerCase().includes('4 seater'))
+        );
+        if (fourSeater && fourSeater.price) {
+          const price = extractNumericPrice(fourSeater.price);
+          if (price !== null && price > 0) return price;
+        }
+        // Get lowest price
+        const prices = meetingRoomPlans
+          .map(plan => extractNumericPrice(plan.price))
+          .filter((p): p is number => p !== null && p > 0)
+          .sort((a, b) => a - b);
+        if (prices.length > 0) return prices[0];
+      }
+      return null;
+    }
+
+    // Coworking category page - Dedicated Desk first, then Private Cabin
+    if (normalizedCategory === 'coworking' || normalizedCategory === 'coworkingspace' || categoryLower === 'coworking-space' || categoryLower.includes('coworking')) {
+      const dedicatedDesk = findPlanByTitle(['dedicated desk']);
+      if (dedicatedDesk && dedicatedDesk.price) {
+        const price = extractNumericPrice(dedicatedDesk.price);
+        if (price !== null && price > 0) return price;
+      }
+      const privateCabin = findPlanByTitle(['private cabin']);
+      if (privateCabin && privateCabin.price) {
+        const price = extractNumericPrice(privateCabin.price);
+        if (price !== null && price > 0) return price;
+      }
+      return null;
+    }
+
+    // Dedicated Desk category page
+    if (normalizedCategory === 'dedicateddesk' || categoryLower === 'dedicated-desk' || categoryLower.includes('dedicated-desk')) {
+      const plan = findPlanByTitle(['dedicated desk']);
+      if (plan && plan.price) {
+        const price = extractNumericPrice(plan.price);
+        if (price !== null && price > 0) return price;
+      }
+      return null;
+    }
+
+    // Private Cabin category page
+    if (normalizedCategory === 'privatecabin' || categoryLower === 'private-cabin' || categoryLower.includes('private-cabin')) {
+      const plan = findPlanByTitle(['private cabin']);
+      if (plan && plan.price) {
+        const price = extractNumericPrice(plan.price);
+        if (price !== null && price > 0) return price;
+      }
+      return null;
+    }
+
+    // Managed Office category page
+    if (normalizedCategory === 'managed' || normalizedCategory === 'managedoffice' || categoryLower === 'managed-office' || categoryLower.includes('managed-office')) {
+      const plan = findPlanByTitle(['managed office']);
+      if (plan && plan.price) {
+        const price = extractNumericPrice(plan.price);
+        if (price !== null && price > 0) return price;
+      }
+      // Fallback to property.price for managed office
+      return property.price || null;
+    }
+
+    // Default: fallback to property.price
+    return property.price || null;
+  };
+
   const filterAndSortProperties = () => {
     let filtered = [...properties];
 
@@ -583,10 +703,13 @@ export default function CategoryPage() {
       }
     }
 
-    // Price filter
+    // Price filter - use price from seating plans based on category
     if (filters.price !== 'all') {
       filtered = filtered.filter(property => {
-        const price = property.price;
+        const price = getPropertyPriceForCategory(property);
+        // If no price found, exclude the property from results
+        if (price === null) return false;
+        
         switch (filters.price) {
           case 'under-10000':
             return price < 10000;
@@ -603,11 +726,19 @@ export default function CategoryPage() {
     }
 
 
-    // Sort properties
+    // Sort properties - use price from seating plans for sorting
     if (filters.sortBy === 'Price: Low to High') {
-      filtered.sort((a, b) => a.price - b.price);
+      filtered.sort((a, b) => {
+        const priceA = getPropertyPriceForCategory(a) || 0;
+        const priceB = getPropertyPriceForCategory(b) || 0;
+        return priceA - priceB;
+      });
     } else if (filters.sortBy === 'Price: High to Low') {
-      filtered.sort((a, b) => b.price - a.price);
+      filtered.sort((a, b) => {
+        const priceA = getPropertyPriceForCategory(a) || 0;
+        const priceB = getPropertyPriceForCategory(b) || 0;
+        return priceB - priceA;
+      });
     } else if (filters.sortBy === 'Rating') {
       filtered.sort((a, b) => b.rating - a.rating);
     }
@@ -895,8 +1026,8 @@ export default function CategoryPage() {
       <div className="bg-white border-b border-gray-100">
         <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%', paddingTop: '8px', paddingBottom: '8px' }}>
           <div className="mb-1.5 sm:mb-2">
-            <h1 className={`${poppins.className} text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-800 mb-0.5 tracking-tight`}>
-              <span className="text-gray-800">
+            <h1 className={`${poppins.className} text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-black mb-0.5 tracking-tight`}>
+              <span className="text-black">
                 {categoryDisplayName} in {selectedCity && selectedCity !== 'all' ? selectedCity : 'Mumbai'}
               </span>
             </h1>
@@ -904,23 +1035,21 @@ export default function CategoryPage() {
 
           {/* Main Category Navigation - Opens in new tab */}
           <div className="mb-2 sm:mb-3">
-            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-2.5 sm:p-3 border border-blue-100 shadow-md">
-              <h3 className={`${poppins.className} text-xs sm:text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5`}>
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-3.5 sm:p-4 border border-blue-100 shadow-md">
+              <h3 className={`${poppins.className} text-sm sm:text-base md:text-lg font-semibold text-black mb-2.5 sm:mb-3 flex items-center gap-2`}>
+                <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
                 Browse Categories
               </h3>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <div className="flex flex-nowrap gap-2.5 sm:gap-3 md:gap-3.5 overflow-x-auto">
                 {[
                   { key: 'coworking-space', label: 'Coworking' },
                   { key: 'dedicated-desk', label: 'Dedicated Desk' },
                   { key: 'private-cabin', label: 'Private Cabin' },
-                  { key: 'virtual-office', label: 'Virtual Office' },
                   { key: 'meeting-room', label: 'Meeting Room' },
                   { key: 'managed-office', label: 'Managed Office' },
-                  { key: 'day-pass', label: 'Day Pass' },
-                  { key: 'flexi-desk', label: 'Flexi Desk' }
+                  { key: 'day-pass', label: 'Day Pass' }
                 ].map(cat => {
                   // Normalize category names for comparison
                   const normalizeCategory = (catName: string) => {
@@ -957,25 +1086,25 @@ export default function CategoryPage() {
                       href={`/category/${cat.key}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`${poppins.className} group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer ${
+                      className={`${poppins.className} group relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex-shrink-0 ${
                         isCurrentCategory
                           ? 'bg-blue-500 text-white border-blue-600'
                           : 'bg-white border-gray-200'
                       }`}
                     >
                       {/* Label */}
-                      <span className={`text-[10px] sm:text-xs font-semibold transition-colors duration-200 whitespace-nowrap ${
+                      <span className={`text-xs sm:text-sm md:text-base font-semibold transition-colors duration-200 whitespace-nowrap ${
                         isCurrentCategory
                           ? 'text-white'
-                          : 'text-gray-700 group-hover:text-blue-600'
+                          : 'text-black group-hover:text-blue-600'
                       }`}>
                         {cat.label}
                       </span>
                       {/* External link icon */}
-                      <svg className={`w-3 h-3 flex-shrink-0 transform group-hover:translate-x-0.5 transition-all duration-200 ${
+                      <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0 transform group-hover:translate-x-0.5 transition-all duration-200 ${
                         isCurrentCategory
                           ? 'text-white opacity-100'
-                          : 'text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100'
+                          : 'text-black group-hover:text-blue-500 opacity-0 group-hover:opacity-100'
                       }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
@@ -1056,7 +1185,7 @@ export default function CategoryPage() {
                     className={`${poppins.className} px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-medium border transition-all duration-200 ${
                       isSelected
                         ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                        : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
                     }`}
                   >
                     {area.label}
@@ -1072,7 +1201,7 @@ export default function CategoryPage() {
             <div className="flex flex-1 w-full max-w-full sm:max-w-xl items-stretch sm:items-center gap-1.5 sm:gap-2">
               <div className="relative flex-1 w-full">
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -1087,7 +1216,7 @@ export default function CategoryPage() {
                       handleSearch();
                     }
                   }}
-                className={`${poppins.className} block w-full pl-6 sm:pl-7 md:pl-8 pr-2 sm:pr-2.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg leading-5 bg-white text-gray-900 placeholder-gray-400 text-[10px] sm:text-xs md:text-sm focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`${poppins.className} block w-full pl-6 sm:pl-7 md:pl-8 pr-2 sm:pr-2.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg leading-5 bg-white text-black placeholder-gray-400 text-[10px] sm:text-xs md:text-sm focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 style={{ color: '#111827' }}
               />
               </div>
@@ -1126,7 +1255,7 @@ export default function CategoryPage() {
                     const categoryPath = `/category/${encodeURIComponent(category)}`;
                     router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
                   }}
-                  className={`${poppins.className} w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
+                  className={`${poppins.className} w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-black text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
                 >
                   <option value="all">All Cities</option>
                   {cityOptions.map((city) => (
@@ -1143,7 +1272,7 @@ export default function CategoryPage() {
                   onClick={() => {
                     setIsLocationMenuOpen(prev => !prev);
                   }}
-                  className={`${poppins.className} flex items-center justify-between w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
+                  className={`${poppins.className} flex items-center justify-between w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-black text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
                 >
                   <span className="truncate">
                     Prime Locations
@@ -1176,7 +1305,7 @@ export default function CategoryPage() {
                             className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded text-[10px] sm:text-xs md:text-xs font-medium border transition-all duration-200 flex items-center w-full justify-center text-center ${
                               isSelected
                                 ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
-                                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-500'
+                                : 'bg-white text-black border-gray-300 hover:border-blue-400 hover:text-blue-500'
                             }`}
                           >
                             <span className="w-full text-center whitespace-nowrap overflow-hidden text-ellipsis">{area.label}</span>
@@ -1188,7 +1317,7 @@ export default function CategoryPage() {
                       <button
                         type="button"
                         onClick={handleResetArea}
-                        className="text-xs sm:text-xs md:text-sm font-medium text-gray-700 hover:text-gray-900"
+                        className="text-xs sm:text-xs md:text-sm font-medium text-black hover:text-black"
                       >
                         Reset
                       </button>
@@ -1208,7 +1337,7 @@ export default function CategoryPage() {
                 ref={priceSelectRef}
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
-                className={`${poppins.className} font-sans block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-[10px] sm:text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent`}
+                className={`${poppins.className} font-sans block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-black text-[10px] sm:text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent`}
               >
                 <option value="all">Select Price</option>
                 <option value="under-10000">Less than ₹10,000</option>
@@ -1256,17 +1385,17 @@ export default function CategoryPage() {
                         {[
                           {
                             title: 'Private Office',
-                            description: 'Fully furnished Private offices for you and your growing team.',
+                            description: 'Our fully furnished private office spaces feature customized layouts and complete privacy, allowing your business and growing team to work efficiently.',
                             image: '/images/co1.jpeg'
                           },
                           {
                             title: 'Managed Office',
-                            description: 'Customised fully furnished office managed by professionals.',
+                            description: 'Our professionally managed offices feature customized layouts and full furnishings, allowing your team to start working immediately.',
                             image: '/images/co2.jpeg'
                           },
                           {
                             title: 'Enterprise Solution',
-                            description: 'Fully equipped offices for larger teams with flexibility to scale & customise.',
+                            description: 'Empower your large team in a fully equipped office that offers the flexibility to scale and customize your workspace to your requirement.',
                             image: '/images/co3.jpeg'
                           }
                         ].map((card) => (
@@ -1474,7 +1603,7 @@ export default function CategoryPage() {
                             <>
                               {/* Previous Button */}
                               {currentPage === 1 ? (
-                                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold bg-gray-200 text-black cursor-not-allowed`}>
+                                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold bg-gray-200 text-gray-500 cursor-not-allowed opacity-60`}>
                                   Previous
                                 </span>
                               ) : (
@@ -1511,9 +1640,9 @@ export default function CategoryPage() {
                                 )
                               ))}
                               
-                              {/* Next Button */}
+                              {/* Next Button - Always visible, grayed out when disabled */}
                               {currentPage === totalPages ? (
-                                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold bg-gray-200 text-black cursor-not-allowed`}>
+                                <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold bg-gray-100 text-gray-400 cursor-not-allowed inline-block">
                                   Next
                                 </span>
                               ) : (
@@ -1522,7 +1651,7 @@ export default function CategoryPage() {
                                   onClick={(e) => handlePageChange(nextPage, e)}
                                   target={nextPage > 1 ? "_blank" : undefined}
                                   rel={nextPage > 1 ? "noopener noreferrer" : undefined}
-                                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all bg-blue-400 text-white hover:bg-blue-500`}
+                                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-semibold transition-all bg-blue-400 text-white hover:bg-blue-500 inline-block"
                                 >
                                   Next
                                 </Link>
@@ -1566,37 +1695,40 @@ export default function CategoryPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-5">
-              {primeLocations.map((location) => (
-                <Link
-                  key={location.slug}
-                  href={`/category/coworking-space`}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 overflow-hidden transition-transform duration-300 hover:-translate-y-1 flex flex-col h-full"
-                >
-                  <div className="h-40 md:h-44 w-full overflow-hidden">
-                    <img
-                      src={location.image}
-                      alt={`Coworking Space in ${location.name}`}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      Coworking Space in {location.name}
-                    </h4>
-                    <div className="flex items-center justify-between text-xs font-semibold text-blue-500">
-                      <span>Explore Spaces</span>
-                      <svg
-                        className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+              {primeLocations.map((location) => {
+                const encodedArea = encodeURIComponent(location.name);
+                return (
+                  <Link
+                    key={location.slug}
+                    href={`/category/coworking-space?area=${encodedArea}`}
+                    className="bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 overflow-hidden transition-transform duration-300 hover:-translate-y-1 flex flex-col h-full"
+                  >
+                    <div className="h-40 md:h-44 w-full overflow-hidden">
+                      <img
+                        src={location.image}
+                        alt={`Coworking Space in ${location.name}`}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
                     </div>
-                  </div>
-                </Link>
-              ))}
+                    <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                      <h4 className="text-lg font-semibold text-black">
+                        Coworking Space in {location.name}
+                      </h4>
+                      <div className="flex items-center justify-between text-xs font-semibold text-blue-500">
+                        <span>Explore Spaces</span>
+                        <svg
+                          className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
