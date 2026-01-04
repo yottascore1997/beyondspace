@@ -68,11 +68,11 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
   const categories = [
     {
       name: 'Coworking Space',
-      description: 'Full-time offices for teams of all sizes',
+      description: 'Full-time premium flexible offices for teams of all sizes',
       features: [
         'Dedicated seats & private cabins',
         'Fully-equipped coworking spaces',
-        'Ideal for individual or small teams'
+        'Ideal for individual professionals or small growing businesses'
       ]
     },
     {
@@ -89,7 +89,7 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
       description: 'Fully private, lockable room for confidentiality',
       features: [
         'Enclosed & secure workspace',
-        'Available in various sizes (2, 4, 8, 10+ seater)',
+        'Available in various sizes (2, 4, 8, 10, 30+ seater)',
         'Perfect for businesses of all sizes'
       ]
     },
@@ -106,8 +106,8 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
       name: 'Virtual Office',
       description: 'Professional address and communication services',
       features: [
-        'Business address & mail handling',
-        'Call answering & forwarding',
+        'Now register your Business address & GST',
+        'Call answering & mail handling',
         'Ideal for remote teams'
       ]
     },

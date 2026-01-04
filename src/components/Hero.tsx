@@ -139,11 +139,11 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   const quickFilters = [
     { key: 'coworking', label: 'Coworking' },
     { key: 'managed', label: 'Managed Office Space' },
+    { key: 'privatecabin', label: 'Private Cabin' },
     { key: 'dedicateddesk', label: 'Dedicated Desk' },
     { key: 'flexidesk', label: 'Day Pass' },
-    { key: 'privatecabin', label: 'Private Cabin' },
-    { key: 'virtualoffice', label: 'Virtual Office' },
     { key: 'meetingroom', label: 'Meeting Room' },
+    { key: 'virtualoffice', label: 'Virtual Office' },
     { key: 'enterpriseoffices', label: 'Enterprise Offices' },
   ];
 

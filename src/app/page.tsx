@@ -14,6 +14,7 @@ import Footer from '@/components/Footer';
 import Benefits from '@/components/Benefits';
 import FeaturedCoworking from '@/components/FeaturedCoworking';
 import ShareRequirementsModal from '@/components/ShareRequirementsModal';
+import FAQ from '@/components/FAQ';
 
 export default function Home() {
   const [filters, setFilters] = useState({
@@ -152,6 +153,8 @@ export default function Home() {
 
         <Testimonials />
       </div>
+
+      <FAQ />
 
       <Footer />
 
