@@ -44,18 +44,30 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-5 group">
-              <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-blue-500/40 group-hover:border-blue-600 transition-all shadow-md group-hover:shadow-lg">
-                <img
-                  src="/images/logo.jpeg"
-                  alt="Beyond Space Logo"
-                  className="w-full h-full object-cover"
-                />
+            <Link href="/" className="flex items-center gap-0.5 group">
+              <div className="relative mt-2.5 -ml-4">
+                {/* Main Logo */}
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-lg overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <img 
+                    src="/images/logo.png" 
+                    alt="Beyond Space Logo" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </div>
-              <span className="text-2xl font-bold tracking-tight">
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Beyond</span>{' '}
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Space</span>
-              </span>
+              <div className="flex flex-col gap-0.5 min-w-[200px] sm:min-w-[240px] md:min-w-[280px]">
+                <span className="font-black text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight tracking-tight drop-shadow-lg">
+                  <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                    Beyond
+                  </span>{' '}
+                  <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                    Space
+                  </span>
+                </span>
+                <span className="text-[8px] sm:text-[9px] md:text-[10px] font-semibold tracking-wide normal-case text-black">
+                  ✦ One Stop Solution For Your Office Space ✦
+                </span>
+              </div>
             </Link>
             <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-5 font-medium">
               Premium commercial real estate advisors helping enterprises discover Grade-A office spaces across Mumbai.

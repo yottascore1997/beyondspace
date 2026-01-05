@@ -645,6 +645,12 @@ export default function CategoryPage() {
     // Apply filter regardless of properties length to ensure filtering works
     applyCategoryFilter();
 
+    // Filter out properties that don't have pricing for the current category
+    filtered = filtered.filter(property => {
+      const price = getPropertyPriceForCategory(property);
+      return price !== null && price > 0;
+    });
+
     // Search filter
     if (searchQuery.trim() !== '') {
       filtered = filtered.filter(property => 
@@ -1470,7 +1476,7 @@ export default function CategoryPage() {
                       
                       // Add properties batch
                       batches.push(
-                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4' : 'space-y-3 sm:space-y-4'}>
+                        <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4 items-stretch' : 'space-y-3 sm:space-y-4'}>
                           {batch.map((property) => (
                             <PropertyCard
                               key={property.id}

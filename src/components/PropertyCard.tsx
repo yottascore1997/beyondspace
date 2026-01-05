@@ -552,7 +552,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       rel="noopener noreferrer"
       className="block"
     >
-      <article ref={cardRef} className={`${poppins.className} bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200`}>
+      <article ref={cardRef} className={`${poppins.className} bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 h-full flex flex-col`}>
         <div className="relative h-56 sm:h-64 md:h-72 2xl:h-80 overflow-hidden rounded-t-xl group">
         {property.propertyTier && (
           <span className="absolute top-2 left-2 z-20 inline-flex items-center rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-white shadow-md capitalize">
@@ -659,7 +659,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
         )}
         </div>
       
-        <div className="p-3 sm:p-4 space-y-1.5">
+        <div className="p-3 sm:p-4 space-y-1.5 flex-1 flex flex-col">
         <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-tight cursor-pointer line-clamp-2">
           {property.title}
         </h3>
@@ -749,7 +749,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
           return null;
         })()}
 
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between mt-auto pt-2">
           <div className="font-semibold text-gray-800 text-sm sm:text-base font-sans">
             {(() => {
               // Get the appropriate suffix based on category

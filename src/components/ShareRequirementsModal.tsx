@@ -133,33 +133,21 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
         }}
       >
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative z-50 flex flex-col lg:flex-row"
+          className="bg-gradient-to-b from-blue-50 via-blue-50 to-blue-50 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] relative z-50 flex flex-col lg:flex-row overflow-hidden"
           onClick={(event) => event.stopPropagation()}
           style={{
             animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
           }}
         >
-          <div className="bg-gradient-to-b from-blue-50 via-blue-50 to-blue-50 p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">We Curate Workspaces That Work</h2>
-              <p className="text-gray-700 text-base">Share your goals and we’ll shortlist fully managed options, negotiate savings, and coordinate a stress-free move-in.</p>
-            </div>
-            <div className="space-y-4">
-              {[ 'Guided walkthroughs & transparent pricing', 'Flexible terms with end-to-end support' ].map((text) => (
-                <div key={text} className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-gray-800 font-medium">{text}</span>
-                </div>
-              ))}
+          <div className="p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">We Curate Workspaces That Work</h2>
+              <p className="text-gray-700 text-base">Share your goals and we'll shortlist fully managed options, negotiate savings, and coordinate a stress-free move-in.</p>
             </div>
 
-            <div className="mt-10">
-              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Trusted by teams at</p>
-              <div className="grid grid-cols-3 gap-4 gap-y-6 items-center">
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 leading-none">Trusted by teams at</p>
+              <div className="grid grid-cols-3 gap-2 md:gap-3 gap-y-3 md:gap-y-4 items-center">
                 {[
                   '/images/trusted/c1.png',
                   '/images/trusted/c2.png',
@@ -173,14 +161,21 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                 ].map((logo, index) => (
                   <div
                     key={index}
-                    className="relative mx-auto flex h-20 w-24 sm:h-24 sm:w-28 items-center justify-center rounded-xl border border-transparent bg-white/80 shadow-[0_8px_24px_rgba(148,163,184,0.18)] backdrop-blur-sm"
+                    className={`relative mx-auto flex items-center justify-center ${
+                      index === 0 ? 'h-20 w-full sm:h-24 md:h-28' : 'h-14 w-full sm:h-16 md:h-18'
+                    }`}
                   >
                     <img
                       src={logo}
                       alt={`Client logo ${index + 1}`}
-                      className="h-full w-full object-contain"
+                      className="max-h-full max-w-full w-auto h-auto object-contain"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.style.display = 'none';
+                        }
                       }}
                     />
                   </div>
@@ -189,11 +184,11 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
             </div>
           </div>
 
-          <div className="p-8 flex-1 relative">
+          <div className="p-8 flex-1 relative bg-white/80 backdrop-blur-sm lg:rounded-r-2xl lg:rounded-tl-none rounded-b-2xl flex flex-col overflow-y-auto">
             <button
               type="button"
               onClick={handleClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -330,7 +325,7 @@ export default function ShareRequirementsModal({ isOpen, onClose }: ShareRequire
                   <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <a href="tel:+919876543210" className="text-base font-bold text-orange-500">+91 98765 43210</a>
+                  <a href="tel:+919820744251" className="text-base font-bold text-orange-500">+91 98207 44251</a>
                 </div>
               </div>
             </div>
