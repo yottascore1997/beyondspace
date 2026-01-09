@@ -39,7 +39,7 @@ export default function Footer() {
 
   return (
     <>
-    <footer className={`${poppins.className} bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 text-gray-800 w-full border-t border-gray-200`}>
+    <footer className={`${poppins.className} bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 text-gray-800 w-full border-t-2 border-gray-500`}>
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
           {/* Logo and Description */}

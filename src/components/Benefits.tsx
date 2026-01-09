@@ -62,7 +62,7 @@ export default function Benefits() {
       ),
     },
     {
-      title: 'Partner with premium brand, largest network of offices',
+      title: 'Partner with premium brand',
       desc:
         'Certified office spaces across Mumbai’s top micro-markets, tailored to every team’s needs and budget.',
       iconColor: 'bg-green-500',
@@ -143,7 +143,7 @@ export default function Benefits() {
             <div className="space-y-4 md:space-y-5">
               {items.map((it, itemIndex) => {
                 // Skip partner item; it will be rendered below the image
-                if (it.title === 'Partner with premium brand, largest network of offices') {
+                if (it.title === 'Partner with premium brand') {
                   return null;
                 }
 
@@ -242,7 +242,7 @@ export default function Benefits() {
 
             {/* Right Side - Client Images Slider */}
             <div className="relative lg:-mt-2">
-              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border-r-4 md:border-r-6 lg:border-r-8 border-b-4 md:border-b-6 lg:border-b-8 border-blue-400 shadow-2xl h-[400px] md:h-[500px] lg:h-[550px]">
+              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border-r-4 md:border-r-6 lg:border-r-8 border-b-4 md:border-b-6 lg:border-b-8 border-blue-400 shadow-2xl h-[480px] md:h-[580px] lg:h-[630px]">
                 {clientImages.map((client, index) => (
                   <img
                     key={index}
@@ -271,11 +271,11 @@ export default function Benefits() {
               
               {/* Partner network card below image */}
               {(() => {
-                const partnerItem = items.find(it => it.title === 'Partner with premium brand, largest network of offices');
+                const partnerItem = items.find(it => it.title === 'Partner with premium brand');
                 if (!partnerItem) return null;
                 
                 return (
-                  <div className="mt-6 md:mt-8 bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-5 hover:shadow-xl transition-all duration-300">
+                  <div className="mt-10 md:mt-12 lg:mt-14 bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-5 hover:shadow-xl transition-all duration-300">
                     <div className="flex items-start gap-3 md:gap-4">
                       <div className={`w-12 h-12 md:w-14 md:h-14 ${partnerItem.iconColor} rounded-lg md:rounded-xl text-white flex items-center justify-center flex-shrink-0`}>
                         <div className="w-6 h-6 md:w-7 md:h-7 [&>svg]:w-full [&>svg]:h-full">

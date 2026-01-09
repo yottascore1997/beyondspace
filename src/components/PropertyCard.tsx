@@ -664,17 +664,63 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
           {property.title}
         </h3>
         
-        <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 flex-wrap">
+        <div className="flex items-center text-xs sm:text-sm text-gray-600 flex-wrap">
           {property.sublocation && (
             <>
               <span>{property.sublocation}</span>
-              <span className="w-0.5 h-0.5 bg-gray-400 rounded-full"></span>
+              <span className="mx-1">,</span>
             </>
           )}
           <span>{property.area}</span>
-          <span className="w-0.5 h-0.5 bg-gray-400 rounded-full"></span>
+          <span className="mx-1">,</span>
           <span>{property.city}</span>
         </div>
+
+        {(() => {
+          // Only show text if we're on specific category pages: coworking, dedicated, private, or managed
+          const categoryLower = category?.toLowerCase() || '';
+          const normalizedCategory = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+          
+          // Check if we're on coworking category page
+          const isCoworkingPage = normalizedCategory === 'coworking' || 
+                                  normalizedCategory === 'coworkingspace' ||
+                                  categoryLower === 'coworking-space' ||
+                                  categoryLower === 'coworking' ||
+                                  categoryLower.includes('coworking');
+          
+          // Check if we're on dedicated-desk category page
+          const isDedicatedPage = normalizedCategory === 'dedicateddesk' || 
+                                 normalizedCategory === 'dedicateddesks' ||
+                                 categoryLower === 'dedicated-desk' ||
+                                 categoryLower === 'dedicateddesk' ||
+                                 categoryLower.includes('dedicated-desk');
+          
+          // Check if we're on private-cabin category page
+          const isPrivatePage = normalizedCategory === 'privatecabin' || 
+                               normalizedCategory === 'privatecabins' ||
+                               categoryLower === 'private-cabin' ||
+                               categoryLower === 'privatecabin' ||
+                               categoryLower.includes('private-cabin');
+          
+          // Check if we're on managed-office category page
+          const isManagedPage = normalizedCategory === 'managed' || 
+                               normalizedCategory === 'managedoffice' ||
+                               categoryLower === 'managed-office' ||
+                               categoryLower === 'managedoffice' ||
+                               categoryLower === 'managed' ||
+                               categoryLower.includes('managed-office') ||
+                               categoryLower.includes('managed');
+          
+          // Only show if we're on one of these specific category pages
+          if (isCoworkingPage || isDedicatedPage || isPrivatePage || isManagedPage) {
+            return (
+              <span className="text-xs sm:text-sm text-black mt-0.5">
+                Quoted price is negotiable
+              </span>
+            );
+          }
+          return null;
+        })()}
 
         {!hideCategory && property.categories && property.categories.length > 0 && (
           <div className="flex flex-wrap gap-1.5 text-[10px] sm:text-xs text-blue-700 font-medium">
@@ -751,91 +797,91 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
 
         <div className="flex items-center justify-between mt-auto pt-2">
           <div className="font-semibold text-gray-800 text-sm sm:text-base font-sans">
-            {(() => {
-              // Get the appropriate suffix based on category
-              // Check category parameter first (for category pages)
-              const categoryLowerForSuffix = category?.toLowerCase() || '';
-              const normalizedCategoryForSuffix = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
-              
-              // Check if we're on virtual-office category page
-              const isVirtualOfficeCategoryPageForSuffix = normalizedCategoryForSuffix === 'virtualoffice' || 
-                                                            categoryLowerForSuffix === 'virtual-office' ||
-                                                            categoryLowerForSuffix === 'virtualoffice' ||
-                                                            categoryLowerForSuffix === 'virtual office' ||
-                                                            categoryLowerForSuffix.includes('virtual-office');
-              
-              // Check if we're on meeting-room category page
-              const isMeetingRoomCategoryPageForSuffix = normalizedCategoryForSuffix === 'meetingroom' || 
-                                                          categoryLowerForSuffix === 'meeting-room' ||
-                                                          categoryLowerForSuffix === 'meetingroom' ||
-                                                          categoryLowerForSuffix === 'meeting room' ||
-                                                          categoryLowerForSuffix.includes('meeting-room');
-              
-              // Check if we're on coworking category page
-              const isCoworkingCategoryPageForSuffix = normalizedCategoryForSuffix === 'coworking' || 
-                                                       normalizedCategoryForSuffix === 'coworkingspace' ||
-                                                       categoryLowerForSuffix === 'coworking-space' ||
-                                                       categoryLowerForSuffix === 'coworking' ||
-                                                       categoryLowerForSuffix.includes('coworking');
-              
-              // Check if we're on dedicated-desk category page
-              const isDedicatedDeskCategoryPageForSuffix = normalizedCategoryForSuffix === 'dedicateddesk' || 
-                                                            normalizedCategoryForSuffix === 'dedicateddesks' ||
-                                                            categoryLowerForSuffix === 'dedicated-desk' ||
-                                                            categoryLowerForSuffix === 'dedicateddesk' ||
-                                                            categoryLowerForSuffix.includes('dedicated-desk');
-              
-              // Check if we're on private-cabin category page
-              const isPrivateCabinCategoryPageForSuffix = normalizedCategoryForSuffix === 'privatecabin' || 
+              {(() => {
+                // Get the appropriate suffix based on category
+                // Check category parameter first (for category pages)
+                const categoryLowerForSuffix = category?.toLowerCase() || '';
+                const normalizedCategoryForSuffix = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+                
+                // Check if we're on virtual-office category page
+                const isVirtualOfficeCategoryPageForSuffix = normalizedCategoryForSuffix === 'virtualoffice' || 
+                                                              categoryLowerForSuffix === 'virtual-office' ||
+                                                              categoryLowerForSuffix === 'virtualoffice' ||
+                                                              categoryLowerForSuffix === 'virtual office' ||
+                                                              categoryLowerForSuffix.includes('virtual-office');
+                
+                // Check if we're on meeting-room category page
+                const isMeetingRoomCategoryPageForSuffix = normalizedCategoryForSuffix === 'meetingroom' || 
+                                                            categoryLowerForSuffix === 'meeting-room' ||
+                                                            categoryLowerForSuffix === 'meetingroom' ||
+                                                            categoryLowerForSuffix === 'meeting room' ||
+                                                            categoryLowerForSuffix.includes('meeting-room');
+                
+                // Check if we're on coworking category page
+                const isCoworkingCategoryPageForSuffix = normalizedCategoryForSuffix === 'coworking' || 
+                                                         normalizedCategoryForSuffix === 'coworkingspace' ||
+                                                         categoryLowerForSuffix === 'coworking-space' ||
+                                                         categoryLowerForSuffix === 'coworking' ||
+                                                         categoryLowerForSuffix.includes('coworking');
+                
+                // Check if we're on dedicated-desk category page
+                const isDedicatedDeskCategoryPageForSuffix = normalizedCategoryForSuffix === 'dedicateddesk' || 
+                                                              normalizedCategoryForSuffix === 'dedicateddesks' ||
+                                                              categoryLowerForSuffix === 'dedicated-desk' ||
+                                                              categoryLowerForSuffix === 'dedicateddesk' ||
+                                                              categoryLowerForSuffix.includes('dedicated-desk');
+                
+                // Check if we're on private-cabin category page
+                const isPrivateCabinCategoryPageForSuffix = normalizedCategoryForSuffix === 'privatecabin' || 
                                                            normalizedCategoryForSuffix === 'privatecabins' ||
                                                            categoryLowerForSuffix === 'private-cabin' ||
                                                            categoryLowerForSuffix === 'privatecabin' ||
                                                            categoryLowerForSuffix.includes('private-cabin');
-              
-              // Check if we're on managed-office category page
-              const isManagedOfficeCategoryPageForSuffix = normalizedCategoryForSuffix === 'managed' || 
-                                                            normalizedCategoryForSuffix === 'managedoffice' ||
-                                                            categoryLowerForSuffix === 'managed-office' ||
-                                                            categoryLowerForSuffix === 'managedoffice' ||
-                                                            categoryLowerForSuffix === 'managed' ||
-                                                            categoryLowerForSuffix.includes('managed-office') ||
-                                                            categoryLowerForSuffix.includes('managed');
-              
-              const hasVirtualOfficeCategory = property.categories?.some(cat => 
-                cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
-              ) || isVirtualOfficeCategoryPageForSuffix;
-              
-              const hasDayPassCategory = property.categories?.some(cat => 
-                cat.toLowerCase().includes('daypass') || cat.toLowerCase().includes('day pass')
-              ) || category?.toLowerCase().includes('daypass') || category?.toLowerCase().includes('day-pass');
-              
-              const hasMeetingRoomCategory = property.categories?.some(cat => 
-                cat.toLowerCase().includes('meetingroom') || cat.toLowerCase().includes('meeting room')
-              ) || isMeetingRoomCategoryPageForSuffix;
-              
-              const hasFlexiCategory = property.categories?.some(cat => 
-                cat.toLowerCase().includes('flexidesk') || cat.toLowerCase().includes('flexi desk')
-              ) || category?.toLowerCase().includes('flexidesk') || category?.toLowerCase().includes('flexi-desk');
+                
+                // Check if we're on managed-office category page
+                const isManagedOfficeCategoryPageForSuffix = normalizedCategoryForSuffix === 'managed' || 
+                                                              normalizedCategoryForSuffix === 'managedoffice' ||
+                                                              categoryLowerForSuffix === 'managed-office' ||
+                                                              categoryLowerForSuffix === 'managedoffice' ||
+                                                              categoryLowerForSuffix === 'managed' ||
+                                                              categoryLowerForSuffix.includes('managed-office') ||
+                                                              categoryLowerForSuffix.includes('managed');
+                
+                const hasVirtualOfficeCategory = property.categories?.some(cat => 
+                  cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
+                ) || isVirtualOfficeCategoryPageForSuffix;
+                
+                const hasDayPassCategory = property.categories?.some(cat => 
+                  cat.toLowerCase().includes('daypass') || cat.toLowerCase().includes('day pass')
+                ) || category?.toLowerCase().includes('daypass') || category?.toLowerCase().includes('day-pass');
+                
+                const hasMeetingRoomCategory = property.categories?.some(cat => 
+                  cat.toLowerCase().includes('meetingroom') || cat.toLowerCase().includes('meeting room')
+                ) || isMeetingRoomCategoryPageForSuffix;
+                
+                const hasFlexiCategory = property.categories?.some(cat => 
+                  cat.toLowerCase().includes('flexidesk') || cat.toLowerCase().includes('flexi desk')
+                ) || category?.toLowerCase().includes('flexidesk') || category?.toLowerCase().includes('flexi-desk');
 
-              let priceSuffix = '/month';
-              // Priority order: Check category page first, then property categories
-              if (isVirtualOfficeCategoryPageForSuffix) priceSuffix = '/Year';
-              else if (isMeetingRoomCategoryPageForSuffix) priceSuffix = '/Hour';
-              else if (isManagedOfficeCategoryPageForSuffix) priceSuffix = '/seat/month';
-              else if (isCoworkingCategoryPageForSuffix) priceSuffix = '/seat/month';
-              else if (isDedicatedDeskCategoryPageForSuffix) priceSuffix = '/seat/month';
-              else if (isPrivateCabinCategoryPageForSuffix) priceSuffix = '/seat/month';
-              else if (hasVirtualOfficeCategory) priceSuffix = '/Year';
-              else if (hasDayPassCategory) priceSuffix = '/seat/Day';
-              else if (hasMeetingRoomCategory) priceSuffix = '/Hour';
-              else if (hasFlexiCategory) priceSuffix = '/seat/month';
+                let priceSuffix = '/month';
+                // Priority order: Check category page first, then property categories
+                if (isVirtualOfficeCategoryPageForSuffix) priceSuffix = '/Year';
+                else if (isMeetingRoomCategoryPageForSuffix) priceSuffix = '/Hour';
+                else if (isManagedOfficeCategoryPageForSuffix) priceSuffix = '/seat/month';
+                else if (isCoworkingCategoryPageForSuffix) priceSuffix = '/seat/month';
+                else if (isDedicatedDeskCategoryPageForSuffix) priceSuffix = '/seat/month';
+                else if (isPrivateCabinCategoryPageForSuffix) priceSuffix = '/seat/month';
+                else if (hasVirtualOfficeCategory) priceSuffix = '/Year';
+                else if (hasDayPassCategory) priceSuffix = '/seat/Day';
+                else if (hasMeetingRoomCategory) priceSuffix = '/Hour';
+                else if (hasFlexiCategory) priceSuffix = '/seat/month';
 
-              if (minSeatingPrice) {
-                return <span>{minSeatingPrice}<span className="text-gray-600 font-normal text-xs">{priceSuffix}</span></span>;
-              } else {
-                return <span>{property.priceDisplay}<span className="text-gray-600 font-normal text-xs">{priceSuffix}</span></span>;
-              }
-            })()}
+                if (minSeatingPrice) {
+                  return <span>{minSeatingPrice}<span className="text-gray-600 font-normal text-xs">{priceSuffix}</span></span>;
+                } else {
+                  return <span>{property.priceDisplay}<span className="text-gray-600 font-normal text-xs">{priceSuffix}</span></span>;
+                }
+              })()}
           </div>
           <button
             onClick={(e) => {

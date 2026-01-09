@@ -1391,7 +1391,7 @@ export default function CategoryPage() {
                         {[
                           {
                             title: 'Private Office',
-                            description: 'Our fully furnished private office spaces feature customized layouts and complete privacy, allowing your business and growing team to work efficiently.',
+                            description: 'Our fully furnished private office spaces feature customized layouts and privacy, allowing your business and growing team to work efficiently.',
                             image: '/images/co1.jpeg'
                           },
                           {

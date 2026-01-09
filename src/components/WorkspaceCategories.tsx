@@ -72,7 +72,7 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
       features: [
         'Dedicated seats & private cabins',
         'Fully-equipped coworking spaces',
-        'Ideal for individual professionals or small growing businesses'
+        'Ideal for professionals or small businesses'
       ]
     },
     {
