@@ -676,52 +676,6 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
           <span>{property.city}</span>
         </div>
 
-        {(() => {
-          // Only show text if we're on specific category pages: coworking, dedicated, private, or managed
-          const categoryLower = category?.toLowerCase() || '';
-          const normalizedCategory = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
-          
-          // Check if we're on coworking category page
-          const isCoworkingPage = normalizedCategory === 'coworking' || 
-                                  normalizedCategory === 'coworkingspace' ||
-                                  categoryLower === 'coworking-space' ||
-                                  categoryLower === 'coworking' ||
-                                  categoryLower.includes('coworking');
-          
-          // Check if we're on dedicated-desk category page
-          const isDedicatedPage = normalizedCategory === 'dedicateddesk' || 
-                                 normalizedCategory === 'dedicateddesks' ||
-                                 categoryLower === 'dedicated-desk' ||
-                                 categoryLower === 'dedicateddesk' ||
-                                 categoryLower.includes('dedicated-desk');
-          
-          // Check if we're on private-cabin category page
-          const isPrivatePage = normalizedCategory === 'privatecabin' || 
-                               normalizedCategory === 'privatecabins' ||
-                               categoryLower === 'private-cabin' ||
-                               categoryLower === 'privatecabin' ||
-                               categoryLower.includes('private-cabin');
-          
-          // Check if we're on managed-office category page
-          const isManagedPage = normalizedCategory === 'managed' || 
-                               normalizedCategory === 'managedoffice' ||
-                               categoryLower === 'managed-office' ||
-                               categoryLower === 'managedoffice' ||
-                               categoryLower === 'managed' ||
-                               categoryLower.includes('managed-office') ||
-                               categoryLower.includes('managed');
-          
-          // Only show if we're on one of these specific category pages
-          if (isCoworkingPage || isDedicatedPage || isPrivatePage || isManagedPage) {
-            return (
-              <span className="text-xs sm:text-sm text-black mt-0.5">
-                Quoted price is negotiable
-              </span>
-            );
-          }
-          return null;
-        })()}
-
         {!hideCategory && property.categories && property.categories.length > 0 && (
           <div className="flex flex-wrap gap-1.5 text-[10px] sm:text-xs text-blue-700 font-medium">
             {property.categories.map((category) => (
@@ -894,6 +848,54 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
             Get Quote
           </button>
         </div>
+
+        {(() => {
+          // Only show text if we're on specific category pages: coworking, dedicated, private, or managed
+          const categoryLower = category?.toLowerCase() || '';
+          const normalizedCategory = category?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+          
+          // Check if we're on coworking category page
+          const isCoworkingPage = normalizedCategory === 'coworking' || 
+                                  normalizedCategory === 'coworkingspace' ||
+                                  categoryLower === 'coworking-space' ||
+                                  categoryLower === 'coworking' ||
+                                  categoryLower.includes('coworking');
+          
+          // Check if we're on dedicated-desk category page
+          const isDedicatedPage = normalizedCategory === 'dedicateddesk' || 
+                                 normalizedCategory === 'dedicateddesks' ||
+                                 categoryLower === 'dedicated-desk' ||
+                                 categoryLower === 'dedicateddesk' ||
+                                 categoryLower.includes('dedicated-desk');
+          
+          // Check if we're on private-cabin category page
+          const isPrivatePage = normalizedCategory === 'privatecabin' || 
+                               normalizedCategory === 'privatecabins' ||
+                               categoryLower === 'private-cabin' ||
+                               categoryLower === 'privatecabin' ||
+                               categoryLower.includes('private-cabin');
+          
+          // Check if we're on managed-office category page
+          const isManagedPage = normalizedCategory === 'managed' || 
+                               normalizedCategory === 'managedoffice' ||
+                               categoryLower === 'managed-office' ||
+                               categoryLower === 'managedoffice' ||
+                               categoryLower === 'managed' ||
+                               categoryLower.includes('managed-office') ||
+                               categoryLower.includes('managed');
+          
+          // Only show if we're on one of these specific category pages
+          if (isCoworkingPage || isDedicatedPage || isPrivatePage || isManagedPage) {
+            return (
+              <div className="mt-1">
+                <span className="text-xs sm:text-sm text-blue-600">
+                  (Quoted price is negotiable)
+                </span>
+              </div>
+            );
+          }
+          return null;
+        })()}
         </div>
       </article>
     </Link>

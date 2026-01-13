@@ -76,7 +76,7 @@ export default function MumbaiPlaces() {
     },
     {
       id: 'bkc',
-      name: 'BKC',
+      name: 'Bandra East (BKC)',
       description: 'Mumbai\'s premier business district with world-class infrastructure',
       image: '/images/mumbai3.png',
       properties: '0 Properties',
@@ -84,7 +84,7 @@ export default function MumbaiPlaces() {
     },
     {
       id: 'goregaon',
-      name: 'Goregaon',
+      name: 'Goregaon East',
       description: 'Thriving business hub with excellent connectivity and commercial spaces',
       image: '/images/mumbai20.jpeg',
       properties: '0 Properties',
@@ -100,7 +100,7 @@ export default function MumbaiPlaces() {
     },
     {
       id: 'thane',
-      name: 'Thane',
+      name: 'Thane West',
       description: 'Rapidly developing suburb with great connectivity and modern amenities',
       image: '/images/mumbai7.jpg',
       properties: '0 Properties',
