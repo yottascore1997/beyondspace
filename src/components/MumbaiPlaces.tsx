@@ -92,7 +92,7 @@ export default function MumbaiPlaces() {
     },
     {
       id: 'lower-parel',
-      name: 'Lower Parel',
+      name: 'Lower Parel West',
       description: 'Historic mill district transformed into modern business hub',
       image: '/images/mumbai5.jpg',
       properties: '0 Properties',
