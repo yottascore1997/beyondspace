@@ -22,14 +22,22 @@ interface FirewallConfig {
   suspiciousIPs: Map<string, { count: number; firstSeen: number }>;
 }
 
+// Localhost IPs that should always be allowed (development)
+const LOCALHOST_IPS = ['127.0.0.1', '::1', 'localhost', 'unknown'];
+
 // In-memory store (for production, use Redis or database)
 const firewallConfig: FirewallConfig = {
   enabled: process.env.FIREWALL_ENABLED === 'true',
   defaultAction: 'allow',
-  whitelist: process.env.FIREWALL_WHITELIST?.split(',').map(ip => ip.trim()) || [],
+  whitelist: [
+    // Always whitelist localhost IPs for development
+    ...LOCALHOST_IPS,
+    // User-defined whitelist
+    ...(process.env.FIREWALL_WHITELIST?.split(',').map(ip => ip.trim()) || []),
+  ],
   blacklist: process.env.FIREWALL_BLACKLIST?.split(',').map(ip => ip.trim()) || [],
   rules: [],
-  maxRequestsPerMinute: parseInt(process.env.FIREWALL_MAX_REQUESTS_PER_MINUTE || '100', 10),
+  maxRequestsPerMinute: parseInt(process.env.FIREWALL_MAX_REQUESTS_PER_MINUTE || '200', 10), // Increased default threshold
   suspiciousIPs: new Map(),
 };
 
@@ -37,25 +45,77 @@ const firewallConfig: FirewallConfig = {
  * Get client IP address from request
  */
 export function getClientIP(request: Request): string {
-  // Try to get IP from headers (for proxies/load balancers)
+  // In development, always return localhost
+  if (process.env.NODE_ENV === 'development') {
+    return '127.0.0.1';
+  }
+
+  // Try to get IP from headers (for proxies/load balancers like Railway, Vercel, etc.)
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    // X-Forwarded-For can contain multiple IPs: client, proxy1, proxy2
+    // First IP is usually the original client IP
+    const ips = forwarded.split(',').map(ip => ip.trim()).filter(ip => ip);
+    if (ips.length > 0) {
+      const clientIP = ips[0];
+      // Validate IP format (basic check)
+      if (clientIP && /^[\d.]+$/.test(clientIP) || /^[\da-fA-F:]+$/.test(clientIP)) {
+        return clientIP;
+      }
+    }
   }
 
   const realIP = request.headers.get('x-real-ip');
   if (realIP) {
-    return realIP.trim();
+    const ip = realIP.trim();
+    // Validate IP format
+    if (ip && (/^[\d.]+$/.test(ip) || /^[\da-fA-F:]+$/.test(ip))) {
+      return ip;
+    }
   }
 
-  // Fallback
+  // Try CF-Connecting-IP (Cloudflare)
+  const cfIP = request.headers.get('cf-connecting-ip');
+  if (cfIP) {
+    const ip = cfIP.trim();
+    if (ip && (/^[\d.]+$/.test(ip) || /^[\da-fA-F:]+$/.test(ip))) {
+      return ip;
+    }
+  }
+
+  // Fallback - in production, if we can't determine IP, don't block
+  // Return a special value that will be allowed
   return 'unknown';
+}
+
+/**
+ * Check if IP is localhost
+ */
+function isLocalhost(ip: string): boolean {
+  return LOCALHOST_IPS.includes(ip) || 
+         ip === '127.0.0.1' || 
+         ip === '::1' || 
+         ip === 'localhost' ||
+         ip === 'unknown' ||
+         ip.startsWith('127.') ||
+         ip.startsWith('::1') ||
+         ip.startsWith('localhost');
 }
 
 /**
  * Check if IP is allowed
  */
 export function isIPAllowed(ip: string): { allowed: boolean; reason?: string } {
+  // Always allow localhost in development
+  if (process.env.NODE_ENV === 'development' && isLocalhost(ip)) {
+    return { allowed: true, reason: 'Localhost always allowed in development' };
+  }
+
+  // Always allow unknown IPs (can't determine IP - don't block)
+  if (ip === 'unknown') {
+    return { allowed: true, reason: 'IP could not be determined - allowing access' };
+  }
+
   if (!firewallConfig.enabled) {
     return { allowed: true };
   }
@@ -91,16 +151,29 @@ export function isIPAllowed(ip: string): { allowed: boolean; reason?: string } {
     }
   }
 
-  // Check for suspicious activity
-  const suspicious = firewallConfig.suspiciousIPs.get(ip);
-  if (suspicious) {
-    const timeDiff = Date.now() - suspicious.firstSeen;
-    const requestsPerMinute = (suspicious.count / timeDiff) * 60000;
-    
-    if (requestsPerMinute > firewallConfig.maxRequestsPerMinute) {
-      // Auto-block suspicious IP
-      addBlockRule(ip, 'Auto-blocked due to suspicious activity', 60 * 60 * 1000); // Block for 1 hour
-      return { allowed: false, reason: 'IP blocked due to suspicious activity' };
+  // Check for suspicious activity (skip for localhost and unknown IPs)
+  if (!isLocalhost(ip) && ip !== 'unknown') {
+    const suspicious = firewallConfig.suspiciousIPs.get(ip);
+    if (suspicious) {
+      const timeDiff = Date.now() - suspicious.firstSeen;
+      // Avoid division by zero and require at least 1 second
+      if (timeDiff > 1000) {
+        const requestsPerMinute = (suspicious.count / timeDiff) * 60000;
+        
+        // Only block if significantly exceeding threshold (2x to avoid false positives)
+        const threshold = firewallConfig.maxRequestsPerMinute * 2;
+        
+        if (requestsPerMinute > threshold) {
+          // Auto-block suspicious IP (but log first)
+          console.warn(`[Firewall] Suspicious activity detected from IP: ${ip}, RPM: ${requestsPerMinute.toFixed(2)}`);
+          
+          // Only auto-block in production and if threshold is significantly exceeded
+          if (process.env.NODE_ENV === 'production' && requestsPerMinute > threshold * 1.5) {
+            addBlockRule(ip, 'Auto-blocked due to suspicious activity', 60 * 60 * 1000); // Block for 1 hour
+            return { allowed: false, reason: 'Auto-blocked due to suspicious activity' };
+          }
+        }
+      }
     }
   }
 
@@ -165,7 +238,8 @@ function matchesCIDR(ip: string, cidr: string): boolean {
  * Track request from IP (for suspicious activity detection)
  */
 export function trackRequest(ip: string): void {
-  if (!firewallConfig.enabled || ip === 'unknown') {
+  // Don't track localhost, unknown IPs, or if firewall is disabled
+  if (!firewallConfig.enabled || isLocalhost(ip) || ip === 'unknown' || process.env.NODE_ENV === 'development') {
     return;
   }
 
@@ -265,18 +339,44 @@ export function getFirewallStatus(ip: string): {
 }
 
 /**
+ * Clear blocked rules for localhost (useful for development)
+ */
+export function clearLocalhostBlocks(): void {
+  firewallConfig.rules = firewallConfig.rules.filter(rule => {
+    return !isLocalhost(rule.ip);
+  });
+  
+  // Clear suspicious IPs for localhost
+  for (const localhostIP of LOCALHOST_IPS) {
+    firewallConfig.suspiciousIPs.delete(localhostIP);
+  }
+}
+
+/**
  * Firewall middleware for Next.js
  */
 export function firewallMiddleware(request: Request): { allowed: boolean; status: number; message: string } {
   const ip = getClientIP(request);
   
-  // Track request
-  trackRequest(ip);
+  // In development, clear any localhost blocks
+  if (process.env.NODE_ENV === 'development' && isLocalhost(ip)) {
+    clearLocalhostBlocks();
+  }
   
-  // Check if allowed
+  // Check if allowed first (before tracking)
   const check = isIPAllowed(ip);
   
+  // Only track if IP is valid and not localhost/unknown
+  if (check.allowed && ip !== 'unknown' && !isLocalhost(ip)) {
+    trackRequest(ip);
+  }
+  
   if (!check.allowed) {
+    // Log blocked requests for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`[Firewall] Blocked request from IP: ${ip}, Reason: ${check.reason}`);
+    }
+    
     return {
       allowed: false,
       status: 403,
