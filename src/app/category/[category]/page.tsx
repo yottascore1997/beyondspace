@@ -1392,17 +1392,17 @@ export default function CategoryPage() {
                           {
                             title: 'Private Office',
                             description: 'Our fully furnished private office spaces feature customized layouts and privacy, allowing your business and growing team to work efficiently.',
-                            image: '/images/co1.jpeg'
+                            image: '/images/2private.png'
                           },
                           {
                             title: 'Managed Office',
                             description: 'Our professionally managed offices feature customized layouts and full furnishings, allowing your team to start working immediately.',
-                            image: '/images/co2.jpeg'
+                            image: '/images/2managed.jpg'
                           },
                           {
                             title: 'Enterprise Solution',
                             description: 'Empower your large team in a fully equipped office that offers the flexibility to scale and customize your workspace to your requirement.',
-                            image: '/images/co3.jpeg'
+                            image: '/images/2enterprise.jpg'
                           }
                         ].map((card) => (
                           <div key={card.title} className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">

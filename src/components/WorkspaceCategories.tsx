@@ -126,7 +126,7 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
   const categoryImages = [
     '/images/co1.jpeg', // Coworking Space
     '/images/co2.jpeg', // Managed Office
-    '/images/seating/privatecabin.jpeg', // Private Cabin
+    '/images/seating/privatecabin.png', // Private Cabin
     '/images/co3.jpeg', // Dedicated Desk
     '/images/co5.jpeg', // Virtual Office
     '/images/co6.jpeg'  // Meeting Room
@@ -205,7 +205,7 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
               {/* Left Side - Image */}
               <div className="w-full h-64 md:h-80 xl:h-96 rounded-2xl overflow-hidden shadow-lg">
                 <img
-                  src="/images/co4.jpeg"
+                  src="/images/enterprise.png"
                   alt="Enterprise Offices"
                   className="w-full h-full object-cover"
                 />
