@@ -1,8 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateEmail, validateMobile, sanitizeInput } from '@/lib/security';
+import { rateLimiters } from '@/lib/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting for contact form
+    const rateLimitResult = rateLimiters.general(request as any);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: 'Too many requests. Please try again later.',
+          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
+          }
+        }
+      );
+    }
+
     const data = await request.json();
     const { name, mobile, email, solution, message } = data;
 
@@ -15,8 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!validateEmail(email)) {
       return NextResponse.json(
         { error: 'Please enter a valid email address' },
         { status: 400 }
@@ -24,30 +42,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate mobile format (Indian mobile numbers)
-    // Extract only digits from mobile number
-    const mobileDigits = mobile.replace(/\D/g, '');
-    
-    // Extract last 10 digits (in case country code is included)
-    const phoneNumber = mobileDigits.length >= 10 
-      ? mobileDigits.slice(-10) 
-      : mobileDigits;
-    
-    const mobileRegex = /^[6-9]\d{9}$/;
-    if (!mobileRegex.test(phoneNumber)) {
+    const mobileValidation = validateMobile(mobile);
+    if (!mobileValidation.isValid) {
       return NextResponse.json(
         { error: 'Please enter a valid 10-digit mobile number' },
         { status: 400 }
       );
     }
 
+    // Sanitize inputs
+    const sanitizedName = sanitizeInput(name.trim());
+    const sanitizedEmail = email.toLowerCase().trim();
+    const sanitizedSolution = sanitizeInput(solution);
+    const sanitizedMessage = message ? sanitizeInput(message.trim()) : null;
+
     // Create contact form entry
     const contactForm = await prisma.contactForm.create({
       data: {
-        name: name.trim(),
-        mobile: phoneNumber,
-        email: email.toLowerCase().trim(),
-        solution,
-        message: message?.trim() || null,
+        name: sanitizedName,
+        mobile: mobileValidation.cleaned,
+        email: sanitizedEmail,
+        solution: sanitizedSolution,
+        message: sanitizedMessage,
       },
     });
 
@@ -56,10 +72,16 @@ export async function POST(request: NextRequest) {
       message: 'Thank you for your inquiry! We will contact you soon.',
       data: contactForm,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Contact form error:', error);
+    
+    // Don't expose sensitive error details
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error.message 
+      : 'Failed to submit form. Please try again.';
+    
     return NextResponse.json(
-      { error: 'Failed to submit form. Please try again.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

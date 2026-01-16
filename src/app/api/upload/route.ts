@@ -1,13 +1,58 @@
 import { NextResponse } from "next/server";
+import { validateFileType, validateFileSize, sanitizeFilename } from "@/lib/security";
+import { rateLimiters } from "@/lib/rateLimit";
+
+// Allowed file types for uploads
+const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting for file uploads
+    const rateLimitResult = rateLimiters.upload(request);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: "Too many upload requests. Please try again later.",
+          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
+            'X-RateLimit-Limit': '10',
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+          }
+        }
+      );
+    }
+
     const incomingForm = await request.formData();
     const file = incomingForm.get("file");
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
+
+    // Validate file size
+    if (!validateFileSize(file.size, MAX_FILE_SIZE)) {
+      return NextResponse.json(
+        { error: `File size exceeds maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB` },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type
+    const filename = file.name;
+    if (!validateFileType(filename, ALLOWED_FILE_TYPES)) {
+      return NextResponse.json(
+        { error: `Invalid file type. Allowed types: ${ALLOWED_FILE_TYPES.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize filename
+    const sanitizedFilename = sanitizeFilename(filename);
 
     const uploadForm = new FormData();
     uploadForm.append("file", file);
@@ -61,9 +106,16 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(data, { status: response.status });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Upload error:', error);
+    
+    // Don't expose sensitive error details
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error.message 
+      : 'An error occurred during file upload. Please try again.';
+    
     return NextResponse.json(
-      { error: "Unexpected error", details: (error as Error).message },
+      { error: errorMessage },
       { status: 500 }
     );
   }
