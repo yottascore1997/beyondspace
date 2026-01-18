@@ -988,7 +988,7 @@ export default function PropertyDetails() {
                   const getImageForPlan = (title: string) => {
                     const titleLower = title.toLowerCase();
                     if (titleLower.includes('meeting room')) return '/images/seating/meeting.jpeg';
-                    if (titleLower.includes('private cabin')) return '/images/seating/privatecabin.jpeg';
+                    if (titleLower.includes('private cabin')) return '/images/3private.jpeg';
                     if (titleLower.includes('dedicated desk')) return '/images/seating/dedicated.jpeg';
                     if (titleLower.includes('flexi desk')) return '/images/seating/flexidesk.jpeg';
                     if (titleLower.includes('managed office')) return '/images/seating/managedoffice.jpeg';

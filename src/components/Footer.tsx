@@ -133,6 +133,20 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Footer Bottom - Links */}
+      <div className="border-t border-gray-300 pt-6 mt-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-4 sm:px-6 lg:px-8">
+          <p className="text-sm text-gray-600 font-medium">
+            © {new Date().getFullYear()} Beyond Space. All rights reserved.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            <Link href="/privacy-policy" className="text-sm text-gray-600 hover:text-blue-600 font-medium transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <ShareRequirementsModal 
         isOpen={isShareModalOpen} 
         onClose={() => setShareModalOpen(false)} 

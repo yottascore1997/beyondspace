@@ -169,6 +169,17 @@ model Area {
   createdAt DateTime @default(now())
 }
 
+model SectionImage {
+  id          String   @id @default(cuid())
+  section     String   // e.g., "why-choose-us", "hero", etc.
+  imageUrl    String
+  altText     String?
+  displayOrder Int     @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum Role {
   USER
   ADMIN

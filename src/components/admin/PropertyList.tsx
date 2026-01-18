@@ -41,8 +41,8 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
   const [orderDirty, setOrderDirty] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 30;
+  const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const categoryLabelMap: Record<string, string> = {
     coworking: 'Coworking',
@@ -170,53 +170,49 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
     return filtered;
   }, [properties, selectedArea, searchQuery]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  // Group properties by area
+  const propertiesByArea = useMemo(() => {
+    const grouped: Record<string, Property[]> = {};
+    
+    filteredProperties.forEach((property) => {
+      const areaKey = property.area || 'Unassigned';
+      if (!grouped[areaKey]) {
+        grouped[areaKey] = [];
+      }
+      grouped[areaKey].push(property);
+    });
 
-  const sortedFilteredProperties = useMemo(() => {
-    if (selectedArea === 'All') {
-      return filteredProperties
-        .slice()
-        .sort((a, b) => {
-          const areaCompare = a.area.localeCompare(b.area);
-          if (areaCompare !== 0) return areaCompare;
-          const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
-          if (orderDiff !== 0) return orderDiff;
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
-    }
+    // Sort properties within each area
+    Object.keys(grouped).forEach((areaKey) => {
+      if (selectedArea === 'All' || selectedArea === areaKey) {
+        const order = areaOrderMap[areaKey];
+        if (order && order.length > 0) {
+          const indexMap = new Map(order.map((id, index) => [id, index]));
+          grouped[areaKey].sort((a, b) => {
+            const aIndex = indexMap.has(a.id) ? indexMap.get(a.id)! : Number.MAX_SAFE_INTEGER;
+            const bIndex = indexMap.has(b.id) ? indexMap.get(b.id)! : Number.MAX_SAFE_INTEGER;
+            if (aIndex !== bIndex) return aIndex - bIndex;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+        } else {
+          grouped[areaKey].sort((a, b) => {
+            const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+            if (orderDiff !== 0) return orderDiff;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+        }
+      }
+    });
 
-    const order = areaOrderMap[selectedArea];
-    if (!order || order.length === 0) {
-      return filteredProperties
-        .slice()
-        .sort((a, b) => {
-          const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
-          if (orderDiff !== 0) return orderDiff;
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
-    }
+    // Sort areas alphabetically
+    const sortedAreas = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+    const sortedGrouped: Record<string, Property[]> = {};
+    sortedAreas.forEach((area) => {
+      sortedGrouped[area] = grouped[area];
+    });
 
-    const indexMap = new Map(order.map((id, index) => [id, index]));
-    return filteredProperties
-      .slice()
-      .sort((a, b) => {
-        const aIndex = indexMap.has(a.id) ? indexMap.get(a.id)! : Number.MAX_SAFE_INTEGER;
-        const bIndex = indexMap.has(b.id) ? indexMap.get(b.id)! : Number.MAX_SAFE_INTEGER;
-        if (aIndex !== bIndex) return aIndex - bIndex;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
+    return sortedGrouped;
   }, [filteredProperties, selectedArea, areaOrderMap]);
-
-  // Get paginated properties
-  const paginatedProperties = sortedFilteredProperties.slice(startIndex, endIndex);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedArea, searchQuery]);
 
   const reorderWithinArea = (draggedId: string, targetId: string) => {
     if (selectedArea === 'All' || draggedId === targetId) return;
@@ -268,11 +264,45 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
     setDragOverPropertyId(null);
   };
 
+  const handleDeleteProperty = async (propertyId: string) => {
+    if (deletingPropertyId === propertyId) return; // Prevent duplicate requests
+
+    setDeletingPropertyId(propertyId);
+    setConfirmDeleteId(null); // Close confirmation dialog
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/properties/${propertyId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setMessage('Property deleted successfully.');
+        // Remove property from local state
+        setProperties((prev) => prev.filter((p) => p.id !== propertyId));
+        // Clear any pending order changes
+        setOrderDirty(false);
+      } else {
+        const error = await response.json();
+        setMessage(error.error || 'Failed to delete property.');
+      }
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      setMessage('Network error. Please try again.');
+    } finally {
+      setDeletingPropertyId(null);
+    }
+  };
+
   const handleSaveOrder = async () => {
     if (selectedArea === 'All') return;
 
+    const areaProperties = propertiesByArea[selectedArea] || [];
     const order =
-      areaOrderMap[selectedArea] ?? sortedFilteredProperties.map((property) => property.id);
+      areaOrderMap[selectedArea] ?? areaProperties.map((property) => property.id);
 
     if (order.length === 0) {
       return;
@@ -406,7 +436,7 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
               <span>
                 Drag property cards to change the order for {selectedArea}.
               </span>
-              {sortedFilteredProperties.length > 1 && (
+              {(propertiesByArea[selectedArea]?.length || 0) > 1 && (
                 <button
                   type="button"
                   onClick={handleSaveOrder}
@@ -433,11 +463,11 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
 
       {/* Results Count */}
       <div className="mb-4 text-sm text-gray-600">
-        Showing {startIndex + 1}-{Math.min(endIndex, filteredProperties.length)} of {filteredProperties.length} properties
+        Showing {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'}
         {searchQuery && ` matching "${searchQuery}"`}
       </div>
 
-      {sortedFilteredProperties.length === 0 ? (
+      {filteredProperties.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No properties found</p>
           <p className="text-gray-400 mt-2">
@@ -448,8 +478,21 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {paginatedProperties.map((property) => (
+          {Object.entries(propertiesByArea).map(([area, areaProperties]) => (
+            <div key={area} className="mb-8">
+              {/* Area Header */}
+              <div className="mb-4 pb-3 border-b-2 border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {area}
+                  <span className="ml-2 text-sm font-normal text-gray-500">
+                    ({areaProperties.length} {areaProperties.length === 1 ? 'property' : 'properties'})
+                  </span>
+                </h2>
+              </div>
+              
+              {/* Properties Grid for this Area */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {areaProperties.map((property) => (
             <div
               key={property.id}
               className={`bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all relative ${
@@ -560,68 +603,57 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
                   >
                     Edit Property
                   </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(property.id)}
+                    disabled={deletingPropertyId === property.id}
+                    className="py-2 px-3 rounded-lg text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deletingPropertyId === property.id ? (
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
-          ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-              >
-                Previous
-              </button>
-              
-              <div className="flex gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show first page, last page, current page, and pages around current
-                  if (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 2 && page <= currentPage + 2)
-                  ) {
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? 'bg-[#a08efe] text-white'
-                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  } else if (
-                    page === currentPage - 3 ||
-                    page === currentPage + 3
-                  ) {
-                    return (
-                      <span key={page} className="px-2 text-gray-500">
-                        ...
-                      </span>
-                    );
-                  }
-                  return null;
-                })}
+                ))}
               </div>
+            </div>
+          ))}
+        </>
+      )}
 
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Confirm Delete</h3>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete this property? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                onClick={() => setConfirmDeleteId(null)}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
               >
-                Next
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteProperty(confirmDeleteId)}
+                disabled={deletingPropertyId === confirmDeleteId}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deletingPropertyId === confirmDeleteId ? 'Deleting...' : 'Delete'}
               </button>
             </div>
-          )}
-        </>
+          </div>
+        </div>
       )}
     </div>
   );

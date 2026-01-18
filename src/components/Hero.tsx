@@ -25,39 +25,54 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
   // Hero images from public/images folder
   const heroImages = [
     {
-      src: '/images/co2.jpeg',
-      alt: 'Managed office floor with collaborative zones',
-      category: 'Managed Office'
-    },
-    {
-      src: '/images/hero4.jpeg',
-      alt: 'Modern office space',
+      src: '/images/01.jpg',
+      alt: 'Premium office space with modern design',
       category: 'Office Space'
     },
     {
-      src: '/images/hero1.jpeg',
-      alt: 'Premium hero workspace with modern design and professional atmosphere',
-      category: 'Hero Workspace'
+      src: '/images/02.jpg',
+      alt: 'Contemporary workspace with professional atmosphere',
+      category: 'Coworking Space'
     },
     {
-      src: '/images/9.jpeg',
-      alt: 'Executive office space with sophisticated design and premium facilities',
+      src: '/images/03.webp',
+      alt: 'Modern office environment with collaborative zones',
+      category: 'Managed Office'
+    },
+    {
+      src: '/images/05.jpg',
+      alt: 'Executive office space with sophisticated design',
       category: 'Enterprise Office'
     },
     {
-      src: '/images/10.jpeg',
-      alt: 'Modern conference room with professional setup and bright atmosphere',
-      category: 'Meeting Room'
-    },
-    {
-      src: '/images/12.jpeg',
-      alt: 'Flexible office space with modern amenities and collaborative atmosphere',
+      src: '/images/06.jpg',
+      alt: 'Flexible workspace with modern amenities',
       category: 'Flexi Desk'
     },
     {
-      src: '/images/7.jpeg',
-      alt: 'Contemporary workspace with modern furniture and collaborative environment',
+      src: '/images/07.jpg',
+      alt: 'Professional office space with premium facilities',
+      category: 'Office Space'
+    },
+    {
+      src: '/images/08.jpg',
+      alt: 'Modern conference room with bright atmosphere',
+      category: 'Meeting Room'
+    },
+    {
+      src: '/images/10.jpg',
+      alt: 'Contemporary workspace with collaborative environment',
       category: 'Coworking Space'
+    },
+    {
+      src: '/images/11.jpeg',
+      alt: 'Premium office space with modern furniture',
+      category: 'Office Space'
+    },
+    {
+      src: '/images/12.jpg',
+      alt: 'Flexible office space with professional setup',
+      category: 'Flexi Desk'
     }
   ];
 

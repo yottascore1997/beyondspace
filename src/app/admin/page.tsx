@@ -14,6 +14,7 @@ import AreasList from '@/components/admin/AreasList';
 import BulkUpload from '@/components/admin/BulkUpload';
 import TestimonialsList from '@/components/admin/TestimonialsList';
 import TestimonialForm from '@/components/admin/TestimonialForm';
+import SectionImagesManager from '@/components/admin/SectionImagesManager';
 
 interface User {
   id: string;
@@ -264,6 +265,11 @@ export default function AdminPage() {
                     onCancelEdit={handleCancelTestimonialEdit}
                   />
                 </div>
+              </div>
+            )}
+            {activeTab === 'section-images' && (
+              <div className="p-8">
+                <SectionImagesManager />
               </div>
             )}
           </div>

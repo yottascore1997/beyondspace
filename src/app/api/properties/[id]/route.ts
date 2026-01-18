@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -160,4 +161,65 @@ export async function PUT(
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return requireAdmin(async (req: NextRequest, user: any) => {
+    try {
+      const { id } = await params;
+      
+      // Check if property exists
+      const existingProperty = await prisma.property.findUnique({
+        where: { id },
+        include: { propertyImages: true },
+      });
+
+      if (!existingProperty) {
+        return NextResponse.json(
+          { error: 'Property not found' },
+          { status: 404 }
+        );
+      }
+
+      // Delete property and related images in a transaction
+      await prisma.$transaction(async (tx) => {
+        // Delete property images first (due to foreign key constraint)
+        await tx.propertyImage.deleteMany({
+          where: { propertyId: id },
+        });
+
+        // Delete the property
+        await tx.property.delete({
+          where: { id },
+        });
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Property deleted successfully',
+      });
+    } catch (error: any) {
+      console.error('Error deleting property:', error);
+      
+      // Handle foreign key constraint errors
+      if (error.code === 'P2003') {
+        return NextResponse.json(
+          { error: 'Cannot delete property. It may be referenced by other records.' },
+          { status: 400 }
+        );
+      }
+
+      const errorMessage = process.env.NODE_ENV === 'development' 
+        ? error.message 
+        : 'Failed to delete property';
+      
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 500 }
+      );
+    }
+  })(request);
 }

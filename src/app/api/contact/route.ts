@@ -94,6 +94,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
+    // Test connection first - reconnect if needed
+    await prisma.$connect();
+
     const [contacts, total] = await Promise.all([
       prisma.contactForm.findMany({
         skip,
@@ -112,10 +115,25 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching contacts:', error);
+    
+    // If connection error, try to reconnect
+    if (error.code === 'P1017' || error.code === 'P1001') {
+      try {
+        await prisma.$disconnect();
+        await prisma.$connect();
+      } catch (reconnectError) {
+        console.error('Failed to reconnect to database:', reconnectError);
+      }
+    }
+    
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error.message 
+      : 'Failed to fetch contacts. Please try again.';
+    
     return NextResponse.json(
-      { error: 'Failed to fetch contacts' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

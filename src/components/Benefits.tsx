@@ -6,25 +6,61 @@ import ShareRequirementsModal from './ShareRequirementsModal';
 export default function Benefits() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [currentClientIndex, setCurrentClientIndex] = useState(0);
-
-  // Client images slider - images of clients they've closed deals with
-  const clientImages = [
-    { src: '/images/1.jpeg', alt: 'Client testimonial' },
-    { src: '/images/2.jpeg', alt: 'Client testimonial' },
-    { src: '/images/3.jpeg', alt: 'Client testimonial' },
-    { src: '/images/4.jpeg', alt: 'Client testimonial' },
-    { src: '/images/5.jpeg', alt: 'Client testimonial' },
-    { src: '/images/6.jpeg', alt: 'Client testimonial' },
+  // Default fallback images (use existing images from public folder)
+  const defaultImages = [
+    { src: '/images/co1.jpeg', alt: 'Client testimonial' },
+    { src: '/images/co2.jpeg', alt: 'Client testimonial' },
+    { src: '/images/co3.jpeg', alt: 'Client testimonial' },
+    { src: '/images/co4.jpeg', alt: 'Client testimonial' },
+    { src: '/images/co5.jpeg', alt: 'Client testimonial' },
+    { src: '/images/co6.jpeg', alt: 'Client testimonial' },
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentClientIndex((prevIndex) =>
-        prevIndex === clientImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 4000);
+  const [clientImages, setClientImages] = useState<Array<{ src: string; alt: string }>>(defaultImages);
 
-    return () => clearInterval(interval);
+  // Fetch images from API
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch('/api/section-images?section=why-choose-us');
+        if (response.ok) {
+          const data = await response.json();
+          // Only update if we have images from API, otherwise keep defaults
+          if (data && Array.isArray(data) && data.length > 0) {
+            setClientImages(
+              data.map((img: any) => ({
+                src: img.imageUrl,
+                alt: img.altText || 'Client testimonial',
+              }))
+            );
+          } else {
+            // If API returns empty array, keep default images
+            setClientImages(defaultImages);
+          }
+        } else {
+          // If API fails, keep default images
+          setClientImages(defaultImages);
+        }
+      } catch (error) {
+        console.error('Error fetching section images:', error);
+        // Keep default images if API fails
+        setClientImages(defaultImages);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
+  useEffect(() => {
+    if (clientImages.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentClientIndex((prevIndex) =>
+          prevIndex === clientImages.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }
   }, [clientImages.length]);
 
   const items = [

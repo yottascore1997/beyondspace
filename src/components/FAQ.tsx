@@ -16,42 +16,18 @@ const faqData: FAQItem[] = [
   },
   {
     question: 'What is a Managed Office space?',
-    answer: `A managed office space is a fully equipped, ready‑to‑use or customizable workspace that can be tailored to the client's specifications.
-
-The service provider handles all day‑to‑day operations, offering businesses a flexible, private, and brand‑aligned solution that eliminates the complexities of a traditional office setup. 
-
-It's Include services encompass IT support, electricity, maintenance, cleaning, security, and high‑speed internet, basically day-to-day operations, creating a turn‑key environment where companies can move in and begin working immediately, with the ability to scale up or down as needed. 
-
-This model is cost‑effective, its one cheque solution, predictable monthly fee that covers all operational expenses and simplifies budgeting.
-
-It is ideal for 
-
-.Startups and growing businesses needing agility.
-
-.Companies wanting a professional image without large capital expenditure.
-
-.Businesses handling sensitive data needing dedicated, secure spaces.
-
-.Firms prioritizing focus on core business over facility management.`,
-    image: '/images/seating/managedoffice.jpeg'
+    answer: `A managed office space is a fully equipped, ready-to-use workspace where the service provider handles all operations including IT support, maintenance, cleaning, security, and utilities. This turn-key solution offers a flexible, private, and brand-aligned environment, allowing companies to move in immediately and scale as needed. Ideal for startups, growing businesses, and companies wanting a professional setup without large capital expenditure.`,
+    image: '/images/FaqManage.png'
   },
   {
     question: 'What is a Private-Cabin space?',
-    answer: `A private cabin is a dedicated, lockable workspace that offers the confidentiality and security of a standalone office while still providing the amenities of a coworking environment. Cabin sizes range from 2, 4, 8, 10 to 30+ seats configurations, allowing businesses of any scale to select a layout that matches their team size and workflow. 
-
-Standard amenities include high‑speed internet, printing services, access to shared meeting rooms, a pantry with tea and coffee, and professional reception support. This combination of privacy, flexibility, and full‑service facilities makes private cabins an ideal solution for organizations that require a professional image without the overhead of a traditional lease.`,
-    image: '/images/seating/privatecabin.jpeg'
+    answer: `A private cabin is a dedicated, lockable workspace that offers the confidentiality and security of a standalone office while still providing the amenities of a coworking environment. Cabin sizes range from 2, 4, 8, 10 to 30+ seats configurations, allowing businesses of any scale to select a layout that matches their team size and workflow.`,
+    image: '/images/Faqcabin.jpg'
   },
   {
     question: 'What is a Dedicated desk?',
-    answer: `A dedicated desk in a coworking space is a permanently assigned workstation just for you, unlike a "hot desk" you share. Often includes a lockable cabinet for your valuables and documents.
-
-Ideal For:
-
-Freelancers, solopreneurs, and remote workers needing a reliable setup.
-
-Professionals who need consistent access and a stable, permanent workspace.`,
-    image: '/images/seating/dedicated.jpeg'
+    answer: `A dedicated desk is a permanently assigned workstation exclusively reserved for you in a coworking space, providing a consistent and personalized workspace unlike shared hot desks. This setup includes a lockable storage cabinet for your valuables, documents, and personal items, ensuring security and convenience. Ideal for freelancers, solopreneurs, remote workers, and professionals who require a reliable, stable workspace with consistent access, allowing you to maintain your work setup exactly as you prefer without daily setup and teardown.`,
+    image: '/images/FaqDedicate.jfif'
   },
   {
     question: 'What is Virtual Office?',
@@ -61,7 +37,7 @@ Professionals who need consistent access and a stable, permanent workspace.`,
   {
     question: 'What is Meeting Rooms?',
     answer: 'In a coworking space, meet rooms (meeting rooms) are private, reservable rooms equipped for professional discussions, client presentations, brainstorming, and video calls, offering a distraction-free, tech-ready environment with amenities like Wi-Fi, screens, and whiteboards, providing flexibility and cost-savings compared to setting up your own office space.',
-    image: '/images/seating/meeting.jpeg'
+    image: '/images/FaqMeeting.jpg'
   },
   {
     question: 'What is Day Pass?',
