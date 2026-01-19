@@ -26,9 +26,15 @@ export default function MumbaiPlaces() {
   };
 
   const handleAreaClick = (areaName: string) => {
-    // Navigate to coworking category page with area filter
-    const encodedArea = encodeURIComponent(areaName);
-    router.push(`/category/coworking?area=${encodedArea}`);
+    // For Navi Mumbai, use city parameter instead of area
+    if (areaName.toLowerCase() === 'navi mumbai') {
+      const encodedCity = encodeURIComponent(areaName);
+      router.push(`/category/coworking?city=${encodedCity}`);
+    } else {
+      // For other areas, use area parameter
+      const encodedArea = encodeURIComponent(areaName);
+      router.push(`/category/coworking?area=${encodedArea}`);
+    }
   };
 
   const smoothScrollBy = (distance: number) => {

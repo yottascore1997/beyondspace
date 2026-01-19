@@ -7,7 +7,6 @@ import Header from '@/components/Header';
 import PropertyCard from '@/components/PropertyCard';
 import Footer from '@/components/Footer';
 import ShareRequirementsModal from '@/components/ShareRequirementsModal';
-import GetOfferModal from '@/components/GetOfferModal';
 import Link from 'next/link';
 
 interface SeatingPlan {
@@ -137,7 +136,7 @@ export default function CategoryPage() {
   });
   const [isGridShaking, setIsGridShaking] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isGetOfferModalOpen, setIsGetOfferModalOpen] = useState(false);
+  const [isInterestedModalOpen, setIsInterestedModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -675,14 +674,28 @@ export default function CategoryPage() {
         // Multiple areas selected
         const areaArray = filters.area as string[];
         filtered = filtered.filter(property => 
-          areaArray.some((area: string) => property.area.toLowerCase() === area.toLowerCase())
+          areaArray.some((area: string) => {
+            const areaLower = area.toLowerCase().trim();
+            // Special handling for Navi Mumbai - check both area and city
+            if (areaLower === 'navi mumbai') {
+              return property.area?.toLowerCase().trim() === areaLower || 
+                     property.city?.toLowerCase().trim() === areaLower;
+            }
+            return property.area?.toLowerCase().trim() === areaLower;
+          })
         );
       } else {
         // Single area (backward compatibility)
         const singleArea = filters.area as string;
-        filtered = filtered.filter(property => 
-          property.area.toLowerCase() === singleArea.toLowerCase()
-        );
+        const areaLower = singleArea.toLowerCase().trim();
+        filtered = filtered.filter(property => {
+          // Special handling for Navi Mumbai - check both area and city fields
+          if (areaLower === 'navi mumbai') {
+            return property.area?.toLowerCase().trim() === areaLower || 
+                   property.city?.toLowerCase().trim() === areaLower;
+          }
+          return property.area?.toLowerCase().trim() === areaLower;
+        });
       }
     }
 
@@ -770,7 +783,7 @@ export default function CategoryPage() {
 
   const handleEnquireClick = () => {
     setIsGridShaking(true);
-    setIsGetOfferModalOpen(true);
+    setIsInterestedModalOpen(true);
     setTimeout(() => setIsGridShaking(false), 500); // Shake for 0.5 seconds
   };
 
@@ -778,8 +791,8 @@ export default function CategoryPage() {
     setIsModalOpen(false);
   };
 
-  const closeGetOfferModal = () => {
-    setIsGetOfferModalOpen(false);
+  const closeInterestedModal = () => {
+    setIsInterestedModalOpen(false);
   };
 
   // Category info mapping
@@ -1741,8 +1754,8 @@ export default function CategoryPage() {
       )}
 
       <Footer />
-      <ShareRequirementsModal isOpen={isModalOpen} onClose={closeModal} />
-      <GetOfferModal isOpen={isGetOfferModalOpen} onClose={closeGetOfferModal} />
+      <ShareRequirementsModal isOpen={isModalOpen} onClose={closeModal} showFullForm={true} />
+      <ShareRequirementsModal isOpen={isInterestedModalOpen} onClose={closeInterestedModal} showFullForm={false} />
     </div>
   );
 }

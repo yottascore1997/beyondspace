@@ -992,7 +992,7 @@ export default function PropertyDetails() {
                     if (titleLower.includes('dedicated desk')) return '/images/seating/dedicated.jpeg';
                     if (titleLower.includes('flexi desk')) return '/images/seating/flexidesk.jpeg';
                     if (titleLower.includes('managed office')) return '/images/seating/managedoffice.jpeg';
-                    if (titleLower.includes('virtual office')) return '/images/4.jpeg';
+                    if (titleLower.includes('virtual office')) return '/images/co5.jpeg';
                     return '/images/seating/dedicated.jpeg'; // default
                   };
 
