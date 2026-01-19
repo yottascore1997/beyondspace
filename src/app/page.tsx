@@ -43,6 +43,7 @@ export default function Home() {
   };
 
   const [isShareModalOpen, setShareModalOpen] = useState(false);
+  const [isEnterpriseModalOpen, setEnterpriseModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
@@ -52,6 +53,7 @@ export default function Home() {
         filters={filters}
         onFilterChange={handleFilterChange}
         onReset={resetFilters}
+        onEnterpriseClick={() => setEnterpriseModalOpen(true)}
       />
       <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
 
@@ -59,7 +61,7 @@ export default function Home() {
 
         <TrustedCompanies />
 
-        <WorkspaceCategories onEnterpriseClick={() => setShareModalOpen(true)} />
+        <WorkspaceCategories onEnterpriseClick={() => setEnterpriseModalOpen(true)} />
 
         <QuickCategories />
 
@@ -158,7 +160,23 @@ export default function Home() {
 
       <Footer />
 
-      <ShareRequirementsModal isOpen={isShareModalOpen} onClose={() => setShareModalOpen(false)} />
+      <ShareRequirementsModal 
+        isOpen={isShareModalOpen} 
+        onClose={() => setShareModalOpen(false)} 
+      />
+      
+      <ShareRequirementsModal 
+        isOpen={isEnterpriseModalOpen} 
+        onClose={() => setEnterpriseModalOpen(false)}
+        customLeftContent={
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Office Solutions</h2>
+            <p className="text-gray-700 text-base leading-relaxed">
+              The availability (commercial) of enterprise office space depends on factors such as location, building specifications, and, in some cases, the level of customization required. We are committed to providing exactly what you are looking for. To begin, please fill up the form below or directly call us, so we can discuss how we can cater to your specific business needs.
+            </p>
+          </div>
+        }
+      />
 
     </div>
   );

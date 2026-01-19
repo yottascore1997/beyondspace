@@ -41,6 +41,7 @@ export function middleware(request: NextRequest) {
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://files.beyondspacework.com",
+      "frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com",
       "frame-ancestors 'none'",
     ].join('; '),
   };

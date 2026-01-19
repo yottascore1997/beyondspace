@@ -120,7 +120,39 @@ export default function CategoryPage() {
   
   const initialAreaParam = searchParams.get('area');
   const initialArea = initialAreaParam 
-    ? (initialAreaParam.includes(',') ? initialAreaParam.split(',').map(a => decodeURIComponent(a.trim())) : decodeURIComponent(initialAreaParam))
+    ? (initialAreaParam.includes(',') 
+        ? initialAreaParam.split(',').map(a => {
+            // Handle double encoding - decode multiple times if needed
+            let decoded = a.trim();
+            try {
+              // Try decoding up to 3 times to handle double/triple encoding
+              for (let i = 0; i < 3; i++) {
+                const prevDecoded = decoded;
+                decoded = decodeURIComponent(decoded);
+                if (prevDecoded === decoded) break; // No more decoding needed
+              }
+            } catch (e) {
+              // If decoding fails, use original
+              decoded = a.trim();
+            }
+            return decoded;
+          })
+        : (() => {
+            // Handle double encoding for single area
+            let decoded = initialAreaParam;
+            try {
+              // Try decoding up to 3 times to handle double/triple encoding
+              for (let i = 0; i < 3; i++) {
+                const prevDecoded = decoded;
+                decoded = decodeURIComponent(decoded);
+                if (prevDecoded === decoded) break; // No more decoding needed
+              }
+            } catch (e) {
+              // If decoding fails, use original
+              decoded = initialAreaParam;
+            }
+            return decoded;
+          })())
     : 'all';
   const initialCategoryParam = searchParams.get('subcategory');
   const initialCategory = initialCategoryParam 
@@ -147,7 +179,8 @@ export default function CategoryPage() {
   const [pendingAreas, setPendingAreas] = useState<string[]>([]);
   const locationMenuRef = useRef<HTMLDivElement | null>(null);
   const priceSelectRef = useRef<HTMLSelectElement | null>(null);
-  const propertiesPerPage = 8;
+  const propertiesPerPage = 8; // For page 1 batches
+  const propertiesPerPageAfterFirst = 20; // For page 2+ pagination
   const initialPropertiesCount = 32; // Show first 32 without pagination
   const [cityOptions, setCityOptions] = useState<{ id: string; name: string }[]>([]);
   const [areaOptions, setAreaOptions] = useState<{ id: string; name: string; cityId: string }[]>([]);
@@ -882,19 +915,28 @@ export default function CategoryPage() {
       setFilters(prev => ({ ...prev, area: pendingAreas }));
     }
     
-    // Update URL with area filter
-    const params = new URLSearchParams(searchParams.toString());
+    // Update URL with area filter - create fresh params to avoid double encoding
+    const params = new URLSearchParams();
+    
+    // Preserve all existing params except area and page
+    searchParams.forEach((value, key) => {
+      if (key !== 'area' && key !== 'page') {
+        params.set(key, value);
+      }
+    });
+    
+    // Set area parameter (URLSearchParams handles encoding automatically)
     if (newArea === 'all') {
       params.delete('area');
     } else if (Array.isArray(newArea)) {
-      params.set('area', newArea.map(a => encodeURIComponent(a)).join(','));
+      params.set('area', newArea.join(','));
     } else {
-      params.set('area', encodeURIComponent(newArea));
+      params.set('area', newArea);
     }
     
     // Maintain city in URL
     if (selectedCity && selectedCity !== 'all') {
-      params.set('city', encodeURIComponent(selectedCity));
+      params.set('city', selectedCity);
     }
     
     // Reset to page 1 when area changes
@@ -909,13 +951,22 @@ export default function CategoryPage() {
     setPendingAreas([]);
     setFilters(prev => ({ ...prev, area: 'all' }));
     
-    // Update URL - remove area filter
-    const params = new URLSearchParams(searchParams.toString());
+    // Update URL - remove area filter - create fresh params to avoid double encoding
+    const params = new URLSearchParams();
+    
+    // Preserve all existing params except area and page
+    searchParams.forEach((value, key) => {
+      if (key !== 'area' && key !== 'page') {
+        params.set(key, value);
+      }
+    });
+    
+    // Remove area
     params.delete('area');
     
     // Maintain city in URL
     if (selectedCity && selectedCity !== 'all') {
-      params.set('city', encodeURIComponent(selectedCity));
+      params.set('city', selectedCity);
     }
     
     // Reset to page 1
@@ -1181,19 +1232,28 @@ export default function CategoryPage() {
                         });
                       }
                       
-                      // Update URL with area filter
-                      const params = new URLSearchParams(searchParams.toString());
+                      // Update URL with area filter - create fresh params to avoid double encoding
+                      const params = new URLSearchParams();
+                      
+                      // Preserve all existing params except area and page
+                      searchParams.forEach((value, key) => {
+                        if (key !== 'area' && key !== 'page') {
+                          params.set(key, value);
+                        }
+                      });
+                      
+                      // Set area parameter (URLSearchParams handles encoding automatically)
                       if (newArea === 'all') {
                         params.delete('area');
                       } else if (Array.isArray(newArea)) {
-                        params.set('area', newArea.map(a => encodeURIComponent(a)).join(','));
+                        params.set('area', newArea.join(','));
                       } else {
-                        params.set('area', encodeURIComponent(newArea));
+                        params.set('area', newArea);
                       }
                       
                       // Maintain city in URL
                       if (selectedCity && selectedCity !== 'all') {
-                        params.set('city', encodeURIComponent(selectedCity));
+                        params.set('city', selectedCity);
                       }
                       
                       // Reset to page 1 when area changes
@@ -1274,7 +1334,12 @@ export default function CategoryPage() {
                     const categoryPath = `/category/${encodeURIComponent(category)}`;
                     router.push(`${categoryPath}?${params.toString()}`, { scroll: false });
                   }}
-                  className={`${poppins.className} w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-black text-[10px] sm:text-xs md:text-sm font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200`}
+                  className={`${poppins.className} w-full px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg bg-white text-black text-xs sm:text-sm md:text-base font-medium shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200 appearance-none cursor-pointer`}
+                  style={{
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    minHeight: '36px'
+                  }}
                 >
                   <option value="all">All Cities</option>
                   {cityOptions.map((city) => (
@@ -1356,7 +1421,12 @@ export default function CategoryPage() {
                 ref={priceSelectRef}
                 value={filters.price}
                 onChange={(e) => setFilters(prev => ({ ...prev, price: e.target.value }))}
-                className={`${poppins.className} font-sans block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-black text-[10px] sm:text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent`}
+                className={`${poppins.className} font-sans block w-full sm:w-36 md:w-40 lg:w-44 px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg bg-white text-black text-xs sm:text-sm md:text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent appearance-none cursor-pointer`}
+                style={{
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                  minHeight: '36px'
+                }}
               >
                 <option value="all">Select Price</option>
                 <option value="under-10000">Less than ₹10,000</option>
@@ -1517,17 +1587,17 @@ export default function CategoryPage() {
                   // Show remaining properties with pagination (after 32)
                   // Page 1 shows only first 32, pagination starts from page 2
                   if (remainingProperties.length > 0 || currentPage > 1) {
-                    // Calculate total pages: first 32 properties on page 1, then remaining properties divided by 8
+                    // Calculate total pages: first 32 properties on page 1, then remaining properties divided by 16
                     const totalPages = first32Properties.length > 0 
-                      ? Math.ceil(remainingProperties.length / propertiesPerPage) + 1 // +1 for the first 32 properties page
-                      : Math.ceil(filteredProperties.length / propertiesPerPage); // If no first 32, use all properties
+                      ? Math.ceil(remainingProperties.length / propertiesPerPageAfterFirst) + 1 // +1 for the first 32 properties page
+                      : Math.ceil(filteredProperties.length / propertiesPerPageAfterFirst); // If no first 32, use all properties
                     
                     // Show remaining properties if currentPage > 1
                     if (currentPage > 1) {
                       // For page 2+, show properties from remainingProperties
-                      // Page 2 = index 0-7, Page 3 = index 8-15, etc.
-                      const startIndex = (currentPage - 2) * propertiesPerPage;
-                      const endIndex = startIndex + propertiesPerPage;
+                      // Page 2 = index 0-15, Page 3 = index 16-31, etc.
+                      const startIndex = (currentPage - 2) * propertiesPerPageAfterFirst;
+                      const endIndex = startIndex + propertiesPerPageAfterFirst;
                       const currentPageProperties = remainingProperties.slice(startIndex, endIndex);
                       
                       // Add paginated properties
@@ -1603,12 +1673,41 @@ export default function CategoryPage() {
                           
                           // Helper function to generate URL for a page
                           const getPageUrl = (page: number) => {
-                            const params = new URLSearchParams(searchParams.toString());
+                            const params = new URLSearchParams();
+                            
+                            // Get current URL parameters from both searchParams and filters state
+                            // Use searchParams first, then supplement with current filter state
+                            searchParams.forEach((value, key) => {
+                              if (key !== 'page') { // We'll set page separately
+                                params.set(key, value);
+                              }
+                            });
+                            
+                            // Also ensure area and city from current filter state are included
+                            // This handles cases where searchParams might be stale
+                            if (filters.area && filters.area !== 'all') {
+                              if (Array.isArray(filters.area)) {
+                                params.set('area', filters.area.join(','));
+                              } else {
+                                params.set('area', filters.area);
+                              }
+                            } else {
+                              // If area is 'all', remove it from URL
+                              params.delete('area');
+                            }
+                            
+                            // Maintain city in URL
+                            if (selectedCity && selectedCity !== 'all') {
+                              params.set('city', selectedCity);
+                            }
+                            
+                            // Set page parameter
                             if (page === 1) {
                               params.delete('page');
                             } else {
                               params.set('page', page.toString());
                             }
+                            
                             const queryString = params.toString();
                             // Maintain category path in URL
                             const categoryPath = `/category/${encodeURIComponent(category)}`;

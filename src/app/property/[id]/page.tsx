@@ -1690,10 +1690,11 @@ export default function PropertyDetails() {
                     return `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&output=embed`;
                   }
                   
-                  // Try to extract place ID
+                  // Try to extract place ID or place name
                   const placeMatch = property.googleMapLink.match(/place\/([^\/\?]+)/);
                   if (placeMatch) {
-                    return `https://www.google.com/maps?q=place_id:${encodeURIComponent(placeMatch[1])}&output=embed`;
+                    const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+                    return `https://www.google.com/maps?q=${encodeURIComponent(placeName)}&output=embed`;
                   }
                 }
                 
@@ -2004,7 +2005,7 @@ export default function PropertyDetails() {
                       </svg>
                       <div>
                         <p className="text-[10px] text-gray-500 mb-0.5">Contact</p>
-                        <p className="text-xs font-semibold text-gray-900">+91 98765 43210</p>
+                        <p className="text-xs font-semibold text-gray-900">98207 44251</p>
                       </div>
                     </div>
                     

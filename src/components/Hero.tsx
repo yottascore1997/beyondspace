@@ -12,9 +12,10 @@ interface HeroProps {
   };
   onFilterChange: (key: string, value: string) => void;
   onReset: () => void;
+  onEnterpriseClick?: () => void; // Optional callback for Enterprise Office click
 }
 
-export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
+export default function Hero({ filters, onFilterChange, onReset, onEnterpriseClick }: HeroProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hoveredFilter, setHoveredFilter] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -326,6 +327,12 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
 
             <button
               onClick={() => {
+                // If Enterprise Offices is selected, open Enterprise modal instead of navigating
+                if (filters.purpose === 'enterpriseoffices' && onEnterpriseClick) {
+                  onEnterpriseClick();
+                  return;
+                }
+                
                 // Handle navigation based on filters
                 const queryParams = new URLSearchParams();
                 
@@ -365,7 +372,14 @@ export default function Hero({ filters, onFilterChange, onReset }: HeroProps) {
               {quickFilters.map((filter) => (
               <button
                 key={filter.key}
-                onClick={() => router.push(`/category/${filter.key}`)}
+                onClick={() => {
+                  // If Enterprise Offices is clicked, open Enterprise modal instead of navigating
+                  if (filter.key === 'enterpriseoffices' && onEnterpriseClick) {
+                    onEnterpriseClick();
+                  } else {
+                    router.push(`/category/${filter.key}`);
+                  }
+                }}
                   className="w-full px-2 py-1 2xl:px-3 2xl:py-2 rounded-lg bg-gray-100 text-gray-700 text-[10px] md:text-xs 2xl:text-sm font-medium transition-colors hover:bg-gradient-to-r hover:from-purple-600 hover:via-blue-600 hover:to-cyan-500 hover:text-white"
               >
                 {filter.label}

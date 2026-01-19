@@ -6,9 +6,10 @@ interface ShareRequirementsModalProps {
   isOpen: boolean;
   onClose: () => void;
   showFullForm?: boolean; // If false, shows only "Interested in this Property" section
+  customLeftContent?: React.ReactNode; // Custom left side content (e.g., for Enterprise Office)
 }
 
-export default function ShareRequirementsModal({ isOpen, onClose, showFullForm = true }: ShareRequirementsModalProps) {
+export default function ShareRequirementsModal({ isOpen, onClose, showFullForm = true, customLeftContent }: ShareRequirementsModalProps) {
   const workspaceTypes = [
     'Coworking Space',
     'Managed Office',
@@ -145,48 +146,56 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
         >
           {showFullForm && (
             <div className="p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">We Curate Workspaces That Work</h2>
-                <p className="text-gray-700 text-base">Share your goals and we'll shortlist fully managed options, negotiate savings, and coordinate a stress-free move-in.</p>
-              </div>
+              {customLeftContent ? (
+                // Custom left content (e.g., for Enterprise Office)
+                customLeftContent
+              ) : (
+                // Default left content
+                <>
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3">We Curate Workspaces That Work</h2>
+                    <p className="text-gray-700 text-base">Share your goals and we'll shortlist fully managed options, negotiate savings, and coordinate a stress-free move-in.</p>
+                  </div>
 
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 leading-none">Trusted by teams at</p>
-                <div className="grid grid-cols-3 gap-2 md:gap-3 gap-y-3 md:gap-y-4 items-center">
-                  {[
-                    '/images/trusted/c1.png',
-                    '/images/trusted/c2.png',
-                    '/images/trusted/c3.png',
-                    '/images/trusted/c4-removebg-preview.png',
-                    '/images/trusted/c5.png',
-                    '/images/trusted/c6.png',
-                    '/images/trusted/c7.png',
-                    '/images/trusted/c8.png',
-                    '/images/trusted/c9.png'
-                  ].map((logo, index) => (
-                    <div
-                      key={index}
-                      className={`relative mx-auto flex items-center justify-center ${
-                        index === 0 ? 'h-20 w-full sm:h-24 md:h-28' : 'h-14 w-full sm:h-16 md:h-18'
-                      }`}
-                    >
-                      <img
-                        src={logo}
-                        alt={`Client logo ${index + 1}`}
-                        className="max-h-full max-w-full w-auto h-auto object-contain"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.style.display = 'none';
-                          const parent = target.parentElement;
-                          if (parent) {
-                            parent.style.display = 'none';
-                          }
-                        }}
-                      />
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 leading-none">Trusted by teams at</p>
+                    <div className="grid grid-cols-3 gap-2 md:gap-3 gap-y-3 md:gap-y-4 items-center">
+                      {[
+                        '/images/trusted/c1.png',
+                        '/images/trusted/c2.png',
+                        '/images/trusted/c3.png',
+                        '/images/trusted/c4-removebg-preview.png',
+                        '/images/trusted/c5.png',
+                        '/images/trusted/c6.png',
+                        '/images/trusted/c7.png',
+                        '/images/trusted/c8.png',
+                        '/images/trusted/c9.png'
+                      ].map((logo, index) => (
+                        <div
+                          key={index}
+                          className={`relative mx-auto flex items-center justify-center ${
+                            index === 0 ? 'h-20 w-full sm:h-24 md:h-28' : 'h-14 w-full sm:h-16 md:h-18'
+                          }`}
+                        >
+                          <img
+                            src={logo}
+                            alt={`Client logo ${index + 1}`}
+                            className="max-h-full max-w-full w-auto h-auto object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.style.display = 'none';
+                              }
+                            }}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
