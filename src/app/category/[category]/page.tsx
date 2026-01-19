@@ -1467,7 +1467,7 @@ export default function CategoryPage() {
                       <div className="flex-1">
                         <div className="relative rounded-3xl overflow-hidden shadow-xl">
                           <img
-                            src="/images/customized-office.jpg"
+                            src="/images/2enterprise.jpg"
                             alt="Customized office"
                             className="w-full h-full object-cover"
                           />
