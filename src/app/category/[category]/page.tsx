@@ -1295,7 +1295,7 @@ export default function CategoryPage() {
                       handleSearch();
                     }
                   }}
-                className={`${poppins.className} block w-full pl-6 sm:pl-7 md:pl-8 pr-2 sm:pr-2.5 py-1 sm:py-1.5 md:py-2 border border-gray-300 rounded-lg leading-5 bg-white text-black placeholder-gray-400 text-[10px] sm:text-xs md:text-sm focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`${poppins.className} block w-full pl-6 sm:pl-7 md:pl-8 pr-2 sm:pr-2.5 py-1 sm:py-1.5 md:py-2 border-2 border-gray-400 rounded-lg leading-5 bg-white text-black placeholder-gray-600 text-[10px] sm:text-xs md:text-sm focus:outline-none focus:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm`}
                 style={{ color: '#111827' }}
               />
               </div>

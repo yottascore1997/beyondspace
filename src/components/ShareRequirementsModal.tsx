@@ -136,7 +136,7 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
       >
         <div
           className={`${showFullForm 
-            ? 'bg-gradient-to-b from-blue-50 via-blue-50 to-blue-50 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] relative z-50 flex flex-col lg:flex-row overflow-hidden'
+            ? 'bg-gradient-to-b from-blue-50 via-blue-50 to-blue-50 rounded-2xl shadow-2xl max-w-lg lg:max-w-5xl w-full max-h-[90vh] relative z-50 flex flex-col lg:flex-row overflow-hidden'
             : 'bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] relative z-50 flex flex-col overflow-hidden'
           }`}
           onClick={(event) => event.stopPropagation()}
@@ -145,7 +145,7 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
           }}
         >
           {showFullForm && (
-            <div className="p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
+            <div className="hidden lg:flex p-8 flex-1 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none flex-col">
               {customLeftContent ? (
                 // Custom left content (e.g., for Enterprise Office)
                 customLeftContent
@@ -157,49 +157,23 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
                     <p className="text-gray-700 text-base">Share your goals and we'll shortlist fully managed options, negotiate savings, and coordinate a stress-free move-in.</p>
                   </div>
 
-                  <div className="mt-4">
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 leading-none">Trusted by teams at</p>
-                    <div className="grid grid-cols-3 gap-2 md:gap-3 gap-y-3 md:gap-y-4 items-center">
-                      {[
-                        '/images/trusted/c1.png',
-                        '/images/trusted/c2.png',
-                        '/images/trusted/c3.png',
-                        '/images/trusted/c4-removebg-preview.png',
-                        '/images/trusted/c5.png',
-                        '/images/trusted/c6.png',
-                        '/images/trusted/c7.png',
-                        '/images/trusted/c8.png',
-                        '/images/trusted/c9.png'
-                      ].map((logo, index) => (
-                        <div
-                          key={index}
-                          className={`relative mx-auto flex items-center justify-center ${
-                            index === 0 ? 'h-20 w-full sm:h-24 md:h-28' : 'h-14 w-full sm:h-16 md:h-18'
-                          }`}
-                        >
-                          <img
-                            src={logo}
-                            alt={`Client logo ${index + 1}`}
-                            className="max-h-full max-w-full w-auto h-auto object-contain"
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.style.display = 'none';
-                              }
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex-1 flex flex-col items-start justify-start mt-0 relative">
+                    <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 text-left w-full">Trusted by Leading Companies</h3>
+                    <img
+                      src="/images/clientForm.png"
+                      alt="Client form"
+                      className="w-full h-auto max-w-full object-contain rounded-lg -mt-4"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   </div>
                 </>
               )}
             </div>
           )}
 
-          <div className={`p-8 flex-1 relative ${showFullForm ? 'bg-white/80 backdrop-blur-sm lg:rounded-r-2xl lg:rounded-tl-none rounded-b-2xl' : ''} flex flex-col overflow-y-auto`}>
+          <div className={`p-6 lg:p-8 flex-1 relative ${showFullForm ? 'bg-white lg:bg-white/80 backdrop-blur-sm lg:rounded-r-2xl lg:rounded-tl-none rounded-2xl' : 'bg-white rounded-2xl'} flex flex-col overflow-y-auto`}>
             <button
               type="button"
               onClick={handleClose}

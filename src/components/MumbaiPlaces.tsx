@@ -241,11 +241,8 @@ export default function MumbaiPlaces() {
                     {item.place.description}
                   </p>
 
-                  {/* Properties Count and Get Offer Button */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-cyan-300 font-semibold text-xs">
-                      {item.place.properties}
-                    </span>
+                  {/* Get Offer Button */}
+                  <div className="flex items-center justify-end">
                     <button
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent card click from triggering

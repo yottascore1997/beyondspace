@@ -169,11 +169,27 @@ export default function Home() {
         isOpen={isEnterpriseModalOpen} 
         onClose={() => setEnterpriseModalOpen(false)}
         customLeftContent={
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Office Solutions</h2>
-            <p className="text-gray-700 text-base leading-relaxed">
-              The availability (commercial) of enterprise office space depends on factors such as location, building specifications, and, in some cases, the level of customization required. We are committed to providing exactly what you are looking for. To begin, please fill up the form below or directly call us, so we can discuss how we can cater to your specific business needs.
-            </p>
+          <div className="flex flex-col h-full">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Office Solutions</h2>
+              <p className="text-gray-700 text-base leading-relaxed">
+                Enterprise office availability depends on location, building specifications, and customization needs. We provide tailored solutions for your business. Fill the form below or call us to discuss your requirements.
+              </p>
+            </div>
+
+            <div className="flex-1 flex flex-col items-start justify-start min-h-0 relative">
+              <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 text-left w-full">
+                Trusted by Leading Companies
+              </h3>
+              <img
+                src="/images/clientForm.png"
+                alt="Client form"
+                className="w-full h-auto max-w-[520px] max-h-[45vh] object-contain rounded-lg -mt-2"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
           </div>
         }
       />
