@@ -64,6 +64,12 @@ export async function GET(request: NextRequest) {
 
     const category = normalizeCategoryKey(categoryParam);
 
+    const normalizeToken = (val: unknown) =>
+      String(val ?? '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]/g, '');
+
     if (city && city !== 'all') {
       where.city = city;
     }
@@ -121,20 +127,20 @@ export async function GET(request: NextRequest) {
       properties = properties.filter(property => {
         // Check if property categories array contains any of the related category keys
         const propertyCategories = Array.isArray(property.categories)
-          ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase().trim() : String(cat).toLowerCase().trim())
+          ? property.categories.map((cat: string) => normalizeToken(cat))
           : [];
 
         // Check if any of the related category keys exist in property's categories array (exact match only)
         const hasCategoryMatch = relatedCategoryKeys.some(key => {
-          const normalizedKey = key.toLowerCase().trim();
-          // Exact match only - check if property categories array contains exactly this key
+          const normalizedKey = normalizeToken(key);
+          // Exact match on normalized tokens (handles day-pass vs daypass, flexi-desk vs flexidesk, etc.)
           return propertyCategories.some(cat => cat === normalizedKey);
         });
 
         // For Managed Office Space, only show if it has 'managed' category (strict filtering)
         if (category === 'managed') {
           // Double check: must have exact 'managed' category, not partial matches like "year", "seat", "day"
-          const hasExactManaged = propertyCategories.some(cat => cat.trim() === 'managed');
+          const hasExactManaged = propertyCategories.some(cat => cat === 'managed');
           return hasExactManaged && hasCategoryMatch; // Don't use type fallback for managed category
         }
 

@@ -88,7 +88,7 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
     }, 10000);
 
     // Typewriter effect for "Dream Office Space" with restart
-    const text = 'Discover your Dream Office space';
+    const text = 'Discover Your Dream Office Space';
     let index = 0;
     let typingTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -157,7 +157,7 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
     { key: 'managed', label: 'Managed Office Space' },
     { key: 'privatecabin', label: 'Private Cabin' },
     { key: 'dedicateddesk', label: 'Dedicated Desk' },
-    { key: 'day-pass', label: 'Day Pass' },
+    { key: 'daypass', label: 'Day Pass' },
     { key: 'meetingroom', label: 'Meeting Room' },
     { key: 'virtualoffice', label: 'Virtual Office' },
     { key: 'enterpriseoffices', label: 'Enterprise Offices' },

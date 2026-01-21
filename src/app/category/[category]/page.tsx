@@ -502,6 +502,26 @@ export default function CategoryPage() {
       return null;
     }
 
+    // Day Pass category page
+    if (normalizedCategory === 'daypass' || categoryLower === 'day-pass' || categoryLower.includes('day-pass')) {
+      const plan = findPlanByTitle(['day pass', 'daypass']);
+      if (plan && plan.price) {
+        const price = extractNumericPrice(plan.price);
+        if (price !== null && price > 0) return price;
+      }
+      return null;
+    }
+
+    // Flexi Desk category page
+    if (normalizedCategory === 'flexidesk' || categoryLower === 'flexi-desk' || categoryLower.includes('flexi-desk')) {
+      const plan = findPlanByTitle(['flexi desk', 'flexidesk']);
+      if (plan && plan.price) {
+        const price = extractNumericPrice(plan.price);
+        if (price !== null && price > 0) return price;
+      }
+      return null;
+    }
+
     // Coworking category page - Dedicated Desk first, then Private Cabin
     if (normalizedCategory === 'coworking' || normalizedCategory === 'coworkingspace' || categoryLower === 'coworking-space' || categoryLower.includes('coworking')) {
       const dedicatedDesk = findPlanByTitle(['dedicated desk']);
@@ -589,6 +609,12 @@ export default function CategoryPage() {
 
       const normalizedCategory = normalizeCategoryKey(categoryName);
       const relatedCategoryKeys = categoryKeyMap[normalizedCategory] || [normalizedCategory];
+
+      const normalizeToken = (val: unknown) =>
+        String(val ?? '')
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]/g, '');
       
       // Debug: Log category filtering (only in development)
       if (process.env.NODE_ENV === 'development') {
@@ -600,22 +626,21 @@ export default function CategoryPage() {
 
       filtered = filtered.filter(property => {
         const propertyCategories = Array.isArray(property.categories)
-          ? property.categories.map((cat: string) => typeof cat === 'string' ? cat.toLowerCase() : String(cat).toLowerCase())
+          ? property.categories.map((cat: string) => normalizeToken(cat))
           : [];
 
         // Check if any property category matches any of the related category keys (exact match only)
         const hasCategoryMatch = relatedCategoryKeys.some(key => {
-          const normalizedKey = key.toLowerCase().trim();
-          // Exact match only - check if property categories array contains exactly this key
-          return propertyCategories.some(cat => cat.trim() === normalizedKey);
+          const normalizedKey = normalizeToken(key);
+          // Exact match on normalized tokens (handles day-pass vs daypass, flexi-desk vs flexidesk, etc.)
+          return propertyCategories.some(cat => cat === normalizedKey);
         });
 
         // For Managed Office Space, only show if it has exact 'managed' category (strict filtering)
         if (normalizedCategory === 'managed') {
           // Double check: must have exact 'managed' category, not partial matches like "year", "seat", "day"
           const hasExactManaged = propertyCategories.some(cat => {
-            const trimmed = cat.trim();
-            return trimmed === 'managed';
+            return cat === 'managed';
           });
           // Debug log for managed category
           if (process.env.NODE_ENV === 'development' && !hasExactManaged) {

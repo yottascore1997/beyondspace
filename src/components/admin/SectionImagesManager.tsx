@@ -18,6 +18,10 @@ export default function SectionImagesManager() {
   const [message, setMessage] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newAltText, setNewAltText] = useState('');
+  const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+  const [dragOverImageId, setDragOverImageId] = useState<string | null>(null);
+  const [orderDirty, setOrderDirty] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   useEffect(() => {
     fetchImages();
@@ -35,6 +39,7 @@ export default function SectionImagesManager() {
       if (response.ok) {
         const data = await response.json();
         setImages(data);
+        setOrderDirty(false);
       }
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -146,24 +151,78 @@ export default function SectionImagesManager() {
     }
   };
 
-  const handleReorder = async (id: string, newOrder: number) => {
+  const reorderLocally = (fromId: string, toId: string) => {
+    if (fromId === toId) return;
+    const current = [...images].sort((a, b) => a.displayOrder - b.displayOrder);
+    const fromIndex = current.findIndex((img) => img.id === fromId);
+    const toIndex = current.findIndex((img) => img.id === toId);
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+
+    const next = current.map((img, idx) => ({ ...img, displayOrder: idx }));
+    setImages(next);
+    setOrderDirty(true);
+  };
+
+  const handleSaveOrder = async () => {
+    if (!orderDirty || savingOrder) return;
+    setSavingOrder(true);
+    setMessage('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/section-images/${id}`, {
-        method: 'PUT',
+      const updates = [...images]
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map((img, idx) => ({ id: img.id, displayOrder: idx }));
+
+      const response = await fetch('/api/section-images/reorder', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ displayOrder: newOrder }),
+        body: JSON.stringify({
+          section: 'why-choose-us',
+          updates,
+        }),
       });
 
       if (response.ok) {
+        setMessage('Order saved successfully!');
+        setOrderDirty(false);
         fetchImages();
+      } else {
+        const err = await response.json().catch(() => ({}));
+        setMessage(err?.error || 'Failed to save order');
       }
-    } catch (error) {
-      setMessage('Error reordering image');
+    } catch (e) {
+      setMessage('Error saving order');
+    } finally {
+      setSavingOrder(false);
     }
+  };
+
+  const handleDragStart = (id: string) => {
+    setDraggedImageId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    if (!draggedImageId || draggedImageId === id) return;
+    e.preventDefault();
+    setDragOverImageId(id);
+  };
+
+  const handleDrop = (id: string) => {
+    if (!draggedImageId) return;
+    reorderLocally(draggedImageId, id);
+    setDraggedImageId(null);
+    setDragOverImageId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedImageId(null);
+    setDragOverImageId(null);
   };
 
   if (loading) {
@@ -173,9 +232,18 @@ export default function SectionImagesManager() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Why Choose Us - Images Management
-        </h2>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Why Choose Us - Images Management
+          </h2>
+          <button
+            onClick={handleSaveOrder}
+            disabled={!orderDirty || savingOrder}
+            className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {savingOrder ? 'Saving...' : 'Save Order'}
+          </button>
+        </div>
         <p className="text-gray-600 mb-6">
           Manage images displayed in the "Why Choose Us?" section. Images will automatically rotate in the slider.
         </p>
@@ -236,7 +304,14 @@ export default function SectionImagesManager() {
               {images.map((image, index) => (
                 <div
                   key={image.id}
-                  className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                  draggable
+                  onDragStart={() => handleDragStart(image.id)}
+                  onDragOver={(e) => handleDragOver(e, image.id)}
+                  onDrop={() => handleDrop(image.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+                    dragOverImageId === image.id ? 'border-blue-400 ring-2 ring-blue-200' : 'border-gray-200'
+                  }`}
                 >
                   <div className="relative aspect-video bg-gray-100">
                     <img
@@ -244,6 +319,9 @@ export default function SectionImagesManager() {
                       alt={image.altText || 'Section image'}
                       className="w-full h-full object-cover"
                     />
+                    <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-semibold px-2 py-1 rounded">
+                      Drag
+                    </div>
                     {!image.isActive && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span className="text-white font-semibold">Inactive</span>
@@ -275,7 +353,7 @@ export default function SectionImagesManager() {
                     <div className="flex gap-2">
                       {index > 0 && (
                         <button
-                          onClick={() => handleReorder(image.id, image.displayOrder - 1)}
+                          onClick={() => reorderLocally(image.id, images[index - 1].id)}
                           className="flex-1 px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs hover:bg-blue-100"
                         >
                           ↑ Move Up
@@ -283,7 +361,7 @@ export default function SectionImagesManager() {
                       )}
                       {index < images.length - 1 && (
                         <button
-                          onClick={() => handleReorder(image.id, image.displayOrder + 1)}
+                          onClick={() => reorderLocally(image.id, images[index + 1].id)}
                           className="flex-1 px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs hover:bg-blue-100"
                         >
                           ↓ Move Down

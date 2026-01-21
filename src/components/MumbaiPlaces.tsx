@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import ShareRequirementsModal from './ShareRequirementsModal';
 
 interface Place {
   id: string;
@@ -15,14 +16,12 @@ interface Place {
 export default function MumbaiPlaces() {
   const router = useRouter();
   const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<string>('');
+  const [showShareModal, setShowShareModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const scrollAnimationRef = useRef<number | null>(null);
 
   const handleGetOffer = (placeName: string) => {
-    setSelectedPlace(placeName);
-    setShowModal(true);
+    setShowShareModal(true);
   };
 
   const handleAreaClick = (areaName: string) => {
@@ -230,7 +229,10 @@ export default function MumbaiPlaces() {
                     className="text-lg md:text-xl font-bold mb-1.5 transition-all duration-300"
                     style={{ 
                       color: '#ffffff',
-                      textShadow: '0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.3)'
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,1), 0 0 20px rgba(255,255,255,0.8)',
+                      filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(255,255,255,0.9))',
+                      WebkitTextStroke: '2px #000000',
+                      paintOrder: 'stroke fill'
                     }}
                   >
                     {item.place.name}
@@ -263,101 +265,11 @@ export default function MumbaiPlaces() {
         </div>
 
 
-        {/* Popup Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full relative shadow-2xl">
-              {/* Close Button */}
-              <button
-                onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600 transition-colors"
-              >
-                ✕
-              </button>
-
-              {/* Header */}
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Enter your details to request callback
-                </h3>
-                <p className="text-black text-sm leading-relaxed">
-                  Our workspace experts will get in touch to help you with your requirements.
-                </p>
-              </div>
-
-              {/* Offer Details */}
-              <div className="text-center mb-6">
-                <div className="mb-2">
-                  <span className="text-gray-700 font-medium">Offer valid till </span>
-                  <span className="text-orange-500 font-bold">Saturday</span>
-                </div>
-                <div className="flex items-center justify-center gap-4">
-                  <div className="text-red-500 font-bold">
-                    <span className="line-through">One Month Rent</span>
-                  </div>
-                  <div className="text-green-600 font-bold text-lg">
-                    Zero Brokerage
-                  </div>
-                </div>
-              </div>
-
-              {/* Form */}
-              <form className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Enter Your Name *"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <input
-                    type="tel"
-                    placeholder="Enter Your Mobile No *"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Enter Your Email Id *"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-600">
-                    <option value="">Team Size *</option>
-                    <option value="1-5">1-5 People</option>
-                    <option value="6-10">6-10 People</option>
-                    <option value="11-20">11-20 People</option>
-                    <option value="21-50">21-50 People</option>
-                    <option value="50+">50+ People</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-900 transition-colors duration-300 flex items-center justify-center gap-2"
-                >
-                  Request Callback
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </form>
-
-              {/* Trust Indicator */}
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-black">
-                <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Your data is 100% Safe with us!
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Share Requirements Modal (GetQuote Form) */}
+        <ShareRequirementsModal 
+          isOpen={showShareModal} 
+          onClose={() => setShowShareModal(false)} 
+        />
       </div>
     </section>
   );

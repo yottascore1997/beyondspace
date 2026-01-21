@@ -592,9 +592,6 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
                   <div className="font-bold text-gray-900 text-lg">
                     {property.priceDisplay}
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {property.size} sq ft
-                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -631,25 +628,31 @@ export default function PropertyList({ onEditProperty, refreshKey = 0 }: Propert
 
       {/* Delete Confirmation Modal */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setConfirmDeleteId(null)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-xl font-bold text-gray-900 mb-4">Confirm Delete</h3>
             <p className="text-gray-700 mb-6">
-              Are you sure you want to delete this property? This action cannot be undone.
+              Are you sure want to delete this property?
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmDeleteId(null)}
                 className="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                No
               </button>
               <button
                 onClick={() => handleDeleteProperty(confirmDeleteId)}
                 disabled={deletingPropertyId === confirmDeleteId}
                 className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {deletingPropertyId === confirmDeleteId ? 'Deleting...' : 'Delete'}
+                {deletingPropertyId === confirmDeleteId ? 'Deleting...' : 'Yes'}
               </button>
             </div>
           </div>
