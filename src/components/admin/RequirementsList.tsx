@@ -20,6 +20,18 @@ export default function RequirementsList() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
+  // Helper function to format mobile number as "XXXX XXX XXX"
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    // If 10 digits, format as XXXX XXX XXX
+    if (digits.length === 10) {
+      return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+    }
+    // Return as is if not 10 digits
+    return phone;
+  };
+
   useEffect(() => {
     fetchRequirements();
   }, []);
@@ -138,7 +150,7 @@ export default function RequirementsList() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-gray-500">Contact</p>
-                      <p className="text-gray-900">{requirement.mobile}</p>
+                      <p className="text-gray-900">{formatPhoneNumber(requirement.mobile)}</p>
                       <p className="text-gray-600">{requirement.email}</p>
                     </div>
                     

@@ -104,7 +104,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="tel:+919820744251" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block">
-                  +91 98207 44251
+                  +91 9820 744 251
                 </a>
               </li>
             </ul>

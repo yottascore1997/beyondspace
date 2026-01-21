@@ -229,7 +229,7 @@ export default function RequirementPage() {
                     <p className="text-sm text-gray-500 mb-2">(Mon - Sat, 10 am to 8 pm)</p>
                     <p className="text-gray-600 mb-3">Reach out to our sales team directly for any details, pricing or availability</p>
                     <a href="tel:+919820744251" className="text-blue-600 font-medium hover:text-blue-800 transition-colors">
-                      +91 9820744251
+                      +91 9820 744 251
                     </a>
                   </div>
                 </div>

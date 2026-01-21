@@ -2005,7 +2005,7 @@ export default function PropertyDetails() {
                       </svg>
                       <div>
                         <p className="text-[10px] text-gray-500 mb-0.5">Contact</p>
-                        <p className="text-xs font-semibold text-gray-900">98207 44251</p>
+                        <p className="text-xs font-semibold text-gray-900">9820 744 251</p>
                       </div>
                     </div>
                     

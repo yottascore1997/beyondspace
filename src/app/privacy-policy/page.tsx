@@ -472,7 +472,7 @@ export default function PrivacyPolicy() {
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">Phone</h4>
                   <a href="tel:+919820744251" className="text-blue-600 hover:text-blue-800 text-sm">
-                    +91 98207 44251
+                    +91 9820 744 251
                   </a>
                 </div>
               </div>

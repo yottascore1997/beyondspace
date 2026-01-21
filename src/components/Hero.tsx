@@ -41,11 +41,6 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
       category: 'Managed Office'
     },
     {
-      src: '/images/05.jpg',
-      alt: 'Executive office space with sophisticated design',
-      category: 'Enterprise Office'
-    },
-    {
       src: '/images/06.jpg',
       alt: 'Flexible workspace with modern amenities',
       category: 'Flexi Desk'
@@ -54,11 +49,6 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
       src: '/images/07.jpg',
       alt: 'Professional office space with premium facilities',
       category: 'Office Space'
-    },
-    {
-      src: '/images/08.jpg',
-      alt: 'Modern conference room with bright atmosphere',
-      category: 'Meeting Room'
     },
     {
       src: '/images/10.jpg',

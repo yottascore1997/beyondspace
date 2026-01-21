@@ -25,6 +25,18 @@ export default function ContactList({ token }: ContactListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Helper function to format mobile number as "XXXX XXX XXX"
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    // If 10 digits, format as XXXX XXX XXX
+    if (digits.length === 10) {
+      return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+    }
+    // Return as is if not 10 digits
+    return phone;
+  };
+
   useEffect(() => {
     fetchContacts();
   }, [currentPage]);
@@ -263,7 +275,7 @@ export default function ContactList({ token }: ContactListProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Mobile Number
                     </label>
-                    <p className="text-gray-900">+91 {selectedContact.mobile}</p>
+                    <p className="text-gray-900">+91 {formatPhoneNumber(selectedContact.mobile)}</p>
                   </div>
 
                   <div>
