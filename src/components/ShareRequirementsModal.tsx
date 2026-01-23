@@ -162,7 +162,7 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
                     <img
                       src="/images/clientForm.png"
                       alt="Client form"
-                      className="w-full h-auto max-w-full object-contain rounded-lg -mt-4"
+                      className="w-full h-auto max-w-[110%] object-contain rounded-lg -mt-4 scale-110"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}

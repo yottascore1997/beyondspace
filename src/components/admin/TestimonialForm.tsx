@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface TestimonialFormData {
   name: string;
@@ -40,6 +40,8 @@ export default function TestimonialForm({
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingTestimonialId) {
@@ -141,6 +143,45 @@ export default function TestimonialForm({
     }));
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', files[0]);
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const uploadResult = await uploadResponse.json();
+      const imageUrl = uploadResult.url || uploadResult.imageUrl;
+      
+      setFormData(prev => ({
+        ...prev,
+        avatar: imageUrl,
+      }));
+      setSuccess('Image uploaded successfully!');
+    } catch (error: any) {
+      setError('Upload failed: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (fetching) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -236,23 +277,28 @@ export default function TestimonialForm({
           </select>
         </div>
 
-        {/* Avatar URL */}
+        {/* Avatar Image */}
         <div className="md:col-span-2">
-          <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-2">
-            Avatar Image URL <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Avatar Image <span className="text-red-500">*</span>
           </label>
+          
           <input
-            type="url"
-            id="avatar"
-            name="avatar"
-            value={formData.avatar}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a08efe] focus:border-transparent"
-            placeholder="https://example.com/image.jpg"
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            onChange={handleFileUpload}
+            disabled={uploading}
+            required={!formData.avatar}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#a08efe] file:text-white hover:file:bg-[#7a66ff] disabled:opacity-50"
           />
+          {uploading && (
+            <p className="mt-2 text-sm text-blue-600">Uploading image...</p>
+          )}
+
           {formData.avatar && (
-            <div className="mt-2">
+            <div className="mt-3">
+              <p className="text-sm text-gray-600 mb-2">Preview:</p>
               <img
                 src={formData.avatar}
                 alt="Preview"
