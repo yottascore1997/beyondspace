@@ -204,6 +204,35 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       return null;
     }
     
+    // Check if we're on day-pass category page (from URL parameter)
+    const isDayPassCategoryPage = normalizedCategory === 'daypass' || 
+                                   categoryLower === 'day-pass' ||
+                                   categoryLower === 'daypass' ||
+                                   categoryLower === 'day pass' ||
+                                   categoryLower.includes('day-pass') ||
+                                   categoryLower.includes('daypass');
+    
+    // CRITICAL: If we're on day-pass category page, ONLY show Day Pass price
+    // Check for Day Pass plan FIRST, before any other category checks
+    if (isDayPassCategoryPage) {
+      const dayPassPlan = property.propertyOptions.find((plan: SeatingPlan) => {
+        if (!plan || !plan.title) return false;
+        const titleLower = plan.title.toLowerCase().trim();
+        return titleLower.includes('day pass') || 
+               titleLower.includes('daypass') ||
+               titleLower === 'day pass';
+      });
+      
+      if (dayPassPlan && dayPassPlan.price) {
+        const numericPrice = extractNumericPrice(dayPassPlan.price);
+        if (numericPrice !== null && numericPrice > 0) {
+          return `₹ ${numericPrice.toLocaleString('en-IN')}`;
+        }
+      }
+      // If Day Pass plan not found, return null (don't show any other price)
+      return null;
+    }
+    
     // Check if we're on coworking category page (from URL parameter)
     const isCoworkingCategoryPage = normalizedCategory === 'coworking' || 
                                      normalizedCategory === 'coworkingspace' ||
@@ -801,6 +830,14 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                                                               categoryLowerForSuffix.includes('managed-office') ||
                                                               categoryLowerForSuffix.includes('managed');
                 
+                // Check if we're on day-pass category page
+                const isDayPassCategoryPageForSuffix = normalizedCategoryForSuffix === 'daypass' || 
+                                                        categoryLowerForSuffix === 'day-pass' ||
+                                                        categoryLowerForSuffix === 'daypass' ||
+                                                        categoryLowerForSuffix === 'day pass' ||
+                                                        categoryLowerForSuffix.includes('day-pass') ||
+                                                        categoryLowerForSuffix.includes('daypass');
+                
                 const hasVirtualOfficeCategory = property.categories?.some(cat => 
                   cat.toLowerCase().includes('virtualoffice') || cat.toLowerCase().includes('virtual office')
                 ) || isVirtualOfficeCategoryPageForSuffix;
@@ -821,6 +858,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 // Priority order: Check category page first, then property categories
                 if (isVirtualOfficeCategoryPageForSuffix) priceSuffix = '/Year';
                 else if (isMeetingRoomCategoryPageForSuffix) priceSuffix = '/Hour';
+                else if (isDayPassCategoryPageForSuffix) priceSuffix = '/seat/Day';
                 else if (isManagedOfficeCategoryPageForSuffix) priceSuffix = '/seat/month';
                 else if (isCoworkingCategoryPageForSuffix) priceSuffix = '/seat/month';
                 else if (isDedicatedDeskCategoryPageForSuffix) priceSuffix = '/seat/month';

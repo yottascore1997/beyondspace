@@ -1163,7 +1163,7 @@ export default function PropertyDetails() {
                                         {(plan.seating || isManagedOffice || isPrivateCabin) && (
                                           <div className="mb-3 2xl:mb-4">
                                             <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
-                                              <div className="flex items-center justify-between gap-4">
+                                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                                                 <div className="flex items-center gap-2">
                                                   <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                                                     <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1178,7 +1178,7 @@ export default function PropertyDetails() {
                                                     }
                                                   </span>
                                                 </div>
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
                                                   {(() => {
                                                     const priceValue = plan.price;
                                                     const hasValidPrice = priceValue != null && 
@@ -1192,7 +1192,7 @@ export default function PropertyDetails() {
                                                     const formattedPrice = isNaN(priceNum) ? priceStr : priceNum.toLocaleString('en-IN');
                                                     
                                                     return (
-                                                      <div className="text-right flex items-baseline gap-1">
+                                                      <div className="text-left sm:text-right flex items-baseline gap-1">
                                                         <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
                                                         <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                                           {formattedPrice}
@@ -1204,7 +1204,7 @@ export default function PropertyDetails() {
                                                   <button
                                                     type="button"
                                                     onClick={handleEnquireClick}
-                                                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 sm:px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap flex-shrink-0"
                                                   >
                                                     Enquire Now
                                                   </button>
@@ -1252,7 +1252,7 @@ export default function PropertyDetails() {
                                       {(plan.seating || isManagedOffice || isPrivateCabin) && (
                                         <div className="mt-3 2xl:mt-4 mb-3 2xl:mb-3.5">
                                           <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
-                                            <div className="flex items-center justify-between gap-4">
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                                               <div className="flex items-center gap-2">
                                                 <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                                                   <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1267,7 +1267,7 @@ export default function PropertyDetails() {
                                                   }
                                                 </span>
                                               </div>
-                                              <div className="flex items-center gap-3">
+                                              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
                                                 {(() => {
                                                   const priceValue = plan.price;
                                                   const hasValidPrice = priceValue != null && 
@@ -1281,7 +1281,7 @@ export default function PropertyDetails() {
                                                   const formattedPrice = isNaN(priceNum) ? priceStr : priceNum.toLocaleString('en-IN');
                                                   
                                                   return (
-                                                    <div className="text-right flex items-baseline gap-1">
+                                                    <div className="text-left sm:text-right flex items-baseline gap-1">
                                                       <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
                                                       <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                                         {formattedPrice}
@@ -1293,7 +1293,7 @@ export default function PropertyDetails() {
                                                 <button
                                                   type="button"
                                                   onClick={handleEnquireClick}
-                                                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 sm:px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap flex-shrink-0"
                                                 >
                                                   Enquire Now
                                                 </button>
@@ -1345,7 +1345,7 @@ export default function PropertyDetails() {
                                 ) : null}
                                 {isManagedOffice || isPrivateCabin ? (
                                   <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
-                                    <div className="flex items-center justify-between gap-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                                       <div className="flex items-center gap-2">
                                         <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                                           <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1360,7 +1360,7 @@ export default function PropertyDetails() {
                                           }
                                         </span>
                                       </div>
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
                                         {(() => {
                                           // Check if price exists and is valid
                                           const priceValue = plan.price;
@@ -1400,7 +1400,7 @@ export default function PropertyDetails() {
                                           }
                                           
                                           return (
-                                            <div className="text-right flex items-baseline gap-1">
+                                            <div className="text-left sm:text-right flex items-baseline gap-1">
                                               <span className="text-base 2xl:text-lg font-bold text-gray-900 font-sans">₹</span>
                                               <span className="text-base 2xl:text-lg font-bold text-gray-900">
                                                 {formattedPrice}
@@ -1412,7 +1412,7 @@ export default function PropertyDetails() {
                                         <button
                                           type="button"
                                           onClick={handleEnquireClick}
-                                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 sm:px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap flex-shrink-0"
                                         >
                                           Enquire Now
                                         </button>

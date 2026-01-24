@@ -278,7 +278,7 @@ export default function Benefits() {
 
             {/* Right Side - Client Images Slider */}
             <div className="relative lg:-mt-2">
-              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border-r-4 md:border-r-6 lg:border-r-8 border-b-4 md:border-b-6 lg:border-b-8 border-blue-400 shadow-2xl h-[480px] md:h-[580px] lg:h-[630px]">
+              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border-r-4 md:border-r-6 lg:border-r-8 border-b-4 md:border-b-6 lg:border-b-8 border-blue-400 shadow-2xl h-[420px] md:h-[520px] lg:h-[560px]">
                 {clientImages.map((client, index) => (
                   <img
                     key={index}
