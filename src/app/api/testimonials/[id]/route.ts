@@ -32,12 +32,13 @@ export async function GET(
 }
 
 // PUT update testimonial (admin only)
-export const PUT = requireAdmin(async (
+export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await params;
+) {
+  return requireAdmin(async (req: NextRequest, user: any) => {
+    try {
+      const { id } = await params;
     const data = await request.json();
     const { name, role, company, text, rating, avatar, displayOrder, isActive } = data;
 
@@ -54,49 +55,54 @@ export const PUT = requireAdmin(async (
     }
 
     // Validate rating if provided (1-5)
-    if (rating !== undefined && (rating < 1 || rating > 5)) {
-      return NextResponse.json(
-        { error: 'Rating must be between 1 and 5' },
-        { status: 400 }
-      );
+    if (rating !== undefined) {
+      const ratingNum = typeof rating === 'number' ? rating : parseInt(String(rating));
+      if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+        return NextResponse.json(
+          { error: 'Rating must be between 1 and 5' },
+          { status: 400 }
+        );
+      }
     }
 
     // Update testimonial
     const testimonial = await prisma.testimonial.update({
       where: { id },
       data: {
-        ...(name !== undefined && { name: name.trim() }),
-        ...(role !== undefined && { role: role.trim() }),
-        ...(company !== undefined && { company: company.trim() }),
-        ...(text !== undefined && { text: text.trim() }),
-        ...(rating !== undefined && { rating: parseInt(rating) }),
-        ...(avatar !== undefined && { avatar: avatar.trim() }),
-        ...(displayOrder !== undefined && { displayOrder: parseInt(displayOrder) }),
-        ...(isActive !== undefined && { isActive }),
+        ...(name !== undefined && { name: String(name).trim() }),
+        ...(role !== undefined && { role: String(role).trim() }),
+        ...(company !== undefined && { company: String(company).trim() }),
+        ...(text !== undefined && { text: String(text).trim() }),
+        ...(rating !== undefined && { rating: typeof rating === 'number' ? rating : parseInt(String(rating)) || 5 }),
+        ...(avatar !== undefined && { avatar: String(avatar).trim() }),
+        ...(displayOrder !== undefined && { displayOrder: typeof displayOrder === 'number' ? displayOrder : parseInt(String(displayOrder)) || 0 }),
+        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Testimonial updated successfully',
-      testimonial,
-    });
-  } catch (error) {
-    console.error('Error updating testimonial:', error);
-    return NextResponse.json(
-      { error: 'Failed to update testimonial' },
-      { status: 500 }
-    );
-  }
-});
+      return NextResponse.json({
+        success: true,
+        message: 'Testimonial updated successfully',
+        testimonial,
+      });
+    } catch (error) {
+      console.error('Error updating testimonial:', error);
+      return NextResponse.json(
+        { error: 'Failed to update testimonial' },
+        { status: 500 }
+      );
+    }
+  })(request);
+}
 
 // DELETE testimonial (admin only)
-export const DELETE = requireAdmin(async (
+export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await params;
+) {
+  return requireAdmin(async (req: NextRequest, user: any) => {
+    try {
+      const { id } = await params;
 
     // Check if testimonial exists
     const existingTestimonial = await prisma.testimonial.findUnique({
@@ -110,21 +116,22 @@ export const DELETE = requireAdmin(async (
       );
     }
 
-    // Delete testimonial
-    await prisma.testimonial.delete({
-      where: { id },
-    });
+      // Delete testimonial
+      await prisma.testimonial.delete({
+        where: { id },
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Testimonial deleted successfully',
-    });
-  } catch (error) {
-    console.error('Error deleting testimonial:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete testimonial' },
-      { status: 500 }
-    );
-  }
-});
+      return NextResponse.json({
+        success: true,
+        message: 'Testimonial deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete testimonial' },
+        { status: 500 }
+      );
+    }
+  })(request);
+}
 

@@ -104,6 +104,7 @@ export default function TestimonialForm({
       });
 
       if (response.ok) {
+        const result = await response.json();
         setSuccess(
           editingTestimonialId
             ? 'Testimonial updated successfully!'
@@ -118,8 +119,9 @@ export default function TestimonialForm({
           }
         }, 1500);
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to save testimonial');
+        const data = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
+        console.error('Update error:', data);
+        setError(data.error || data.message || 'Failed to save testimonial');
       }
     } catch (error) {
       setError('Network error. Please try again.');
