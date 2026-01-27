@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await fetch("https://files.beyondspacework.com/upload.php", {
+    const response = await fetch("https://files.yottascore.com/upload.php", {
       method: "POST",
       headers: {
         "X-Upload-Token": token,

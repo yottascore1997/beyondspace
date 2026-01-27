@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "files.beyondspacework.com",
+        hostname: "files.yottascore.com",
         pathname: "/uploads/**",
       },
     ],

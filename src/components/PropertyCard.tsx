@@ -609,7 +609,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                   loading={index === 0 ? "lazy" : "lazy"}
                   quality={85}
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  unoptimized={image.startsWith('http') && !image.includes('files.beyondspacework.com')}
+                  unoptimized={image.startsWith('http') && !image.includes('files.yottascore.com')}
                 />
               ) : (
                 <div
