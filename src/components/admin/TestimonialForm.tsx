@@ -172,11 +172,24 @@ export default function TestimonialForm({
       const uploadResult = await uploadResponse.json();
       const imageUrl = uploadResult.url || uploadResult.imageUrl;
       
+      // Debug: Log the upload result
+      console.log('Upload result:', uploadResult);
+      console.log('Image URL:', imageUrl);
+      
+      if (!imageUrl) {
+        throw new Error('No image URL received from server');
+      }
+      
+      // Ensure URL is from yottascore
+      if (!imageUrl.includes('yottascore.com')) {
+        console.warn('Warning: Image URL does not contain yottascore.com:', imageUrl);
+      }
+      
       setFormData(prev => ({
         ...prev,
         avatar: imageUrl,
       }));
-      setSuccess('Image uploaded successfully!');
+      setSuccess('Image uploaded successfully! URL: ' + imageUrl);
     } catch (error: any) {
       setError('Upload failed: ' + error.message);
     } finally {
@@ -301,12 +314,17 @@ export default function TestimonialForm({
           {formData.avatar && (
             <div className="mt-3">
               <p className="text-sm text-gray-600 mb-2">Preview:</p>
+              <p className="text-xs text-gray-500 mb-2 break-all">URL: {formData.avatar}</p>
               <img
                 src={formData.avatar}
                 alt="Preview"
                 className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
                 onError={(e) => {
+                  console.error('Image load error:', formData.avatar);
                   (e.target as HTMLImageElement).style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully:', formData.avatar);
                 }}
               />
             </div>

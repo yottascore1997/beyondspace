@@ -24,7 +24,15 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(images);
+    // Replace files.beyondspacework.com with files.yottascore.com in response
+    const normalizedImages = images.map(img => ({
+      ...img,
+      imageUrl: img.imageUrl.includes('files.beyondspacework.com')
+        ? img.imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com')
+        : img.imageUrl,
+    }));
+
+    return NextResponse.json(normalizedImages);
   } catch (error: any) {
     console.error('Error fetching section images:', error);
     // Return empty array instead of error for graceful fallback
@@ -51,13 +59,19 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
     }
 
     const data = await request.json();
-    const { section = 'why-choose-us', imageUrl, altText, displayOrder = 0 } = data;
+    let { section = 'why-choose-us', imageUrl, altText, displayOrder = 0 } = data;
 
     if (!imageUrl) {
       return NextResponse.json(
         { error: 'Image URL is required' },
         { status: 400 }
       );
+    }
+
+    // Replace files.beyondspacework.com with files.yottascore.com before saving
+    if (imageUrl.includes('files.beyondspacework.com')) {
+      imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
+      console.log('Replaced beyondspacework.com with yottascore.com in section image URL');
     }
 
     const image = await prisma.sectionImage.create({

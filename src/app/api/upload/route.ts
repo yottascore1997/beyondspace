@@ -94,15 +94,32 @@ export async function POST(request: Request) {
 
     // Normalize response: ensure both `url` and `imageUrl` keys for FE compatibility
     if (data && typeof data === "object") {
-      const urlValue =
+      let urlValue =
         (data.url as string) ||
         (data.imageUrl as string) ||
         (data.secure_url as string) ||
         "";
+      
       if (urlValue) {
+        // Replace files.beyondspacework.com with files.yottascore.com
+        if (urlValue.includes('files.beyondspacework.com')) {
+          urlValue = urlValue.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
+          console.log('Replaced beyondspacework.com with yottascore.com:', urlValue);
+        }
+        
         data.url = urlValue;
         data.imageUrl = urlValue;
+        
+        // Debug: Log the URL to ensure it's from yottascore
+        console.log('Upload successful. Image URL:', urlValue);
+        if (!urlValue.includes('yottascore.com')) {
+          console.warn('Warning: Uploaded image URL does not contain yottascore.com:', urlValue);
+        }
+      } else {
+        console.error('Upload response missing URL:', data);
       }
+    } else {
+      console.error('Upload response is not an object:', data);
     }
 
     return NextResponse.json(data, { status: response.status });

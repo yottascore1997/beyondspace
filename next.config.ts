@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "files.yottascore.com",
-        pathname: "/uploads/**",
       },
     ],
   },

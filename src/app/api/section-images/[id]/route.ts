@@ -26,7 +26,13 @@ export async function PUT(
       }
 
       const data = await req.json();
-      const { imageUrl, altText, displayOrder, isActive } = data;
+      let { imageUrl, altText, displayOrder, isActive } = data;
+
+      // Replace files.beyondspacework.com with files.yottascore.com before saving
+      if (imageUrl && imageUrl.includes('files.beyondspacework.com')) {
+        imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
+        console.log('Replaced beyondspacework.com with yottascore.com in section image update');
+      }
 
       const image = await prisma.sectionImage.update({
         where: { id },

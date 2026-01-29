@@ -77,7 +77,18 @@ export default function Testimonials() {
               {testimonials.map((t) => (
                 <div key={t.id} className="group snap-start min-w-[480px] w-[480px] min-h-[320px] bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-100 p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
                   <div className="flex items-center gap-6 mb-6">
-                    <img src={t.avatar} alt={t.name} className="w-24 h-24 rounded-full object-cover border-2 border-white shadow group-hover:scale-105 transition-transform" />
+                    <img 
+                      src={t.avatar} 
+                      alt={t.name} 
+                      className="w-24 h-24 rounded-full object-cover border-2 border-white shadow group-hover:scale-105 transition-transform"
+                      onError={(e) => {
+                        console.error('Testimonial image load error:', t.avatar, t.name);
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Testimonial image loaded:', t.avatar);
+                      }}
+                    />
                     <div>
                       <div className="font-extrabold text-gray-900 text-2xl">{t.name}</div>
                       <div className="text-black text-base">{t.role}</div>

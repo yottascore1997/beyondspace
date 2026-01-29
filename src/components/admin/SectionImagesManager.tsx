@@ -74,7 +74,17 @@ export default function SectionImagesManager() {
       }
 
       const uploadResult = await uploadResponse.json();
-      const imageUrl = uploadResult.url || uploadResult.imageUrl;
+      let imageUrl = uploadResult.url || uploadResult.imageUrl;
+      
+      // Ensure URL is from yottascore.com (replace beyondspacework.com if present)
+      if (imageUrl && imageUrl.includes('files.beyondspacework.com')) {
+        imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
+        console.log('Replaced beyondspacework.com with yottascore.com in section image:', imageUrl);
+      }
+      
+      if (!imageUrl) {
+        throw new Error('No image URL received from server');
+      }
 
       // Add to section images
       const addResponse = await fetch('/api/section-images', {
