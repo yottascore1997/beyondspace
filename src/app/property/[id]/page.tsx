@@ -1675,32 +1675,15 @@ export default function PropertyDetails() {
 
             {/* Google Maps Section - Below Location Details */}
             {property && (() => {
-              // Helper function to get Google Maps embed URL
+              // Helper function to get Google Maps embed URL (shows only area, not exact location)
               const getMapEmbedUrl = () => {
-                // If googleMapLink is provided and is already an embed URL, use it directly
-                if (property.googleMapLink && property.googleMapLink.includes('/embed')) {
-                  return property.googleMapLink;
-                }
+                // Always use area name only (not exact location) for privacy
+                // This shows general area map without revealing exact property location
+                const areaQuery = `${property.area}, ${property.city}`;
                 
-                // If googleMapLink is a regular Google Maps URL, try to extract location
-                if (property.googleMapLink) {
-                  // Try to extract coordinates from URL
-                  const coordMatch = property.googleMapLink.match(/@([-\d.]+),([-\d.]+)/);
-                  if (coordMatch) {
-                    return `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&output=embed`;
-                  }
-                  
-                  // Try to extract place ID or place name
-                  const placeMatch = property.googleMapLink.match(/place\/([^\/\?]+)/);
-                  if (placeMatch) {
-                    const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
-                    return `https://www.google.com/maps?q=${encodeURIComponent(placeName)}&output=embed`;
-                  }
-                }
-                
-                // Fallback: Create embed URL from location details (no API key needed)
-                const locationQuery = property.locationDetails || `${property.sublocation ? property.sublocation + ', ' : ''}${property.area}, ${property.city}`;
-                return `https://www.google.com/maps?q=${encodeURIComponent(locationQuery)}&output=embed`;
+                // Use zoom level 13-14 for area view (not too close, not too far)
+                // This shows the general area without pinpointing exact location
+                return `https://www.google.com/maps?q=${encodeURIComponent(areaQuery)}&output=embed&z=13`;
               };
 
               const locationText = property.locationDetails || `${property.sublocation ? property.sublocation + ', ' : ''}${property.area}, ${property.city}`;
@@ -1830,7 +1813,7 @@ export default function PropertyDetails() {
             <div ref={amenitiesRef} className="mb-8 2xl:mb-8">
               <h3 className="text-xl 2xl:text-xl font-semibold text-gray-900 mb-5 2xl:mb-5">Amenities</h3>
               
-              <div className="rounded-2xl overflow-hidden">
+              <div className="rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 max-w-2xl w-full">
                 <img 
                   src="/images/amenity.jpeg" 
                   alt="Amenities" 
@@ -2042,9 +2025,9 @@ export default function PropertyDetails() {
             </div>
 
             {loadingSimilar ? (
-              <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl shadow-md animate-pulse">
+                  <div key={i} className="bg-white rounded-xl shadow-md animate-pulse">
                     <div className="h-64 bg-gray-300 rounded-t-xl"></div>
                     <div className="p-4 space-y-3">
                       <div className="h-4 bg-gray-300 rounded w-3/4"></div>
@@ -2055,14 +2038,13 @@ export default function PropertyDetails() {
                 ))}
               </div>
             ) : (
-              <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4">
                 {similarProperties.map((similarProperty) => (
-                  <div key={similarProperty.id} className="flex-shrink-0 w-80">
-                    <PropertyCard
-                      property={similarProperty}
-                      hideCategory={true}
-                    />
-                  </div>
+                  <PropertyCard
+                    key={similarProperty.id}
+                    property={similarProperty}
+                    hideCategory={true}
+                  />
                 ))}
               </div>
             )}

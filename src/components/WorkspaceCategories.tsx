@@ -68,7 +68,7 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
   const categories = [
     {
       name: 'Coworking Space',
-      description: 'Full-time premium flexible offices for teams of all sizes',
+      description: 'Full-time premium offices for teams of all sizes',
       features: [
         'Dedicated seats & private cabins',
         'Fully-equipped coworking spaces',

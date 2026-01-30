@@ -172,23 +172,49 @@ export default function Home() {
           <div className="flex flex-col h-full">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Enterprise Office Solutions</h2>
-              <p className="text-gray-700 text-base leading-relaxed">
-                Enterprise office availability depends on location, building specifications, and customization needs. We provide tailored solutions for your business. Fill the form below or call us to discuss your requirements.
-              </p>
-            </div>
+              
+              <div className="space-y-4">
+                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <p className="text-gray-800 text-sm font-semibold mb-2">
+                    Availability & Customization
+                  </p>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    The availability (commercial) of enterprise office space depends on factors such as:
+                  </p>
+                  <ul className="mt-3 space-y-2 text-gray-700 text-sm">
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-1">•</span>
+                      <span>Location</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-1">•</span>
+                      <span>Building specifications</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-1">•</span>
+                      <span>Level of customization required</span>
+                    </li>
+                  </ul>
+                </div>
 
-            <div className="flex-1 flex flex-col items-start justify-start min-h-0 relative">
-              <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 text-left w-full">
-                Trusted by Leading Companies
-              </h3>
-              <img
-                src="/images/clientForm.png"
-                alt="Client form"
-                className="w-full h-auto max-w-[520px] max-h-[45vh] object-contain rounded-lg -mt-2"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+                <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                  <p className="text-gray-800 text-sm font-semibold mb-2">
+                    Our Commitment
+                  </p>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    We are committed to providing exactly what you are looking for.
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-500">
+                  <p className="text-gray-800 text-sm font-semibold mb-2">
+                    Get Started
+                  </p>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    To begin, please fill up the form below or directly call us, so we can discuss how we can cater to your specific business needs.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         }

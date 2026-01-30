@@ -162,7 +162,7 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
                     <img
                       src="/images/clientForm.png"
                       alt="Client form"
-                      className="w-full h-auto max-w-[110%] object-contain rounded-lg -mt-4 scale-110"
+                      className="w-full h-auto max-w-[95%] object-contain rounded-lg mt-2"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -302,41 +302,28 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
             {showFullForm && (
               <>
                 <div className="flex items-center gap-3 mt-6">
-                  <img
-                    src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80"
-                    alt="Workspace consultant"
-                    className="w-12 h-12 rounded-full object-cover border border-blue-200"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/30">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">Workspace Consultant</p>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <a href="tel:+919820744251" className="text-base font-bold text-orange-500">+91 9820 744 251</a>
-                    </div>
+                    <p className="text-base font-semibold text-gray-900 mb-1">Connect with us our number</p>
+                    <a href="tel:+919820744251" className="text-base font-semibold text-orange-500">+91 9820 744 251</a>
                   </div>
                 </div>
 
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-md shadow-purple-500/30">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-500/30">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-base font-semibold text-gray-900">Connect with our space expert</p>
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-base font-semibold text-orange-500">
-                        contact@beyondspacework.com
-                      </span>
-                    </div>
+                    <p className="text-base font-semibold text-gray-900 mb-1">Connect with us our email</p>
+                    <a href="mailto:contact@beyondspacework.com" className="text-base font-semibold text-orange-500">
+                      contact@beyondspacework.com
+                    </a>
                   </div>
                 </div>
               </>
