@@ -15,9 +15,10 @@ interface ContactForm {
 
 interface ContactListProps {
   token: string;
+  onContactUpdate?: () => void;
 }
 
-export default function ContactList({ token }: ContactListProps) {
+export default function ContactList({ token, onContactUpdate }: ContactListProps) {
   const [contacts, setContacts] = useState<ContactForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -86,6 +87,7 @@ export default function ContactList({ token }: ContactListProps) {
         if (selectedContact?.id === id) {
           setSelectedContact(prev => prev ? { ...prev, isRead: true } : null);
         }
+        onContactUpdate?.();
       }
     } catch (error) {
       console.error('Error marking as read:', error);
@@ -111,6 +113,7 @@ export default function ContactList({ token }: ContactListProps) {
         if (selectedContact?.id === id) {
           setSelectedContact(null);
         }
+        onContactUpdate?.();
       } else {
         setError('Failed to delete contact');
       }

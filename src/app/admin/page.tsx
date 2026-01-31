@@ -8,8 +8,6 @@ import Dashboard from '@/components/admin/Dashboard';
 import PropertyForm from '@/components/admin/PropertyForm';
 import PropertyList from '@/components/admin/PropertyList';
 import ContactList from '@/components/admin/ContactList';
-import RequirementsList from '@/components/admin/RequirementsList';
-import CustomerSubmissions from '@/components/admin/CustomerSubmissions';
 import AreasList from '@/components/admin/AreasList';
 import BulkUpload from '@/components/admin/BulkUpload';
 import TestimonialsList from '@/components/admin/TestimonialsList';
@@ -31,6 +29,7 @@ export default function AdminPage() {
   const [propertyListRefreshKey, setPropertyListRefreshKey] = useState(0);
   const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
   const [testimonialListRefreshKey, setTestimonialListRefreshKey] = useState(0);
+  const [unreadInquiriesCount, setUnreadInquiriesCount] = useState(0);
   const router = useRouter();
   const isClient = useIsClient();
 
@@ -39,6 +38,30 @@ export default function AdminPage() {
       checkAuth();
     }
   }, [isClient]);
+
+  const fetchUnreadInquiriesCount = async () => {
+    try {
+      const res = await fetch('/api/contact/stats');
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadInquiriesCount(data.unread ?? 0);
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
+  useEffect(() => {
+    if (user && isClient) {
+      fetchUnreadInquiriesCount();
+    }
+  }, [user, isClient]);
+
+  useEffect(() => {
+    if (activeTab === 'contacts' && isClient) {
+      fetchUnreadInquiriesCount();
+    }
+  }, [activeTab, isClient]);
 
   const checkAuth = async () => {
     // Check if we're on the client side
@@ -160,7 +183,8 @@ export default function AdminPage() {
           user={user} 
           activeTab={activeTab} 
           setActiveTab={handleTabChange} 
-          onLogout={handleLogout} 
+          onLogout={handleLogout}
+          unreadInquiriesCount={unreadInquiriesCount}
         />
       )}
       
@@ -200,24 +224,11 @@ export default function AdminPage() {
             {activeTab === 'contacts' && (
               <div className="p-8">
                 <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-6">Contact Inquiries</h1>
-                  <ContactList token={isClient ? localStorage.getItem('token') || '' : ''} />
-                </div>
-              </div>
-            )}
-            {activeTab === 'requirements' && (
-              <div className="p-8">
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-6">Requirements</h1>
-                  <RequirementsList />
-                </div>
-              </div>
-            )}
-            {activeTab === 'customer-submissions' && (
-              <div className="p-8">
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-6">Customer Submissions</h1>
-                  <CustomerSubmissions />
+                  <h1 className="text-2xl font-bold text-gray-900 mb-6">Inquiries</h1>
+                  <ContactList 
+                    token={isClient ? localStorage.getItem('token') || '' : ''} 
+                    onContactUpdate={fetchUnreadInquiriesCount}
+                  />
                 </div>
               </div>
             )}

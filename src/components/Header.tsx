@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import ShareRequirementsModal from './ShareRequirementsModal';
 
+// Set to true to show "List Your Space" in header
+const SHOW_LIST_YOUR_SPACE = false;
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRequirementModalOpen, setRequirementModalOpen] = useState(false);
@@ -92,12 +95,14 @@ export default function Header() {
             >
               Share Requirement
             </button>
-            <a
-              href="/list-your-space"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:from-blue-600 hover:via-blue-700 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-400/50 transform hover:scale-105 transition-all duration-300 border border-blue-200/60 shadow-md"
-            >
-              List Your Space
-            </a>
+            {SHOW_LIST_YOUR_SPACE && (
+              <a
+                href="/list-your-space"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:from-blue-600 hover:via-blue-700 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-400/50 transform hover:scale-105 transition-all duration-300 border border-blue-200/60 shadow-md"
+              >
+                List Your Space
+              </a>
+            )}
             <a
               href="https://wa.me/919820744251"
               target="_blank"
@@ -133,12 +138,14 @@ export default function Header() {
               >
                 Share Requirement
               </button>
-              <a 
-                href="/list-your-space" 
-                className="px-3 py-2 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white rounded-lg text-sm font-semibold text-center shadow-md shadow-blue-400/30 border border-blue-300/40"
-              >
-                List Your Space
-              </a>
+              {SHOW_LIST_YOUR_SPACE && (
+                <a 
+                  href="/list-your-space" 
+                  className="px-3 py-2 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white rounded-lg text-sm font-semibold text-center shadow-md shadow-blue-400/30 border border-blue-300/40"
+                >
+                  List Your Space
+                </a>
+              )}
               <a 
                 href="https://wa.me/919820744251" 
                 target="_blank" 

@@ -14,9 +14,10 @@ interface AdminSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onLogout: () => void;
+  unreadInquiriesCount?: number;
 }
 
-export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout }: AdminSidebarProps) {
+export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout, unreadInquiriesCount = 0 }: AdminSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -59,28 +60,10 @@ export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout }
     },
     {
       id: 'contacts',
-      label: 'Contact Inquiries',
+      label: 'Inquiries',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      )
-    },
-    {
-      id: 'requirements',
-      label: 'Requirements',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      )
-    },
-    {
-      id: 'customer-submissions',
-      label: 'Customer Submissions',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
       )
     },
@@ -176,7 +159,7 @@ export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout }
             <li key={item.id}>
               <button
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 relative ${
                   activeTab === item.id
                     ? 'bg-gradient-to-r from-[#a08efe] to-[#7a66ff] text-white shadow-lg'
                     : 'text-gray-700 hover:bg-gray-100'
@@ -187,7 +170,19 @@ export default function AdminSidebar({ user, activeTab, setActiveTab, onLogout }
                   {item.icon}
                 </div>
                 {!isCollapsed && (
-                  <span className="font-semibold">{item.label}</span>
+                  <>
+                    <span className="font-semibold">{item.label}</span>
+                    {item.id === 'contacts' && unreadInquiriesCount > 0 && (
+                      <span className="min-w-[22px] h-[22px] px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full shrink-0">
+                        {unreadInquiriesCount > 99 ? '99+' : unreadInquiriesCount}
+                      </span>
+                    )}
+                  </>
+                )}
+                {isCollapsed && item.id === 'contacts' && unreadInquiriesCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full">
+                    {unreadInquiriesCount > 99 ? '99+' : unreadInquiriesCount}
+                  </span>
                 )}
               </button>
             </li>

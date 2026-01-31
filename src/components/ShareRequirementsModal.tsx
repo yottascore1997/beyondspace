@@ -27,8 +27,8 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
     seats: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
   const [submitError, setSubmitError] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,14 +37,12 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
       [name]: value
     }));
     setSubmitError('');
-    setSubmitMessage('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError('');
-    setSubmitMessage('');
 
     try {
       // Combine type and seats into solution field
@@ -67,7 +65,6 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
       });
 
       if (response.ok) {
-        setSubmitMessage('Thank you for your inquiry! We will contact you soon.');
         setFormData({
           name: '',
           email: '',
@@ -75,11 +72,12 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
           type: '',
           seats: ''
         });
-        // Close modal after 2 seconds
+        setShowSuccessPopup(true);
+        // Naya popup 5 sec baad band + main modal bhi close
         setTimeout(() => {
+          setShowSuccessPopup(false);
           onClose();
-          setSubmitMessage('');
-        }, 2000);
+        }, 5000);
       } else {
         const errorData = await response.json();
         setSubmitError(errorData.error || 'Something went wrong. Please try again.');
@@ -101,8 +99,8 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
       type: '',
       seats: ''
     });
-    setSubmitMessage('');
     setSubmitError('');
+    setShowSuccessPopup(false);
   };
 
   if (!isOpen) return null;
@@ -124,6 +122,20 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
               opacity: 1;
               transform: translateY(0) scale(1);
             }
+          }
+          @keyframes successPopIn {
+            from {
+              opacity: 0;
+              transform: translateY(-20px) scale(0.9);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+          @keyframes progressShrink {
+            from { width: 100%; }
+            to { width: 0%; }
           }
         `
       }} />
@@ -274,12 +286,6 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
                 </div>
               </div>
 
-              {submitMessage && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800">{submitMessage}</p>
-                </div>
-              )}
-
               {submitError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-800">{submitError}</p>
@@ -331,6 +337,43 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
           </div>
         </div>
       </div>
+
+      {/* Naya beautiful popup - form submit ke baad upar dikhega, 5 sec baad band */}
+      {showSuccessPopup && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 font-['Poppins']"
+          style={{ animation: 'fadeIn 0.3s ease-out' }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center border border-green-100"
+            style={{
+              animation: 'successPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(34, 197, 94, 0.1)'
+            }}
+          >
+            <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-green-500/30">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Thanks for Submitting!</h3>
+            <p className="text-gray-600 text-sm mb-1">
+              Your requirements have been received successfully.
+            </p>
+            <p className="text-gray-500 text-xs">Our team will reach out to you shortly.</p>
+            <div className="mt-4 h-1.5 w-28 bg-gray-200 rounded-full mx-auto overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                style={{ 
+                  animation: 'progressShrink 5s linear forwards',
+                  transformOrigin: 'left'
+                }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-2">Closing in 5 seconds...</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }

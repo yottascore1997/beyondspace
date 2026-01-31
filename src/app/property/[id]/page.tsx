@@ -1813,7 +1813,7 @@ export default function PropertyDetails() {
             <div ref={amenitiesRef} className="mb-8 2xl:mb-8">
               <h3 className="text-xl 2xl:text-xl font-semibold text-gray-900 mb-5 2xl:mb-5">Amenities</h3>
               
-              <div className="rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 max-w-2xl w-full">
+              <div className="rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 w-full max-w-4xl">
                 <img 
                   src="/images/amenity.jpeg" 
                   alt="Amenities" 
