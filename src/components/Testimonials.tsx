@@ -81,6 +81,8 @@ export default function Testimonials() {
                       src={t.avatar} 
                       alt={t.name} 
                       className="w-24 h-24 rounded-full object-cover border-2 border-white shadow group-hover:scale-105 transition-transform"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         console.error('Testimonial image load error:', t.avatar, t.name);
                         (e.target as HTMLImageElement).style.display = 'none';

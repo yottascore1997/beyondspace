@@ -205,6 +205,8 @@ export default function MumbaiPlaces() {
                   src={item.image}
                   alt={item.place.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     console.error(`Failed to load image: ${item.image}`);
                     // Fallback to a placeholder or default image

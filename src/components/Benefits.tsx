@@ -287,6 +287,9 @@ export default function Benefits() {
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
                       index === currentClientIndex ? 'opacity-100' : 'opacity-0'
                     }`}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : undefined}
+                    decoding="async"
                   />
                 ))}
                 {/* Navigation Dots */}

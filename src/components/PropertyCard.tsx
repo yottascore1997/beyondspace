@@ -52,12 +52,15 @@ interface PropertyCardProps {
   onEnquireClick?: () => void;
   hideCategory?: boolean;
   category?: string; // Category from which page user is viewing (for filtering seating plans)
+  priority?: boolean; // Above-fold cards load images first
 }
 
-export default function PropertyCard({ property, onEnquireClick, hideCategory = false, category }: PropertyCardProps) {
+export default function PropertyCard({ property, onEnquireClick, hideCategory = false, category, priority = false }: PropertyCardProps) {
   const [isFav, setIsFav] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0])); // Load first image immediately
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(
+    priority ? new Set([0, 1, 2, 3, 4]) : new Set([0])
+  );
   const cardRef = useRef<HTMLElement | null>(null);
   
   // Get all available images (main image + additional images)
@@ -65,9 +68,9 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     ? [property.image, ...property.propertyImages.map(img => img.imageUrl).filter(img => img !== property.image)]
     : [property.image];
   
-  // Lazy load images when card comes into view
+  // Lazy load images when card comes into view (skip if priority)
   useEffect(() => {
-    if (!cardRef.current) return;
+    if (priority || !cardRef.current) return;
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -606,10 +609,11 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                   height={300}
                   className="w-full h-full object-cover flex-shrink-0"
                   style={{ minWidth: '100%', width: '100%' }}
-                  loading={index === 0 ? "lazy" : "lazy"}
-                  quality={85}
+                  loading={priority && index === 0 ? "eager" : "lazy"}
+                  quality={100}
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   unoptimized={image.startsWith('http')}
+                  priority={priority && index === 0}
                 />
               ) : (
                 <div

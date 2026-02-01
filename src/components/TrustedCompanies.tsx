@@ -60,6 +60,8 @@ export default function TrustedCompanies() {
                       src={company.logo}
                       alt={`${company.name} logo`}
                       className="max-w-full max-h-full w-full h-full object-contain transition-all duration-300 group-hover:scale-110"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}

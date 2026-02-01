@@ -39,6 +39,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to CDN for faster image loading */}
+        <link rel="preconnect" href="https://files.yottascore.com" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.className} antialiased`}
         suppressHydrationWarning={true}

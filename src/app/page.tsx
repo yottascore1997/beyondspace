@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { prefetchCategoryData } from '@/lib/categoryPrefetch';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import QuickCategories from '@/components/QuickCategories';
@@ -17,6 +19,15 @@ import ShareRequirementsModal from '@/components/ShareRequirementsModal';
 import FAQ from '@/components/FAQ';
 
 export default function Home() {
+  const router = useRouter();
+
+  // Prefetch category page + API data when home loads - faster navigation
+  useEffect(() => {
+    router.prefetch('/category/coworking-space');
+    router.prefetch('/category/coworking');
+    prefetchCategoryData('coworking-space', 'Mumbai');
+  }, [router]);
+
   const [filters, setFilters] = useState({
     city: 'all',
     area: 'all',

@@ -4,6 +4,7 @@ import { useState, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
 import { Poppins } from 'next/font/google';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PropertyCard from '@/components/PropertyCard';
@@ -650,10 +651,15 @@ export default function PropertyDetails() {
                   style={{ borderRadius: '1rem' }}
                   onClick={() => setShowGallery(true)}
                 >
-                    <img
-                    src={allImages[0]}
+                    <Image
+                      src={allImages[0]}
                       alt={property.title}
-                    className="w-full h-full object-cover object-center"
+                      fill
+                      className="object-cover object-center"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      quality={100}
+                      priority
+                      unoptimized={allImages[0]?.startsWith('http')}
                     />
                   {/* View All Images Button */}
                         <button
@@ -686,6 +692,8 @@ export default function PropertyDetails() {
                         src={image}
                         alt={`${property.title} ${index + 2}`}
                         className="w-full h-full object-cover object-center"
+                        loading="lazy"
+                        decoding="async"
                       />
                       {/* View All Photos Button on the last image */}
                       {index === 3 && allImages.length > 5 && (
@@ -1818,6 +1826,8 @@ export default function PropertyDetails() {
                   src="/images/amenity.jpeg" 
                   alt="Amenities" 
                   className="w-full h-auto object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

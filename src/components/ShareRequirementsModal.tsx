@@ -175,6 +175,8 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
                       src="/images/clientForm.png"
                       alt="Client form"
                       className="w-full h-auto max-w-[95%] object-contain rounded-lg mt-2"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}

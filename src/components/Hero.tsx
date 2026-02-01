@@ -2,6 +2,8 @@
 
 import { useState, useEffect, CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { prefetchCategoryData } from '@/lib/categoryPrefetch';
 
 interface HeroProps {
   filters: {
@@ -168,16 +170,23 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
       {/* Image Slider - keep images crisp and visible */}
       <div className="absolute inset-0">
         {heroImages.map((image, index) => (
-          <img
+          <div
             key={index}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
-              index === currentImageIndex 
-                ? 'opacity-100 object-cover'
-                : 'opacity-0'
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
             }`}
-            src={image.src}
-            alt={image.alt}
-          />
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              quality={100}
+              priority={index === 0}
+              loading={index === 0 ? 'eager' : 'lazy'}
+            />
+          </div>
         ))}
       </div>
       
@@ -303,7 +312,11 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
               <label className="block text-gray-800 text-[10px] 2xl:text-sm font-semibold mb-0.5 2xl:mb-1">Category</label>
               <select
                 value={filters.purpose}
-                onChange={(e) => onFilterChange('purpose', e.target.value)}
+                onChange={(e) => {
+                  const purpose = e.target.value;
+                  onFilterChange('purpose', purpose);
+                  if (purpose) prefetchCategoryData(purpose, filters.city !== 'all' ? filters.city : 'Mumbai');
+                }}
                 className="w-full p-1.5 2xl:p-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none transition-all duration-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 hover:border-gray-300 text-xs 2xl:text-base"
               >
                 <option value="">Select Category</option>

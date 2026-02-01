@@ -176,7 +176,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(properties);
+    const response = NextResponse.json(properties);
+    // Cache for 30 sec - faster repeat visits and prefetch
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    return response;
   } catch (error) {
     console.error('Error fetching properties:', error);
     return NextResponse.json(

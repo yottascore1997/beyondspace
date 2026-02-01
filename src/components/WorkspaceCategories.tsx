@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { prefetchCategoryData } from '@/lib/categoryPrefetch';
 
 interface WorkspaceCategoriesProps {
   onEnterpriseClick?: () => void;
@@ -145,13 +147,15 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
           </h2>
         </div>
 
-        {/* Categories Section */}
+        {/* Categories Section - Link enables prefetch for faster navigation */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 md:gap-6 xl:gap-8">
           {categories.map((category, index) => (
-            <div
+            <Link
               key={index}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 md:p-5 xl:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-              onClick={() => handleCategoryClick(category.name)}
+              href={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+              prefetch={true}
+              onMouseEnter={() => prefetchCategoryData(category.name.toLowerCase().replace(/\s+/g, '-'), 'Mumbai')}
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 md:p-5 xl:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer block"
             >
               {/* Category Image */}
               <div className="w-full h-56 md:h-64 xl:h-72 rounded-lg overflow-hidden mb-3">
@@ -159,6 +163,8 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
                   src={categoryImages[index]}
                   alt={`${category.name} workspace`}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
 
@@ -184,17 +190,11 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
 
               {/* Explore Link */}
               <div className="pt-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent card click when clicking the button
-                    handleCategoryClick(category.name);
-                  }}
-                  className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300 w-full"
-                >
+                <span className="inline-block w-full text-center bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold shadow-lg shadow-purple-500/30 hover:shadow-cyan-400/40 transition-all duration-300">
                   Explore {category.name} →
-                </button>
+                </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -208,6 +208,8 @@ export default function WorkspaceCategories({ onEnterpriseClick }: WorkspaceCate
                   src="/images/enterprise.png"
                   alt="Enterprise Offices"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
 

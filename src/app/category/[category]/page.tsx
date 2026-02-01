@@ -8,6 +8,7 @@ import PropertyCard from '@/components/PropertyCard';
 import Footer from '@/components/Footer';
 import ShareRequirementsModal from '@/components/ShareRequirementsModal';
 import Link from 'next/link';
+import { getCachedProperties } from '@/lib/categoryPrefetch';
 
 interface SeatingPlan {
   id: string;
@@ -417,6 +418,18 @@ export default function CategoryPage() {
 
   const fetchCategoryProperties = async () => {
     try {
+      const cityToUse = selectedCity && selectedCity !== 'all' ? selectedCity : 'Mumbai';
+      
+      // Check cache first - instant load if prefetched (e.g. on hover)
+      if (searchQuery.trim() === '') {
+        const cached = getCachedProperties(categoryName, cityToUse);
+        if (cached && Array.isArray(cached)) {
+          setProperties(cached as Property[]);
+          setLoading(false);
+          return;
+        }
+      }
+
       setLoading(true);
       // Build query params
       const queryParams = new URLSearchParams();
@@ -426,8 +439,6 @@ export default function CategoryPage() {
         queryParams.set('category', categoryName);
       }
       
-      // Add city filter from URL or default to Mumbai
-      const cityToUse = selectedCity && selectedCity !== 'all' ? selectedCity : 'Mumbai';
       queryParams.set('city', cityToUse);
       
       const url = `/api/properties?${queryParams.toString()}`;
@@ -1087,7 +1098,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className={`${poppins.className} min-h-screen bg-gray-50`} style={{ fontFamily: 'Poppins, sans-serif', overflow: 'visible' }}>
+    <div className={`${poppins.className} min-h-screen bg-gray-50 relative`} style={{ fontFamily: 'Poppins, sans-serif', overflow: 'visible' }}>
       <style jsx global>{`
         * {
           font-family: Poppins, sans-serif !important;
@@ -1565,6 +1576,8 @@ export default function CategoryPage() {
                             src="/images/2enterprise.jpg"
                             alt="Customized office"
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                       </div>
@@ -1585,13 +1598,14 @@ export default function CategoryPage() {
                       // Add properties batch
                       batches.push(
                         <div key={`batch-${batchNumber}`} className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4 items-stretch' : 'space-y-3 sm:space-y-4'}>
-                          {batch.map((property) => (
+                          {batch.map((property, idx) => (
                             <PropertyCard
                               key={property.id}
                               property={property}
                               onEnquireClick={handleEnquireClick}
                               hideCategory={true}
                               category={categoryName}
+                              priority={batchNumber === 0 && idx < 4}
                             />
                           ))}
                         </div>

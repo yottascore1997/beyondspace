@@ -52,6 +52,8 @@ export default function Footer() {
                     src="/images/logo.png" 
                     alt="Beyond Space Logo" 
                     className="w-full h-full object-contain"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </div>
@@ -118,7 +120,7 @@ export default function Footer() {
                   className="w-10 h-10 rounded-lg bg-white border-2 border-gray-300 hover:bg-blue-600 hover:border-blue-600 flex items-center justify-center transition-all hover:scale-110 shadow-md hover:shadow-lg"
                 >
                   <span className="sr-only">{social.label}</span>
-                  <img src={social.iconSrc} alt={social.label} className="w-5 h-5 object-contain" />
+                  <img src={social.iconSrc} alt={social.label} className="w-5 h-5 object-contain" loading="lazy" decoding="async" />
                 </a>
               ))}
             </div>

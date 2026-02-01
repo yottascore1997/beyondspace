@@ -68,6 +68,8 @@ export default function Header() {
                   src="/images/logo.png" 
                   alt="Beyond Space Logo" 
                   className="w-full h-full object-contain"
+                  fetchPriority="high"
+                  loading="eager"
                 />
               </div>
             </div>
