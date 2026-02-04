@@ -53,7 +53,7 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
       category: 'Office Space'
     },
     {
-      src: '/images/10.jpg',
+      src: '/images/22.jpeg',
       alt: 'Contemporary workspace with collaborative environment',
       category: 'Coworking Space'
     },
@@ -63,7 +63,7 @@ export default function Hero({ filters, onFilterChange, onReset, onEnterpriseCli
       category: 'Office Space'
     },
     {
-      src: '/images/12.jpg',
+      src: '/images/23.jpeg',
       alt: 'Flexible office space with professional setup',
       category: 'Flexi Desk'
     }
