@@ -37,7 +37,8 @@ const faqData: FAQItem[] = [
   {
     question: 'What is Meeting Rooms?',
     answer: 'In a coworking space, meet rooms (meeting rooms) are private, reservable rooms equipped for professional discussions, client presentations, brainstorming, and video calls, offering a distraction-free, tech-ready environment with amenities like Wi-Fi, screens, and whiteboards, providing flexibility and cost-savings compared to setting up your own office space.',
-    image: '/images/FaqMeeting.jpg'
+    // NOTE: file name is case-sensitive on Linux servers
+    image: '/images/Faqmeeting.jpg'
   },
   {
     question: 'What is Day Pass?',

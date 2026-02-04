@@ -92,9 +92,9 @@ export default function Testimonials() {
                       }}
                     />
                     <div>
-                      <div className="font-extrabold text-gray-900 text-2xl">{t.name}</div>
+                      <div className="font-bold text-gray-900 text-lg">{t.name}</div>
                       <div className="text-black text-base">{t.role}</div>
-                      <div className="text-orange-500 text-sm font-semibold">{t.company}</div>
+                      <div className="text-orange-500 text-lg font-extrabold">{t.company}</div>
                     </div>
                   </div>
                   <div className="flex items-center text-yellow-400 mb-5">

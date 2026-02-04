@@ -431,14 +431,25 @@ export default function PropertyDetails() {
   const fetchSimilarProperties = async (area: string, currentPropertyId: string) => {
     try {
       setLoadingSimilar(true);
-      const response = await fetch(`/api/properties?city=Mumbai`);
+      const categoryParam = searchParams.get('category');
+      const queryParams = new URLSearchParams();
+      // Prefer property city when available (don’t hardcode Mumbai)
+      queryParams.set('city', property?.city || 'Mumbai');
+      // If category is present in URL, use it to keep suggestions relevant
+      if (categoryParam) queryParams.set('category', categoryParam);
+      const response = await fetch(`/api/properties?${queryParams.toString()}`);
       
       if (response.ok) {
         const allProperties = await response.json();
+        const normalizeArea = (val: string) =>
+          val
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, ' ');
         // Filter properties from the same area, excluding current property
         const similar = allProperties
           .filter((p: Property) => 
-            p.area.toLowerCase() === area.toLowerCase() && 
+            normalizeArea(p.area) === normalizeArea(area) && 
             p.id !== currentPropertyId &&
             p.isActive !== false
           )
@@ -2022,8 +2033,7 @@ export default function PropertyDetails() {
       </div>
 
       {/* Similar Properties Section */}
-      {similarProperties.length > 0 && (
-        <section ref={similarPropertiesRef} className="pt-6 pb-12 md:pt-8 md:pb-16 bg-gradient-to-br from-gray-50 to-white">
+      <section ref={similarPropertiesRef} className="pt-6 pb-12 md:pt-8 md:pb-16 bg-gradient-to-br from-gray-50 to-white">
           <div className="mx-auto px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 2xl:px-12" style={{ maxWidth: '1920px', width: '100%' }}>
             <div className="mb-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
@@ -2047,7 +2057,7 @@ export default function PropertyDetails() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : similarProperties.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4 lg:gap-4">
                 {similarProperties.map((similarProperty) => (
                   <PropertyCard
@@ -2057,10 +2067,13 @@ export default function PropertyDetails() {
                   />
                 ))}
               </div>
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-600">
+                No similar properties found in this area right now.
+              </div>
             )}
           </div>
         </section>
-      )}
 
       <Footer />
 
