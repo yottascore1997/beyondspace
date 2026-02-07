@@ -62,6 +62,8 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     priority ? new Set([0, 1, 2, 3, 4]) : new Set([0])
   );
   const cardRef = useRef<HTMLElement | null>(null);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
   
   // Get all available images (main image + additional images)
   const allImages = property.propertyImages && property.propertyImages.length > 0 
@@ -572,6 +574,24 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     });
   };
 
+  // Touch swipe for mobile - hand se swipe karne par images change
+  const SWIPE_THRESHOLD = 50;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > SWIPE_THRESHOLD && allImages.length > 1) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (diff > 0) nextImage(); // swipe left -> next
+      else prevImage(); // swipe right -> prev
+    }
+  };
+
   // Build property URL with category query param if provided
   const propertyUrl = category 
     ? `/property/${property.id}?category=${encodeURIComponent(category)}`
@@ -591,7 +611,12 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
             {property.propertyTier}
           </span>
         )}
-        <div className="relative w-full h-full overflow-hidden">
+        <div 
+          className="relative w-full h-full overflow-hidden touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div 
             className="flex h-full will-change-transform"
             style={{ 
@@ -639,7 +664,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 }
               }}
               disabled={currentImageIndex === 0}
-              className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30 ${
+              className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md md:opacity-0 md:group-hover:opacity-100 opacity-90 transition-opacity z-30 ${
                 currentImageIndex === 0
                   ? 'bg-gray-100/90 text-gray-400 cursor-not-allowed'
                   : 'bg-white/90 text-black cursor-pointer'
@@ -659,7 +684,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 }
               }}
               disabled={currentImageIndex >= allImages.length - 1}
-              className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30 ${
+              className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md md:opacity-0 md:group-hover:opacity-100 opacity-90 transition-opacity z-30 ${
                 currentImageIndex >= allImages.length - 1
                   ? 'bg-gray-100/90 text-gray-400 cursor-not-allowed'
                   : 'bg-white/90 text-black cursor-pointer'

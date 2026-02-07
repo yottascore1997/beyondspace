@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PropertyCard from '@/components/PropertyCard';
+import ShareRequirementsModal from '@/components/ShareRequirementsModal';
 
 interface PropertyImage {
   id: string;
@@ -116,6 +117,7 @@ export default function PropertyDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEnquireModalOpen, setIsEnquireModalOpen] = useState(false); // Mobile: Enquire Now opens this form modal
   const [contactFormData, setContactFormData] = useState({
     name: '',
     email: '',
@@ -297,13 +299,16 @@ export default function PropertyDetails() {
   ];
 
   const handleEnquireClick = () => {
+    // Mobile: open form modal (same as Get Quote on category page)
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setIsEnquireModalOpen(true);
+      return;
+    }
+    // Desktop: shake the sidebar form to draw attention
     const formFields = document.getElementById('contact-form-fields');
     if (formFields) {
-      // Only trigger shake animation on form fields, not the entire frame
       formFields.classList.add('animate-shake');
-      setTimeout(() => {
-        formFields.classList.remove('animate-shake');
-      }, 400);
+      setTimeout(() => formFields.classList.remove('animate-shake'), 400);
     }
   };
 
@@ -1844,9 +1849,9 @@ export default function PropertyDetails() {
             </div>
           </div>
 
-          {/* Contact Form - Right Side */}
+          {/* Contact Form - Right Side - hidden on mobile */}
           <div 
-            className="lg:col-span-4 lg:order-2" 
+            className="hidden md:block lg:col-span-4 lg:order-2" 
             style={{ alignSelf: 'start', position: 'relative', height: 'fit-content' }}
           >
             <div 
@@ -2077,6 +2082,13 @@ export default function PropertyDetails() {
 
       <Footer />
 
+      {/* Mobile: Enquire Now opens this form modal (same as Get Quote on category page) */}
+      <ShareRequirementsModal
+        isOpen={isEnquireModalOpen}
+        onClose={() => setIsEnquireModalOpen(false)}
+        showFullForm={false}
+      />
+
       {/* Gallery Modal Popup */}
       {showGallery && (() => {
         const allImages = property.propertyImages && property.propertyImages.length > 0
@@ -2084,11 +2096,11 @@ export default function PropertyDetails() {
           : [property.image];
 
         const handleNext = () => {
-          setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+          setCurrentImageIndex((prev) => (prev >= allImages.length - 1 ? prev : prev + 1));
         };
 
         const handlePrevious = () => {
-          setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+          setCurrentImageIndex((prev) => (prev <= 0 ? prev : prev - 1));
         };
 
         return (
@@ -2135,23 +2147,33 @@ export default function PropertyDetails() {
                 }}
               />
 
-                {/* Navigation Buttons */}
+                {/* Navigation Buttons - grayed/disabled at first and last image */}
                 {allImages.length > 1 && (
                   <>
-                    {/* Previous Button */}
+                    {/* Previous Button - gray when at first image */}
                     <button
-                      onClick={handlePrevious}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm z-10"
+                      onClick={(e) => { e.stopPropagation(); if (currentImageIndex > 0) handlePrevious(); }}
+                      disabled={currentImageIndex === 0}
+                      className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-10 ${
+                        currentImageIndex === 0
+                          ? 'bg-gray-300/80 text-gray-500 cursor-not-allowed'
+                          : 'bg-black/70 hover:bg-black/90 text-white hover:scale-110 backdrop-blur-sm cursor-pointer'
+                      }`}
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
 
-                    {/* Next Button */}
+                    {/* Next Button - gray when at last image */}
                     <button
-                      onClick={handleNext}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm z-10"
+                      onClick={(e) => { e.stopPropagation(); if (currentImageIndex < allImages.length - 1) handleNext(); }}
+                      disabled={currentImageIndex >= allImages.length - 1}
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-10 ${
+                        currentImageIndex >= allImages.length - 1
+                          ? 'bg-gray-300/80 text-gray-500 cursor-not-allowed'
+                          : 'bg-black/70 hover:bg-black/90 text-white hover:scale-110 backdrop-blur-sm cursor-pointer'
+                      }`}
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

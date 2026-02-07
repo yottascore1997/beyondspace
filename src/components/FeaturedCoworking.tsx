@@ -98,29 +98,42 @@ export default function FeaturedCoworking() {
                     const isWorkAvenue = lowerName === 'work avenue';
                     const isWeWork = lowerName === 'wework';
                     const isSpringboard = lowerName === '91springboard';
+                    const isTableSpace = lowerName === 'table space';
+                    // Mobile: larger logos for Work Avenue, WeWork, Tablespace
                     const imageClasses = isConnect
                       ? 'max-h-12 md:max-h-16'
                       : isSmartworks
                         ? 'max-h-6 md:max-h-8'
                         : isWorkAvenue
-                          ? 'max-h-20 md:max-h-24'
+                          ? 'max-h-24 md:max-h-24 sm:max-h-28'
                           : isWeWork
-                            ? 'max-h-24 md:max-h-28'
+                            ? 'max-h-28 md:max-h-28 sm:max-h-32'
                             : isSpringboard
                               ? 'max-h-16 md:max-h-20'
+                              : isTableSpace
+                                ? 'max-h-16 md:max-h-20'
                         : 'max-h-10';
 
                     return (
                       <div
                         key={brand.name}
-                        className="flex h-16 md:h-20 w-full max-w-[160px] md:max-w-[180px] items-center justify-center rounded-xl md:rounded-2xl border border-slate-200 bg-white/90 px-2 md:px-3 py-3 md:py-4 shadow-sm transition-transform hover:-translate-y-1 overflow-hidden"
+                        className="flex h-20 md:h-24 w-full max-w-[160px] md:max-w-[180px] items-center justify-center rounded-xl md:rounded-2xl border border-slate-200 bg-white/90 px-3 md:px-4 py-4 md:py-5 shadow-sm transition-transform hover:-translate-y-1 overflow-hidden"
                       >
                         <img
                           src={brand.src}
                           alt={brand.name}
-                          className={`${imageClasses} max-w-full max-h-full object-contain`}
+                          className={`${imageClasses} max-w-full w-auto h-auto object-contain`}
                           loading="lazy"
+                          onError={(e) => {
+                            const el = e.target as HTMLImageElement;
+                            el.style.display = 'none';
+                            const fallback = el.parentElement?.querySelector('.brand-fallback');
+                            if (fallback) (fallback as HTMLElement).classList.remove('hidden');
+                          }}
                         />
+                        <span className="brand-fallback hidden text-sm font-semibold text-slate-700 text-center px-2">
+                          {brand.name}
+                        </span>
                       </div>
                     );
                   })}
