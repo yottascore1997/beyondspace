@@ -583,6 +583,10 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
     touchEndX.current = e.touches[0].clientX;
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
+    // Use release position so tap (no touchMove) is not treated as swipe
+    if (e.changedTouches?.[0]) {
+      touchEndX.current = e.changedTouches[0].clientX;
+    }
     const diff = touchStartX.current - touchEndX.current;
     if (Math.abs(diff) > SWIPE_THRESHOLD && allImages.length > 1) {
       e.preventDefault();
@@ -664,7 +668,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 }
               }}
               disabled={currentImageIndex === 0}
-              className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md md:opacity-0 md:group-hover:opacity-100 opacity-90 transition-opacity z-30 ${
+              className={`hidden md:flex absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full items-center justify-center shadow-md md:opacity-0 md:group-hover:opacity-100 transition-opacity z-30 ${
                 currentImageIndex === 0
                   ? 'bg-gray-100/90 text-gray-400 cursor-not-allowed'
                   : 'bg-white/90 text-black cursor-pointer'
@@ -684,7 +688,7 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
                 }
               }}
               disabled={currentImageIndex >= allImages.length - 1}
-              className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center shadow-md md:opacity-0 md:group-hover:opacity-100 opacity-90 transition-opacity z-30 ${
+              className={`hidden md:flex absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full items-center justify-center shadow-md md:opacity-0 md:group-hover:opacity-100 transition-opacity z-30 ${
                 currentImageIndex >= allImages.length - 1
                   ? 'bg-gray-100/90 text-gray-400 cursor-not-allowed'
                   : 'bg-white/90 text-black cursor-pointer'

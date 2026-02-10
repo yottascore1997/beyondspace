@@ -471,8 +471,8 @@ export default function PrivacyPolicy() {
                 </svg>
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">Phone</h4>
-                  <a href="tel:+919820744251" className="text-blue-600 hover:text-blue-800 text-sm">
-                    +91 9820 744 251
+                  <a href="tel:+919009006989" className="text-blue-600 hover:text-blue-800 text-sm">
+                    +91 900 900 69 89
                   </a>
                 </div>
               </div>

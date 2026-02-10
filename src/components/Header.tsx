@@ -97,6 +97,25 @@ export default function Header() {
             >
               Share Requirement
             </button>
+            <a
+              href="tel:9009006989"
+              className="flex items-center gap-1.5 ml-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-semibold border border-blue-400/70 shadow-md hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-400/40 transform hover:scale-105 transition-all duration-300 whitespace-nowrap"
+            >
+              <svg
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5a2 2 0 012-2h2.28a1 1 0 01.95.684l1.1 3.3a1 1 0 01-.26 1.02l-1.6 1.6a11.05 11.05 0 005.02 5.02l1.6-1.6a1 1 0 011.02-.26l3.3 1.1a1 1 0 01.684.95V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              <span>900 900 69 89</span>
+            </a>
             {SHOW_LIST_YOUR_SPACE && (
               <a
                 href="/list-your-space"
@@ -106,7 +125,7 @@ export default function Header() {
               </a>
             )}
             <a
-              href="https://wa.me/919820744251"
+              href="https://wa.me/919009006989"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-lg text-xs sm:text-sm font-medium hover:from-green-500 hover:to-green-600 hover:shadow-xl hover:shadow-green-400/50 transform hover:scale-105 transition-all duration-300 border border-green-300/50 group"
@@ -149,7 +168,7 @@ export default function Header() {
                 </a>
               )}
               <a 
-                href="https://wa.me/919820744251" 
+                href="https://wa.me/919009006989" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-3 py-2 bg-green-500/20 text-green-500 hover:bg-green-500 hover:text-white font-medium transition-all rounded-lg border border-green-500/50 backdrop-blur-sm text-sm"

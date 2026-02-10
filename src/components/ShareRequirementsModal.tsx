@@ -148,8 +148,8 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
       >
         <div
           className={`${showFullForm 
-            ? 'bg-gradient-to-b from-blue-50 via-blue-50 to-blue-50 rounded-2xl shadow-2xl max-w-lg lg:max-w-5xl w-full max-h-[90vh] relative z-50 flex flex-col lg:flex-row overflow-hidden'
-            : 'bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] relative z-50 flex flex-col overflow-hidden'
+            ? 'bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-2xl shadow-2xl max-w-lg lg:max-w-5xl w-full max-h-[90vh] relative z-50 flex flex-col lg:flex-row overflow-hidden'
+            : 'bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] relative z-50 flex flex-col overflow-hidden'
           }`}
           onClick={(event) => event.stopPropagation()}
           style={{
@@ -187,14 +187,14 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
             </div>
           )}
 
-          <div className={`p-6 lg:p-8 flex-1 relative ${showFullForm ? 'bg-white lg:bg-white/80 backdrop-blur-sm lg:rounded-r-2xl lg:rounded-tl-none rounded-2xl' : 'bg-white rounded-2xl'} flex flex-col overflow-y-auto`}>
+          <div className={`p-6 lg:p-8 flex-1 relative ${showFullForm ? 'bg-gradient-to-br from-slate-50 via-white to-slate-50 lg:from-slate-50 lg:via-white lg:to-slate-50 backdrop-blur-sm lg:rounded-r-2xl lg:rounded-tl-none rounded-2xl' : 'bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl'} flex flex-col overflow-y-auto`}>
             <button
               type="button"
               onClick={handleClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+              className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors z-10"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
@@ -317,7 +317,7 @@ export default function ShareRequirementsModal({ isOpen, onClose, showFullForm =
                   </div>
                   <div>
                     <p className="text-base font-semibold text-gray-900 mb-1">Connect with us our number</p>
-                    <a href="tel:+919820744251" className="text-base font-semibold text-orange-500">+91 9820 744 251</a>
+                    <a href="tel:+919009006989" className="text-base font-semibold text-orange-500">+91 900 900 69 89</a>
                   </div>
                 </div>
 
