@@ -560,7 +560,15 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       if (prev >= allImages.length - 1) {
         return prev;
       }
-      return prev + 1;
+      const next = prev + 1;
+      // Ensure the image element is mounted so browser requests it
+      setLoadedImages((s) => {
+        const ns = new Set(Array.from(s));
+        ns.add(next);
+        ns.add(Math.min(next + 1, allImages.length - 1)); // prefetch neighbor
+        return ns;
+      });
+      return next;
     });
   };
   
@@ -570,7 +578,14 @@ export default function PropertyCard({ property, onEnquireClick, hideCategory = 
       if (prev <= 0) {
         return prev;
       }
-      return prev - 1;
+      const prevIdx = prev - 1;
+      setLoadedImages((s) => {
+        const ns = new Set(Array.from(s));
+        ns.add(prevIdx);
+        ns.add(Math.max(prevIdx - 1, 0)); // prefetch neighbor
+        return ns;
+      });
+      return prevIdx;
     });
   };
 
