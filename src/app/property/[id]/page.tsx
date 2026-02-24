@@ -57,6 +57,7 @@ interface Property {
   aboutWorkspace?: string;
   workspaceTimings?: string | null;
   propertyOptions?: SeatingPlan[] | null;
+  capacity?: number | null;
   isActive?: boolean;
   createdAt: string;
 }
@@ -137,6 +138,7 @@ export default function PropertyDetails() {
   const amenitiesRef = useRef<HTMLDivElement | null>(null);
   const similarPropertiesRef = useRef<HTMLDivElement | null>(null);
   const contactFormRef = useRef<HTMLDivElement | null>(null);
+  const similarCategoryParam = searchParams.get('category') || undefined;
 
   // Fixed positioning - make form container stick when it reaches top
   useEffect(() => {
@@ -2068,7 +2070,9 @@ export default function PropertyDetails() {
                   <PropertyCard
                     key={similarProperty.id}
                     property={similarProperty}
+                    onEnquireClick={() => setIsEnquireModalOpen(true)}
                     hideCategory={true}
+                    category={similarCategoryParam}
                   />
                 ))}
               </div>

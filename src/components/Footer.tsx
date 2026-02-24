@@ -89,7 +89,6 @@ export default function Footer() {
               <li><Link href="/category/coworking-space" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block hover:translate-x-1 transition-transform">Coworking Spaces</Link></li>
               <li><Link href="/category/managed-office" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block hover:translate-x-1 transition-transform">Managed Offices</Link></li>
               <li><Link href="/category/dedicated-desk" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block hover:translate-x-1 transition-transform">Dedicated Desks</Link></li>
-              <li><Link href="/category/enterprise-solutions" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block hover:translate-x-1 transition-transform">Enterprise Offices</Link></li>
               <li><Link href="/category/virtual-office" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block hover:translate-x-1 transition-transform">Virtual Offices</Link></li>
               <li><Link href="/category/meeting-room" className="text-sm md:text-base text-gray-700 hover:text-blue-600 font-medium transition-colors inline-block hover:translate-x-1 transition-transform">Meeting Rooms</Link></li>
             </ul>
