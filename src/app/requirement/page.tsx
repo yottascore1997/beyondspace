@@ -1,17 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
-
 export default function RequirementPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
@@ -21,19 +16,6 @@ export default function RequirementPage() {
     teamSize: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  // Fire Google Ads conversion when thank you view is shown (lead form submit)
-  useEffect(() => {
-    if (!isSubmitted || typeof window === 'undefined' || typeof window.gtag !== 'function') return;
-    window.gtag('event', 'conversion', {
-      send_to: 'AW-17856538861/3qh7CNPglYQcEO3R1MJC',
-      value: 1.0,
-      currency: 'INR',
-    });
-    // Scroll to top so only thank you is visible; form is already unmounted
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [isSubmitted]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -57,15 +39,7 @@ export default function RequirementPage() {
       });
 
       if (response.ok) {
-        setIsSubmitted(true);
-        setFormData({
-          name: '',
-          mobile: '',
-          email: '',
-          interest: '',
-          company: '',
-          teamSize: ''
-        });
+        router.push('/requirement/thank-you');
       } else {
         alert('Something went wrong. Please try again.');
       }
@@ -76,37 +50,6 @@ export default function RequirementPage() {
       setIsSubmitting(false);
     }
   };
-
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="h-16 sm:h-20 md:h-24"></div>
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-white rounded-2xl shadow-lg p-12">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Thank You!</h2>
-              <p className="text-lg text-gray-600 mb-8">
-                Your requirement has been submitted successfully. Our workspace experts will reach out to you at the earliest.
-              </p>
-              <Link
-                href="/"
-                className="inline-flex items-center px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-blue-900 transition-colors"
-              >
-                Back to Home
-              </Link>
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

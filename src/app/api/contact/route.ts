@@ -22,7 +22,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await request.json();
+    let data: any;
+    try {
+      data = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid or empty JSON body' },
+        { status: 400 }
+      );
+    }
+
+    if (!data || typeof data !== 'object') {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
     const { name, mobile, email, solution, message } = data;
 
     // Validate required fields

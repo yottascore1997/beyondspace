@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface PropertyContactFormProps {
   propertyTitle?: string;
@@ -10,6 +11,7 @@ interface PropertyContactFormProps {
 }
 
 export default function PropertyContactForm({ propertyTitle, propertyType, propertyCity, isShaking }: PropertyContactFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,14 +46,7 @@ export default function PropertyContactForm({ propertyTitle, propertyType, prope
       });
 
       if (response.ok) {
-        setSubmitMessage('Thank you! We will contact you soon.');
-        setFormData({
-          name: '',
-          email: '',
-          mobile: '',
-          area: '',
-          message: ''
-        });
+        router.push('/thank-you');
       } else {
         setSubmitMessage('Failed to submit. Please try again.');
       }

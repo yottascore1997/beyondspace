@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface ContactFormData {
   name: string;
@@ -19,6 +20,7 @@ const solutionOptions = [
 ];
 
 export default function ContactForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     mobile: '',
@@ -89,14 +91,7 @@ export default function ContactForm() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Thank you for your inquiry! We will contact you soon.');
-        setFormData({
-          name: '',
-          mobile: '',
-          email: '',
-          solution: '',
-          message: '',
-        });
+        router.push('/thank-you');
       } else {
         setMessage(data.error || 'Failed to submit form. Please try again.');
       }
