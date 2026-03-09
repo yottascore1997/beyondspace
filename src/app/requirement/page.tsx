@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 export default function RequirementPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +22,18 @@ export default function RequirementPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Fire Google Ads conversion when thank you view is shown (lead form submit)
+  useEffect(() => {
+    if (!isSubmitted || typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+    window.gtag('event', 'conversion', {
+      send_to: 'AW-17856538861/3qh7CNPglYQcEO3R1MJC',
+      value: 1.0,
+      currency: 'INR',
+    });
+    // Scroll to top so only thank you is visible; form is already unmounted
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [isSubmitted]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
