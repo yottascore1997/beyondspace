@@ -50,7 +50,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-M9XZ652W');`,
           }}
         />
-        {/* Google tag (gtag.js) */}
+        {/* Google tag (gtag.js) - GA4 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-DNHMJE3K94" />
         <script
           dangerouslySetInnerHTML={{
@@ -59,6 +59,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-DNHMJE3K94');
+`,
+          }}
+        />
+        {/* Google tag (gtag.js) - Google Ads AW-17856538861 - all pages */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17856538861" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17856538861');
 `,
           }}
         />

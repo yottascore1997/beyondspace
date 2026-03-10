@@ -1,10 +1,26 @@
- 'use client';
- 
- import Link from 'next/link';
- import Header from '@/components/Header';
- import Footer from '@/components/Footer';
- 
- export default function ThankYouPage() {
+'use client';
+
+import { useEffect } from 'react';
+import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
+export default function ThankYouPage() {
+  // Event snippet for Submit lead form conversion - thank you page only
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+    window.gtag('event', 'conversion', {
+      send_to: 'AW-17856538861/3qh7CNPglYQcEO3R1MJC',
+      value: 1.0,
+      currency: 'INR',
+    });
+  }, []);
    return (
      <div className="min-h-screen bg-gray-50">
        <Header />
