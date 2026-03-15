@@ -12,6 +12,9 @@ const coworkingBrands = [
   { name: 'Table Space', src: '/images/tablespace.png' },
   { name: 'Cowrks', src: '/images/cowrks.png' },
   { name: 'BHIVE', src: '/images/Bhive.png' },
+  { name: 'Dextrus', src: '/images/Dextrus.jpeg' },
+  { name: 'Redbrick', src: '/images/Redbrick.jpeg' },
+  { name: 'Yesswork', src: '/images/Yesswork.jpeg' },
 ];
 
 export default function FeaturedCoworking() {
@@ -99,7 +102,10 @@ export default function FeaturedCoworking() {
                     const isWeWork = lowerName === 'wework';
                     const isSpringboard = lowerName === '91springboard';
                     const isTableSpace = lowerName === 'table space';
-                    // Mobile: larger logos for Work Avenue, WeWork, Tablespace
+                    const isDextrus = lowerName === 'dextrus';
+                    const isRedbrick = lowerName === 'redbrick';
+                    const isYesswork = lowerName === 'yesswork';
+                    // Mobile: larger logos for Work Avenue, WeWork, Tablespace, Dextrus, Redbrick, Yesswork
                     const imageClasses = isConnect
                       ? 'max-h-12 md:max-h-16'
                       : isSmartworks
@@ -112,7 +118,9 @@ export default function FeaturedCoworking() {
                               ? 'max-h-16 md:max-h-20'
                               : isTableSpace
                                 ? 'max-h-16 md:max-h-20'
-                        : 'max-h-10';
+                                : isDextrus || isRedbrick || isYesswork
+                                  ? 'max-h-20 md:max-h-24 sm:max-h-28'
+                                  : 'max-h-10';
 
                     return (
                       <div

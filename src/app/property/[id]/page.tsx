@@ -1133,9 +1133,9 @@ export default function PropertyDetails() {
                           isSingleMeetingRoom ? 'md:w-2/3 2xl:w-2/3' 
                           : isSingleManagedOffice || isSinglePrivateCabin ? 'md:w-3/4 2xl:w-3/4'
                           : 'md:w-3/4 2xl:w-3/4'
-                        } flex flex-col relative min-h-0`}>
+                        } flex flex-col relative min-h-0 min-w-0`}>
                           {/* Left Side - Title and Content */}
-                          <div className={`flex-1 pr-2 2xl:pr-2 ${
+                          <div className={`flex-1 pr-0 sm:pr-2 2xl:pr-2 min-w-0 ${
                             isSingleMeetingRoom ? 'pt-1 2xl:pt-1 pb-2 2xl:pb-2' : isStandardPlan ? 'pt-1 2xl:pt-1 pb-1 2xl:pb-1' : 'pt-2 2xl:pt-2 pb-2 2xl:pb-2'
                           }`}>
                             <h4 className={`${
@@ -1492,21 +1492,21 @@ export default function PropertyDetails() {
                                   </div>
                                 ) : isStandardPlan ? (
                                   <div className="bg-white rounded-lg p-4 2xl:p-5 border-2 border-blue-200/60 shadow-sm">
-                                    <div className="flex items-center justify-between gap-4">
+                                    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:justify-between">
                                       {plan.seating && plan.seating.trim() !== '' && (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                                           <div className="flex-shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                                             <svg className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>
                                           </div>
                                           <span className="text-sm 2xl:text-base font-medium text-gray-600">Seating :</span>
-                                          <span className="text-base 2xl:text-lg font-semibold text-gray-800">
+                                          <span className="text-base 2xl:text-lg font-semibold text-gray-800 truncate">
                                             {plan.seating.split(',')[0]?.trim() || plan.seating}
                                           </span>
                                         </div>
                                       )}
-                                      <div className={`flex items-center gap-3 ${!plan.seating || plan.seating.trim() === '' ? 'ml-auto' : ''}`}>
+                                      <div className={`flex flex-wrap items-center gap-2 sm:gap-3 ${!plan.seating || plan.seating.trim() === '' ? 'sm:ml-auto' : 'sm:justify-end'}`}>
                                         {(() => {
                                           // Check if price exists and is valid
                                           const priceValue = plan.price;
@@ -1534,7 +1534,7 @@ export default function PropertyDetails() {
                                         <button
                                           type="button"
                                           onClick={handleEnquireClick}
-                                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                                          className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 2xl:px-5 py-2.5 2xl:py-2.5 rounded-lg text-xs 2xl:text-sm font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
                                         >
                                           Enquire Now
                                         </button>
@@ -1629,7 +1629,7 @@ export default function PropertyDetails() {
                   <div className="p-3 2xl:p-3 space-y-2 2xl:space-y-2">
                     <h4 className="text-base 2xl:text-base font-semibold text-gray-900">Enterprise Solutions</h4>
                     <p className="text-gray-600 text-sm 2xl:text-sm leading-relaxed">
-                      Fully equipped offices for larger teams with flexibility to scale and customize your office in prime locations & LEED certified buildings
+                      Fully equipped offices for larger teams with flexibility to scale and customize in prime, LEED certified locations.
                     </p>
                     <button 
                       type="button"

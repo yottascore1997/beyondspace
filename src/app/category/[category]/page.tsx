@@ -425,7 +425,8 @@ export default function CategoryPage() {
         const cached = getCachedProperties(categoryName, cityToUse);
         if (cached && Array.isArray(cached)) {
           setProperties(cached as Property[]);
-          setLoading(false);
+          if (cached.length === 0) setLoading(false);
+          // Else let the filter effect set loading false after filteredProperties is set
           return;
         }
       }
@@ -445,9 +446,11 @@ export default function CategoryPage() {
       const response = await fetch(url);
       const data = await response.json();
       setProperties(data);
+      // If API returned no data, effect won't run filter - set loading false so we can show "No properties found"
+      if (!data || data.length === 0) setLoading(false);
+      // Otherwise let the filter effect run first and setLoading(false) there
     } catch (error) {
       console.error('Error fetching properties:', error);
-    } finally {
       setLoading(false);
     }
   };
@@ -833,6 +836,8 @@ export default function CategoryPage() {
 
     // Show all filtered properties (first 32 without pagination, rest with pagination)
     setFilteredProperties(filtered);
+    // Turn off loading after filter has run, so we never show "No properties found" before filtered list is ready
+    setLoading(false);
   };
 
   const resetFilters = () => {
