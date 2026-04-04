@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { firewallMiddleware, getClientIP } from '@/lib/firewall';
+import { firewallMiddleware } from '@/lib/firewall';
 
 export function middleware(request: NextRequest) {
   // Firewall check (only for API routes and admin routes)
@@ -32,18 +32,6 @@ export function middleware(request: NextRequest) {
     
     // Permissions Policy (formerly Feature Policy)
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-    
-    // Content Security Policy
-    'Content-Security-Policy': [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Adjust based on your needs
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://files.yottascore.com",
-      "frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com",
-      "frame-ancestors 'none'",
-    ].join('; '),
   };
 
   // Add security headers
