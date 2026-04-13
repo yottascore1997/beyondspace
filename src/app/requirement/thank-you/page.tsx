@@ -35,9 +35,20 @@
                </svg>
              </div>
              <h2 className="text-3xl font-bold text-gray-900 mb-4">Thank You!</h2>
-             <p className="text-lg text-gray-600 mb-8">
+             <p className="text-lg text-gray-600 mb-6">
                Your requirement has been submitted successfully. Our workspace experts will reach out to you at the earliest.
              </p>
+             <div className="mb-8 rounded-xl bg-blue-50 border border-blue-100 px-6 py-5 text-center">
+               <p className="text-gray-800 font-medium mb-2">
+                 For an instant reply, please call us on
+               </p>
+               <a
+                 href="tel:+919009006989"
+                 className="text-xl font-bold text-orange-500 hover:text-blue-900 transition-colors inline-block"
+               >
+                 +91 900 900 69 89
+               </a>
+             </div>
              <Link
                href="/"
                className="inline-flex items-center px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-blue-900 transition-colors"
