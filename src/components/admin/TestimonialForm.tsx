@@ -180,9 +180,9 @@ export default function TestimonialForm({
         throw new Error('No image URL received from server');
       }
       
-      // Ensure URL is from yottascore
-      if (!imageUrl.includes('yottascore.com')) {
-        console.warn('Warning: Image URL does not contain yottascore.com:', imageUrl);
+      // Ensure URL is from beyondspacework.in
+      if (!imageUrl.includes('beyondspacework.in')) {
+        console.warn('Warning: Image URL does not contain beyondspacework.in:', imageUrl);
       }
       
       setFormData(prev => ({

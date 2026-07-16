@@ -76,10 +76,14 @@ export default function SectionImagesManager() {
       const uploadResult = await uploadResponse.json();
       let imageUrl = uploadResult.url || uploadResult.imageUrl;
       
-      // Ensure URL is from yottascore.com (replace beyondspacework.com if present)
+      // Ensure URL is from files.beyondspacework.in (replace old domains if present)
       if (imageUrl && imageUrl.includes('files.beyondspacework.com')) {
-        imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
-        console.log('Replaced beyondspacework.com with yottascore.com in section image:', imageUrl);
+        imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.beyondspacework.in');
+        console.log('Replaced beyondspacework.com with beyondspacework.in in section image:', imageUrl);
+      }
+      if (imageUrl && imageUrl.includes('files.yottascore.com')) {
+        imageUrl = imageUrl.replace(/files\.yottascore\.com/g, 'files.beyondspacework.in');
+        console.log('Replaced yottascore.com with beyondspacework.in in section image:', imageUrl);
       }
       
       if (!imageUrl) {

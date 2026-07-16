@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Replace files.beyondspacework.com with files.yottascore.com in response
+    // Normalize old domains to files.beyondspacework.in in response
     const normalizedImages = images.map(img => ({
       ...img,
-      imageUrl: img.imageUrl.includes('files.beyondspacework.com')
-        ? img.imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com')
-        : img.imageUrl,
+      imageUrl: img.imageUrl
+        .replace(/files\.beyondspacework\.com/g, 'files.beyondspacework.in')
+        .replace(/files\.yottascore\.com/g, 'files.beyondspacework.in'),
     }));
 
     return NextResponse.json(normalizedImages);
@@ -68,11 +68,10 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
       );
     }
 
-    // Replace files.beyondspacework.com with files.yottascore.com before saving
-    if (imageUrl.includes('files.beyondspacework.com')) {
-      imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
-      console.log('Replaced beyondspacework.com with yottascore.com in section image URL');
-    }
+    // Normalize old domains to files.beyondspacework.in before saving
+    imageUrl = imageUrl
+      .replace(/files\.beyondspacework\.com/g, 'files.beyondspacework.in')
+      .replace(/files\.yottascore\.com/g, 'files.beyondspacework.in');
 
     const image = await prisma.sectionImage.create({
       data: {

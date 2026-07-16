@@ -28,10 +28,11 @@ export async function PUT(
       const data = await req.json();
       let { imageUrl, altText, displayOrder, isActive } = data;
 
-      // Replace files.beyondspacework.com with files.yottascore.com before saving
-      if (imageUrl && imageUrl.includes('files.beyondspacework.com')) {
-        imageUrl = imageUrl.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
-        console.log('Replaced beyondspacework.com with yottascore.com in section image update');
+      // Normalize old domains to files.beyondspacework.in before saving
+      if (imageUrl) {
+        imageUrl = imageUrl
+          .replace(/files\.beyondspacework\.com/g, 'files.beyondspacework.in')
+          .replace(/files\.yottascore\.com/g, 'files.beyondspacework.in');
       }
 
       const image = await prisma.sectionImage.update({

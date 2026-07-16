@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await fetch("https://files.yottascore.com/upload.php", {
+    const response = await fetch("https://files.beyondspacework.in/upload.php", {
       method: "POST",
       headers: {
         "X-Upload-Token": token,
@@ -101,19 +101,23 @@ export async function POST(request: Request) {
         "";
       
       if (urlValue) {
-        // Replace files.beyondspacework.com with files.yottascore.com
+        // Normalize old domains to files.beyondspacework.in
         if (urlValue.includes('files.beyondspacework.com')) {
-          urlValue = urlValue.replace(/files\.beyondspacework\.com/g, 'files.yottascore.com');
-          console.log('Replaced beyondspacework.com with yottascore.com:', urlValue);
+          urlValue = urlValue.replace(/files\.beyondspacework\.com/g, 'files.beyondspacework.in');
+          console.log('Replaced beyondspacework.com with beyondspacework.in:', urlValue);
+        }
+        if (urlValue.includes('files.yottascore.com')) {
+          urlValue = urlValue.replace(/files\.yottascore\.com/g, 'files.beyondspacework.in');
+          console.log('Replaced yottascore.com with beyondspacework.in:', urlValue);
         }
         
         data.url = urlValue;
         data.imageUrl = urlValue;
         
-        // Debug: Log the URL to ensure it's from yottascore
+        // Debug: Log the URL to ensure it's from beyondspacework.in
         console.log('Upload successful. Image URL:', urlValue);
-        if (!urlValue.includes('yottascore.com')) {
-          console.warn('Warning: Uploaded image URL does not contain yottascore.com:', urlValue);
+        if (!urlValue.includes('beyondspacework.in')) {
+          console.warn('Warning: Uploaded image URL does not contain beyondspacework.in:', urlValue);
         }
       } else {
         console.error('Upload response missing URL:', data);

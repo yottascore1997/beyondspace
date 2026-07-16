@@ -1,3 +1,15 @@
+// Polyfill URL.canParse for older Node.js versions
+if (typeof URL !== 'undefined' && !URL.canParse) {
+  URL.canParse = function (url: string | URL, base?: string | URL) {
+    try {
+      new URL(url, base);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+}
+
 import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {

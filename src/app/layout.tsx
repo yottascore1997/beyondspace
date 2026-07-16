@@ -75,7 +75,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
         {/* Preconnect to CDN for faster image loading */}
-        <link rel="preconnect" href="https://files.yottascore.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://files.beyondspacework.in" crossOrigin="anonymous" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.className} antialiased`}
